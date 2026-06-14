@@ -18,3 +18,6 @@ jobs:
 
       - name: Run git-history redaction scan
         run: scripts/redaction-check.sh --history
+
+      - name: Run public harness template check
+        run: scripts/check-public-harness.sh

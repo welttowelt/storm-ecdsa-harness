@@ -37,6 +37,7 @@ endorsement where there was only inspiration.
 - Worker role cards and handoff templates.
 - Evidence labels and validation gates.
 - Route packet and compute request templates.
+- Safe filled examples for the templates.
 - A fixture-only dashboard for operator status.
 - A redaction checklist and automated redaction scan.
 - Public-credit policy for community-derived ideas.
@@ -50,6 +51,7 @@ git clone https://github.com/welttowelt/stormforge-ecdsa-harness.git
 cd stormforge-ecdsa-harness
 scripts/redaction-check.sh
 scripts/redaction-check.sh --history
+scripts/check-public-harness.sh
 python3 -m http.server 8787 --directory dashboard
 ```
 
@@ -57,6 +59,8 @@ Then adapt the templates with fixture or public data only. Keep private hunt
 state in a separate private repo or local folder.
 
 Full guide: [docs/quickstart.md](docs/quickstart.md).
+
+Safe filled examples: [examples/](examples/).
 
 ## What This Repo Does Not Contain
 

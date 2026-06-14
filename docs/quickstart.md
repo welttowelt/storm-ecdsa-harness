@@ -20,6 +20,7 @@ in a separate private repo or local folder.
 ```bash
 scripts/redaction-check.sh
 scripts/redaction-check.sh --history
+scripts/check-public-harness.sh
 ```
 
 Both should pass before you publish, screenshot, or share.
@@ -36,6 +37,8 @@ Start with:
 
 Use these as formats, not as a mandate. The core rule is that every compute
 request should have an owner, validator, kill gate, and evidence label.
+
+If you want a filled safe example first, read `examples/`.
 
 ## 4. Keep Private State Outside This Repo
 
