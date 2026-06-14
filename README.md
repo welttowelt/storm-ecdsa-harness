@@ -1,5 +1,9 @@
 # Stormforge ECDSA Harness
 
+Public repo: <https://github.com/welttowelt/stormforge-ecdsa-harness>
+
+Fixture dashboard: <https://welttowelt.github.io/stormforge-ecdsa-harness/>
+
 Stormforge is a sanitized operator layer for coordinating public `ecdsa.fail`
 research workflows. It is not the original benchmark harness and it does not
 contain private hunt state.
@@ -66,6 +70,12 @@ More detail: [docs/operating-model.md](docs/operating-model.md).
 The dashboard in `dashboard/` is static and fixture-only. It shows how to
 surface current target, worker status, mailbox activity, breaking news, fleet
 state, and submit gates without leaking operational details.
+
+Public fixture dashboard:
+
+```text
+https://welttowelt.github.io/stormforge-ecdsa-harness/
+```
 
 Open locally:
 

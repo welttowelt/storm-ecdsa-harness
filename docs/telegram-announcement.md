@@ -3,6 +3,12 @@
 hey frens, I cleaned up and open-sourced a sanitized version of my Stormforge
 setup.
 
+Repo:
+https://github.com/welttowelt/stormforge-ecdsa-harness
+
+Demo dashboard:
+https://welttowelt.github.io/stormforge-ecdsa-harness/
+
 Important framing: this is not the original ecdsa.fail harness. The base
 challenge/platform comes from Gautham / ecdsa.fail. Gajesh also shared many
 useful setup ideas around custom agents, goal mode, workflows, and more
