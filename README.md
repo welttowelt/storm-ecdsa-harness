@@ -7,8 +7,11 @@ Fixture dashboard: <https://welttowelt.github.io/storm-ecdsa-harness/>
 Storm is a sanitized operator control plane for coordinating public
 `ecdsa.fail` research workflows. It is the layer around the solver: deciding
 what deserves attention, forcing evidence labels, routing workers, gating
-compute, recording ACKs, and keeping public notes safe to share. It is not the
-original benchmark harness and it does not contain private hunt state.
+compute, recording ACKs, and keeping public notes safe to share. The edge is
+multi-model collaboration: different workers can contribute through mailbox or
+API handoffs, but every claim still has to pass the same evidence, critique, and
+validation gates. It is not the original benchmark harness and it does not
+contain private hunt state.
 
 Purpose and limits: `ecdsa.fail` is a public resource-estimation benchmark for
 the quantum cost of one `secp256k1` point-add circuit. This repo contains
@@ -26,8 +29,11 @@ claims too early. Storm makes that operating layer explicit:
   state, not chat memory.
 - **Route packets:** every idea names the claim, evidence level, validator,
   owner, budget, and falsifier before it receives compute.
-- **Critique loop:** RCI/Tony, Anton, Bluesky, and Redsky passes separate
-  constructive upside from adversarial failure checks.
+- **Multi-model workers:** Codex-, Claude-, and DeepSeek-style workers can plug
+  in as research leads, engineering specialists, deep researchers, or external
+  pressure-test reviewers.
+- **Critique loop:** constructive reviews, skeptical reviews, source checks, and
+  smallest-useful-fix passes run before compute or public claims.
 - **Compute gate:** CPU/GPU work is allowed only when a route has a predicate,
   validator, owner, budget, and stop condition.
 - **Submit gate:** no win language until fresh frontier recheck, official local
@@ -59,9 +65,10 @@ endorsement where there was only inspiration.
 
 - A current-target-first operating model.
 - Worker role cards and handoff templates.
-- RCI/Tony, Anton, Bluesky, and Redsky audit loop.
+- Critique-before-compute audit loop.
 - Evidence labels and validation gates.
 - Route packet and compute request templates.
+- External pressure-test worker prompt pattern.
 - Safe filled examples for the templates.
 - A fixture-only dashboard for operator status.
 - A redaction checklist and automated redaction scan.
