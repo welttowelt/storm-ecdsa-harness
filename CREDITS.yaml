@@ -1,0 +1,94 @@
+credits:
+  - name: Gautham Anant
+    handle: Gautham
+    contribution_type: base_benchmark_and_platform
+    used_as: origin of the public ecdsa.fail challenge and agent benchmark frame
+    source_context: public article
+    source_urls:
+      - https://www.linkedin.com/pulse/you-beat-google-sreeram-kannan-rqehc
+    notes: >
+      Credited for the base benchmark/platform lineage, not for this repo's
+      Stormforge operator-layer implementation.
+
+  - name: ecdsa.fail maintainers and community
+    contribution_type: public_benchmark_ecosystem
+    used_as: benchmark target, public leaderboard, and shared research setting
+    source_context: public benchmark
+    source_urls:
+      - https://ecdsa.fail/
+    notes: >
+      This harness is only useful because the benchmark and community context
+      exist.
+
+  - name: Gajesh Naik / Gajesh2007
+    handle: Gajesh2007
+    contribution_type: custom_agent_harness_inspiration
+    used_as: goal-mode/custom-model/subagent/workflow inspiration; modular agent-readable repo pattern
+    source_context: public repos plus group discussion
+    source_urls:
+      - https://github.com/Gajesh2007/opencode
+      - https://github.com/Gajesh2007/ecdsafail-challenge
+    notes: >
+      Credited as early custom harness/setup inspiration. Do not imply code was
+      copied unless a future change imports code with license review.
+
+  - name: Jieyi Long
+    contribution_type: public_tooling_and_process_pattern
+    used_as: GPU toolkit discipline, skills/process loop, validate-all mindset
+    source_context: public repos
+    source_urls:
+      - https://github.com/jieyilong/ecdsafail_gpu_toolkit
+      - https://github.com/jieyilong/ecdsafail_skills
+
+  - name: BitWonka
+    contribution_type: public_frontier_process_inspiration
+    used_as: promoted-diff discipline, lifecycle/free-reacquire thinking, reachable-support codec framing
+    source_context: public submissions plus group discussion
+    source_urls:
+      - https://github.com/BitWonka
+
+  - name: nasqret / Bartosz Naskrecki
+    contribution_type: public_strategy_inspiration
+    used_as: broad qubit sweeps, memory-mechanism recombination, agentic engineering discipline
+    source_context: public submissions plus group discussion
+    source_urls:
+      - https://github.com/nasqret
+
+  - name: Frosty40 / newjordan
+    contribution_type: status_board_inspiration
+    used_as: shared status-board and team visibility ideas
+    source_context: public repo plus group discussion
+    source_urls:
+      - https://github.com/newjordan/overwatch
+
+  - name: Teddy Pender
+    contribution_type: open_innovation_and_low_qubit_route_sharing
+    used_as: low-qubit branch sharing and public route-study inspiration
+    source_context: public repo plus group discussion
+    source_urls:
+      - https://github.com/teddyjfpender/ecdsafail-challenge
+
+  - name: Sam / karnot.xyz
+    contribution_type: operator_card_and_skill_stack_inspiration
+    used_as: operator-card and skill-stack exchange pattern
+    source_context: group discussion
+    source_urls: []
+
+  - name: zuiris / Maksim
+    contribution_type: role_split_process_inspiration
+    used_as: research-harness plus engineering-harness split; narrow handoff pattern
+    source_context: group discussion
+    source_urls: []
+
+  - name: gnuchev
+    contribution_type: public_frontier_move_context
+    used_as: example of why current-target checks must refresh live state
+    source_context: public leaderboard
+    source_urls:
+      - https://ecdsa.fail/
+
+  - name: Justin Drake and public discussion contributors
+    contribution_type: benchmark_context_and_validation_discussion
+    used_as: public framing and correctness-discussion context where cited
+    source_context: group discussion or public posts
+    source_urls: []

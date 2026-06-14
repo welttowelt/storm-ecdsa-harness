@@ -1,0 +1,82 @@
+{
+  "subtitle": "Sanitized public-demo state. Replace with your own fixture or public data.",
+  "current_target": {
+    "label": "public fixture: 1170q x 1,434,726",
+    "detail": "example public frontier move; always refresh live state"
+  },
+  "active_route": {
+    "label": "demo-route-current-target-first",
+    "detail": "no live private route state included"
+  },
+  "submit_gate": {
+    "status": "closed",
+    "detail": "requires fresh frontier, official local validation, score win, legal diff, public note"
+  },
+  "breaking_news": [
+    {
+      "time": "2026-06-14 14:54 UTC",
+      "headline": "Frontier fixture moved",
+      "detail": "Use this as a dashboard example only. Live systems must query the public benchmark."
+    },
+    {
+      "time": "2026-06-14 13:00 UTC",
+      "headline": "Route parked",
+      "detail": "Demo route lacks complete co-binder packet and validator."
+    },
+    {
+      "time": "2026-06-14 12:40 UTC",
+      "headline": "Credits updated",
+      "detail": "Gautham credited as base benchmark/platform lineage; Gajesh credited for early custom harness sharing."
+    }
+  ],
+  "workers": [
+    {
+      "name": "Research lead",
+      "detail": "Ranks route packets and kills weak lanes.",
+      "status": "ready",
+      "score": "A"
+    },
+    {
+      "name": "Engineering specialist",
+      "detail": "Receives narrow tasks with validator and kill gate.",
+      "status": "waiting",
+      "score": "B+"
+    },
+    {
+      "name": "Pressure-test worker",
+      "detail": "Tries to kill routes before compute.",
+      "status": "ack",
+      "score": "B"
+    }
+  ],
+  "mailbox": [
+    {
+      "name": "Research lead -> all",
+      "detail": "ACK requested on route park decision.",
+      "status": "waiting"
+    },
+    {
+      "name": "Pressure-test worker -> lead",
+      "detail": "ACK received; claims require source check.",
+      "status": "ack"
+    }
+  ],
+  "fleet": [
+    {
+      "label": "CPU pool",
+      "task": "idle by policy: no eligible compute request",
+      "status": "waiting"
+    },
+    {
+      "label": "GPU pool",
+      "task": "paused until route packet has validator and kill gate",
+      "status": "closed"
+    },
+    {
+      "label": "Dashboard",
+      "task": "fixture-only public view",
+      "status": "ready"
+    }
+  ]
+}
+
