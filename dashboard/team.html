@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ecdsa.fail — team Storm</title>
+<style>
+  :root{
+    --bg:#0e3a2c; --panel:rgba(180,230,205,0.06); --panel-bd:rgba(180,230,205,0.16);
+    --ink:#e9f5ee; --mute:#8fb3a2; --dim:#6f9384; --accent:#4ad99a;
+    --rec:#e9a23b; --base:#9fb8ab; --grid:rgba(180,230,205,0.10);
+    --mono:'DM Mono','SF Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#072018;color:var(--ink);font-family:var(--mono);
+       -webkit-font-smoothing:antialiased;padding:24px 16px}
+  .wrap{max-width:860px;margin:0 auto}
+  .card{background:var(--bg);border:1px solid var(--panel-bd);border-radius:14px;padding:22px 24px}
+  .eyebrow{font-size:12px;letter-spacing:.14em;color:var(--mute);text-transform:uppercase}
+  h1{font-size:19px;font-weight:500;margin:6px 0 4px;color:var(--ink)}
+  .sub{font-size:13px;color:var(--mute);margin:0 0 18px;line-height:1.6}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:4px}
+  .stat{background:var(--panel);border:1px solid var(--panel-bd);border-radius:10px;padding:14px 16px}
+  .stat .lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+  .stat .val{font-size:24px;color:var(--ink);margin:4px 0 2px}
+  .stat .sub2{font-size:12px;color:var(--dim);margin:0;line-height:1.45}
+  h2{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);font-weight:500;
+     margin:24px 0 12px;border-top:1px solid var(--panel-bd);padding-top:16px}
+  svg{width:100%;height:auto;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:16px;font-size:12px;color:var(--mute);margin-top:8px}
+  .legend span{display:flex;gap:6px;align-items:center}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .ln{width:16px;height:0;border-top:2.5px solid var(--base);align-self:center;opacity:.65}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .box{background:var(--panel);border:1px solid var(--panel-bd);border-radius:10px;padding:13px 15px}
+  .box .h{font-size:13px;color:var(--accent);margin:0 0 5px}
+  .box .b{font-size:12px;color:var(--mute);line-height:1.55;margin:0}
+  .team{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .member{background:var(--panel);border:1px solid var(--panel-bd);border-radius:10px;padding:15px 12px;text-align:center}
+  .member .nm{font-size:15px;color:var(--ink);display:block;margin-bottom:5px}
+  .member a{font-size:12px;color:var(--accent);text-decoration:none}
+  .member a:hover{text-decoration:underline}
+  .spirit{font-size:12.5px;color:var(--mute);line-height:1.6;margin:14px 0 0;text-align:center}
+  footer{font-size:11px;color:var(--dim);line-height:1.6;margin-top:18px;border-top:1px solid var(--panel-bd);padding-top:12px}
+  footer a{color:var(--mute)}
+  .num{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <span class="eyebrow">storm · secp256k1 point-add · team contributions</span>
+    <h1>team Storm on ecdsa.fail</h1>
+    <p class="sub" id="sub"></p>
+
+    <section class="stats" id="stats"></section>
+
+    <h2>where we sit on the sub-1000-qubit race</h2>
+    <div id="chart"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:#4ad99a"></span>our validated circuits</span>
+      <span><span class="ln"></span>public frontier · other solvers</span>
+    </div>
+
+    <h2>what we contributed</h2>
+    <section class="grid2" id="contribs"></section>
+
+    <h2>the team</h2>
+    <section class="team" id="teamEl"></section>
+    <p class="spirit" id="spirit"></p>
+
+    <footer id="src"></footer>
+  </div>
+</div>
+
+<script>
+const ASOF = "18 Jun 2026";
+
+/* the team — github handles only, no titles: one team, flat */
+const team = [
+  {name:"Oli",   gh:"welttowelt"},
+  {name:"Lucas", gh:"0xLucqs"},
+  {name:"Sam",   gh:"SamrendraS"},
+  {name:"Akash", gh:"Akashneelesh"}
+];
+
+/* the team's OWN circuits — each independently re-validated at 0/0/0 on the full 9024-shot trusted eval */
+const ours = [
+  {qubits:976, toffoli:28573233, best:true},
+  {qubits:979, toffoli:28727201}
+];
+
+/* public sub-1000q frontier — context, held by other solvers */
+const frontier = [
+  {solver:"nasqret",   qubits:965, toffoli:34069641},
+  {solver:"jieyilong", qubits:968, toffoli:33476041},
+  {solver:"jieyilong", qubits:973, toffoli:28328177}
+];
+
+const contribs = [
+  {h:"validated sub-1000q circuits", b:"976q & 979q secp256k1 point-add circuits, each independently re-validated at 0/0/0 (classical / phase / ancilla) on the full 9024-shot trusted eval."},
+  {h:"open harness", b:"the storm ecdsa harness — public tooling and this dashboard, on github. shared, reproducible, auditable."},
+  {h:"validation gate", b:"a 9024-shot trusted-eval pipeline every candidate must pass before it counts — no result is claimed on a count-only or sub-sampled check."},
+  {h:"research map", b:"a two-way sub-1000-qubit floor certificate (~1050q realized floor) plus a closed-lever map — counter-width, Q-target, hCLZ-parity and fixed-shift divstep all proven dead or parked, so the search stays on the live structural question."}
+];
+
+const fmt = (t,d)=>(t/1e6).toFixed(d)+"M";
+const best = ours.reduce((a,b)=>b.qubits<a.qubits?b:a);
+
+document.getElementById("sub").innerHTML =
+  `team Storm in the qubit × gate race for the cheapest reversible secp256k1 point-add, ${ASOF}. `+
+  `together we've built and independently validated circuits at <b style="color:var(--accent);font-weight:500">${best.qubits} qubits</b> — among the small set of solvers with validated sub-1000-qubit results — plus the open tooling and research map below.`;
+
+document.getElementById("stats").innerHTML = [
+  {lbl:"best validated",  val:`${best.qubits}q`, sub2:`× ${fmt(best.toffoli,2)} gates · trusted 0/0/0`},
+  {lbl:"validation gate",  val:"0/0/0", sub2:"9024 shots · every candidate"},
+  {lbl:"sub-1000q floor",  val:"1050q", sub2:"certified two independent ways"}
+].map(c=>`<div class="stat"><div class="lbl">${c.lbl}</div><div class="val num">${c.val}</div><div class="sub2">${c.sub2}</div></div>`).join("");
+
+/* ---- chart: zoomed to the sub-1000q race ---- */
+const W=720,H=312,M={l:66,r:122,t:28,b:46};
+const pw=W-M.l-M.r, ph=H-M.t-M.b;
+const qMin=962, qMax=982;
+const tMin=27.6e6, tMax=34.7e6;
+const X=q=>M.l+(q-qMin)/(qMax-qMin)*pw;
+const Y=t=>M.t+(tMax-t)/(tMax-tMin)*ph;
+
+let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Qubit versus gate count in the sub-1000-qubit race as of ${ASOF}. The public frontier runs from nasqret at 965 qubits to jieyilong at 973 qubits and 28.3M gates. Team Storm's two validated circuits sit just behind it at 976 and 979 qubits and about 28.6M gates.">`;
+s+=`<defs><marker id="arr" markerWidth="9" markerHeight="9" refX="6" refY="4.5" orient="auto"><path d="M1,1 L7,4.5 L1,8" fill="none" stroke="#8fb3a2" stroke-width="1.4"/></marker></defs>`;
+
+[28e6,30e6,32e6,34e6].forEach(t=>{const y=Y(t);
+  s+=`<line x1="${M.l}" y1="${y.toFixed(1)}" x2="${M.l+pw}" y2="${y.toFixed(1)}" stroke="var(--grid)"/>`;
+  s+=`<text x="${M.l-8}" y="${(y+3).toFixed(1)}" text-anchor="end" font-size="11" fill="#6f9384">${fmt(t,0)}</text>`;});
+s+=`<text x="${M.l-44}" y="${M.t-12}" font-size="11" fill="#8fb3a2">gates</text>`;
+[965,970,975,980].forEach(q=>{
+  s+=`<text x="${X(q).toFixed(0)}" y="${M.t+ph+18}" text-anchor="middle" font-size="11" fill="#6f9384">${q}</text>`;});
+s+=`<text x="${(M.l+pw).toFixed(0)}" y="${M.t+ph+34}" text-anchor="end" font-size="11" fill="#8fb3a2">qubits →</text>`;
+
+/* public frontier line + dots (muted) */
+const fsort=frontier.slice().sort((a,b)=>a.qubits-b.qubits);
+s+=`<path d="${fsort.map((d,i)=>(i?'L':'M')+X(d.qubits).toFixed(1)+','+Y(d.toffoli).toFixed(1)).join(' ')}" fill="none" stroke="var(--base)" stroke-width="2" opacity="0.55"/>`;
+fsort.forEach(d=>s+=`<circle cx="${X(d.qubits).toFixed(1)}" cy="${Y(d.toffoli).toFixed(1)}" r="4.5" fill="var(--base)" opacity="0.6"/>`);
+s+=`<text x="${(X(965)+8).toFixed(0)}" y="${(Y(34069641)+4).toFixed(0)}" font-size="11" fill="#9fb8ab">nasqret · 965q</text>`;
+s+=`<text x="${(X(973)-9).toFixed(0)}" y="${(Y(28328177)+15).toFixed(0)}" text-anchor="middle" font-size="11" fill="#9fb8ab">jieyilong · 973q</text>`;
+
+/* our validated circuits (bright) — two dots, one label for the pair */
+ours.forEach(d=>{
+  s+=`<circle cx="${X(d.qubits).toFixed(1)}" cy="${Y(d.toffoli).toFixed(1)}" r="6" fill="var(--accent)"/>`;
+});
+const rm=ours.reduce((a,b)=>b.qubits>a.qubits?b:a);
+const lx=(X(rm.qubits)+12).toFixed(0);
+s+=`<text x="${lx}" y="${(Y(rm.toffoli)-3).toFixed(0)}" font-size="11" fill="#e9f5ee">Storm · 976 &amp; 979q</text>`;
+s+=`<text x="${lx}" y="${(Y(rm.toffoli)+11).toFixed(0)}" font-size="10.5" fill="#4ad99a">validated 0/0/0</text>`;
+
+/* better-direction arrow, bottom-left */
+const ax=X(967.5), ay=Y(29.4e6);
+s+=`<line x1="${ax.toFixed(0)}" y1="${(ay-16).toFixed(0)}" x2="${(ax-30).toFixed(0)}" y2="${(ay+26).toFixed(0)}" stroke="#8fb3a2" stroke-width="1.4" marker-end="url(#arr)"/>`;
+s+=`<text x="${(ax+4).toFixed(0)}" y="${(ay-20).toFixed(0)}" font-size="11" fill="#8fb3a2">better — fewer of both</text>`;
+s+=`</svg>`;
+document.getElementById("chart").innerHTML=s;
+
+document.getElementById("contribs").innerHTML = contribs
+  .map(c=>`<div class="box"><p class="h">${c.h}</p><p class="b">${c.b}</p></div>`).join("");
+
+document.getElementById("teamEl").innerHTML = team.map(m=>
+  `<div class="member"><span class="nm">${m.name}</span>`+
+  `<a href="https://github.com/${m.gh}" target="_blank" rel="noopener">@${m.gh}</a></div>`).join("");
+
+document.getElementById("spirit").innerHTML =
+  `one team — every win is the team's win. four of us, all cooking hard on the sub-1000-qubit problem, run with our codex &amp; claude research agents.`;
+
+document.getElementById("src").innerHTML =
+  `our circuits are independently re-validated at 0/0/0 on the full 9024-shot trusted eval (q976 × 28,573,233 · q979 × 28,727,201). `+
+  `the public ecdsa.fail board shows only the current pareto frontier (fewest qubits or gates at each point); that frontier is presently held by other solvers — nasqret and jieyilong in this sub-1000q range — so our validated circuits sit just behind it. `+
+  `the field's gate-optimized corner (mpjunior92, 1168q × 1.43M) is a different, higher-qubit regime; this view focuses on the sub-1000-qubit race. `+
+  `we're actively hunting below 965q. illustrative team view, not the official board · <a href="leaderboard.html">the record frontier</a> · <a href="https://www.ecdsa.fail/">ecdsa.fail</a>`;
+</script>
+</body>
+</html>
