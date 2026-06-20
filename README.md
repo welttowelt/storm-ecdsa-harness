@@ -112,6 +112,8 @@ Safe filled examples: [examples/](examples/).
 
 Audit loop: [docs/audit-loop.md](docs/audit-loop.md).
 
+Prefilter gate pattern: [docs/stormgate.md](docs/stormgate.md).
+
 ## What This Repo Does Not Contain
 
 - Live `ecdsafail-hunt-ops` state.
