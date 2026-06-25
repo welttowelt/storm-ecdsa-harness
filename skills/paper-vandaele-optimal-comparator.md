@@ -39,8 +39,9 @@ phase callback contract is part of the invariant, not an implementation detail.
 1. Run a near-peak allocation trace and classify whether the comparator is the
    sole peak source or only co-peaking with an adder carry floor.
 2. If a const-add chunk and comparator ladder peak together, require a paired
-   cut or an entry-active reduction. Do not port a comparator-only route as a
-   q-cut claim.
+   cut or an entry-active reduction. If other callsites remain at the same q
+   after excluding that pair, widen the proof to the whole plateau before
+   porting code.
 3. Build a reduced-width toy that exposes the same carry-in, const bits, dirty
    host, and middle callback.
 4. Count the one-callsite port before widening.
@@ -75,6 +76,7 @@ Vandaele comparator gate:
 
 ## Kill Gate
 
-Park the route if the comparator is not the sole peak source and no paired cut
-is specified. Also park on any phase-only residual: a comparator that preserves
-the classical predicate but changes the HMR phase callback is not clean.
+Park the route if the comparator is not the sole peak source and no paired or
+plateau-wide cut is specified. Also park on any phase-only residual: a
+comparator that preserves the classical predicate but changes the HMR phase
+callback is not clean.

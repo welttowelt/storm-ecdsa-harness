@@ -65,6 +65,37 @@ alloc_total="$(grep -c 'ALLOC_NEAR' "$trace" || true)"
 comparator_hits="$(grep 'ALLOC_NEAR' "$trace" | grep -Eci 'compare|comparator|arith.rs:769' || true)"
 add_carry_hits="$(grep 'ALLOC_NEAR' "$trace" | grep -Eci 'const_chunk_add_clean|arith.rs:658|arith.rs:700|carry' || true)"
 
+exclusion_stats="$(
+  awk '
+    /ALLOC_NEAR/ {
+      active = 0;
+      caller = "";
+      for (i = 1; i <= NF; i++) {
+        if ($i ~ /^active=[0-9]+$/) {
+          split($i, a, "=");
+          active = a[2] + 0;
+        }
+        if ($i ~ /^caller=/) {
+          split($i, c, "=");
+          caller = c[2];
+        }
+      }
+      if (caller !~ /arith.rs:769|comparator/) {
+        if (active > no_comp) no_comp = active;
+      }
+      if (caller !~ /arith.rs:658|arith.rs:769|comparator/) {
+        if (active > no_pair) no_pair = active;
+      }
+    }
+    END {
+      printf "max_without_comparator=%s\n", (no_comp ? no_comp : "unknown");
+      printf "max_without_main_pair=%s\n", (no_pair ? no_pair : "unknown");
+    }
+  ' "$trace"
+)"
+max_without_comparator="$(printf '%s\n' "$exclusion_stats" | awk -F= '/max_without_comparator/ { print $2 }')"
+max_without_main_pair="$(printf '%s\n' "$exclusion_stats" | awk -F= '/max_without_main_pair/ { print $2 }')"
+
 top_callers="$(
   grep 'ALLOC_NEAR' "$trace" \
     | sed -E 's/.*caller=//' \
@@ -86,6 +117,9 @@ if [ "${comparator_hits:-0}" -gt 0 ] && [ "${add_carry_hits:-0}" -eq 0 ]; then
   decision="toy-port"
 elif [ "${comparator_hits:-0}" -gt 0 ] && [ "${add_carry_hits:-0}" -gt 0 ]; then
   decision="paired-cut-required"
+  if [ "$max_without_main_pair" = "$peak_qubits" ]; then
+    decision="plateau-cut-required"
+  fi
 fi
 
 cat <<EOF
@@ -96,6 +130,8 @@ Vandaele comparator gate:
 - Peak evidence: peak_qubits=${peak_qubits} alloc_near=${alloc_total}
 - Comparator peak hits: ${comparator_hits}
 - Co-peak add/carry hits: ${add_carry_hits}
+- Max without comparator: ${max_without_comparator:-unknown}
+- Max without main comparator/add pair: ${max_without_main_pair:-unknown}
 - Dirty host: ${dirty_host}
 - Middle callback preserved: ${middle_callback}
 - Decision: ${decision}
