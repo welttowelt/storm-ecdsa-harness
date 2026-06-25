@@ -22,6 +22,8 @@ that would let it proceed.
 
 Use for critique-before-rewrite or critique-before-build.
 
+Standalone skill card: `skills/tony-rci-audit.md`.
+
 Required output:
 
 - Problem
@@ -47,6 +49,8 @@ Best for:
 
 Use for constructive search before killing a route.
 
+Standalone skill card: `skills/bluesky-audit.md`.
+
 Best for:
 
 - "what would make this work?"
@@ -59,6 +63,8 @@ Bluesky output should be optimistic but falsifiable.
 ### Redsky Audit
 
 Use for adversarial frontier work.
+
+Standalone skill card: `skills/redsky-audit.md`.
 
 Best for:
 

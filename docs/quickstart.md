@@ -44,6 +44,12 @@ If you want a filled safe example first, read `examples/`.
 Use `docs/audit-loop.md` when you want the RCI/Tony plus Bluesky/Redsky review
 cycle before changing docs, dispatching compute, or writing a public note.
 
+You can also copy the audit roles as standalone skills:
+
+- `skills/tony-rci-audit.md`
+- `skills/bluesky-audit.md`
+- `skills/redsky-audit.md`
+
 ## 4. Keep Private State Outside This Repo
 
 Do not store these in the public repo:
@@ -104,11 +110,13 @@ For each route:
 
 1. Refresh public current target.
 2. Write a route packet.
-3. Ask a critique worker to try to kill it.
-4. Run cheap validation.
-5. Dispatch paid compute only if the route has a validator and kill gate.
-6. Treat scanner hits as `Prefilter`.
-7. Submit only after official local validation and a fresh frontier check.
+3. Run Bluesky if the route needs a constructive path.
+4. Run Redsky to try to kill the route before compute.
+5. Run Tony/RCI to turn findings into smallest useful fixes and gates.
+6. Run cheap validation.
+7. Dispatch paid compute only if the route has a validator and kill gate.
+8. Treat scanner hits as `Prefilter`.
+9. Submit only after official local validation and a fresh frontier check.
 
 For the full production mapping, read
 `docs/production-shape.md`.

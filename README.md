@@ -98,13 +98,19 @@ agent instructions or used as a preflight before route work:
 - `skills/nasqret-playbook.md`: build route slates before scaling compute.
 - `skills/deepseek-pressure-test.md`: ask an external worker to try to kill a
   route before acting.
+- `skills/tony-rci-audit.md`: turn critique into concrete findings, smallest
+  useful fixes, and explicit gates.
+- `skills/bluesky-audit.md`: find the best bounded path if an idea is real
+  before deciding whether to invest.
+- `skills/redsky-audit.md`: try to kill a route with stale-truth, evidence,
+  validator, economics, and gate checks.
 - `skills/pip-discipline.md`: use the English/PIP-derived evidence discipline
   after repeated failure, passive handoff, or unverified completion claims. This
   repo imports only the local prompt-card discipline, not plugin hooks,
   telemetry, feedback upload, or remote prompt loading.
 
-Codex-style agents can also discover the PIP card through the repo-local bridge
-at `.agents/skills/pip-discipline/SKILL.md`.
+Codex-style agents can also discover the PIP and audit cards through the
+repo-local bridges under `.agents/skills/`.
 
 ## Quickstart
 

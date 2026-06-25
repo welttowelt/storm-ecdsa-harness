@@ -31,6 +31,12 @@ for path in \
   templates/route-packet.md \
   templates/compute-request.md \
   templates/public-note.md \
+  skills/tony-rci-audit.md \
+  skills/bluesky-audit.md \
+  skills/redsky-audit.md \
+  .agents/skills/tony-rci-audit/SKILL.md \
+  .agents/skills/bluesky-audit/SKILL.md \
+  .agents/skills/redsky-audit/SKILL.md \
   docs/production-shape.md \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
@@ -56,6 +62,15 @@ need_text templates/mailbox-entry.md "purpose limits" "Purpose/limits"
 need_text templates/mailbox-entry.md "read receipt requested" "Read receipt requested"
 need_text templates/public-note.md "purpose and limits" "Purpose And Limits"
 need_text templates/public-note.md "evidence label" "Evidence label"
+need_text skills/tony-rci-audit.md "smallest useful fix" "Smallest useful fix"
+need_text skills/tony-rci-audit.md "completion gate" "Completion Gate"
+need_text skills/bluesky-audit.md "bounded experiment" "bounded experiment"
+need_text skills/bluesky-audit.md "stop condition" "Stop condition"
+need_text skills/redsky-audit.md "strongest objection" "Strongest objection"
+need_text skills/redsky-audit.md "fastest falsifier" "Fastest falsifier"
+need_text .agents/skills/tony-rci-audit/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/bluesky-audit/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/redsky-audit/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text docs/production-shape.md "storm production" "STORM harness in production"
 need_text docs/production-shape.md "prefilter label" "Prefilter"
 need_text docs/production-shape.md "private boundary" "private fleet config"
