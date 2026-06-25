@@ -30,8 +30,14 @@ resident floor** — a WIDTH-1 ripple. This closes every adder trick:
   s≥4 chunks, which sit BELOW the global peak → no score change. ROUTE CLOSED.
 - **Fig-5 3-clean** (arXiv:2507.23079 Fig 5): peak 1152 achieved + adder value-exact (anc=0, stale-index
   confirmed), but Q×T-NEGATIVE raw (4n Toffoli > graduated clean-MBU → avgT ~1,407,928 → loses #1 by
-  ~44M). Q×T-positive only with provably-value-exact dead-CCX drops (path A, not cheaply value-exact) or
-  a +f-PAD approximation fix (path B). ROUTE CLOSED as a clean win; conditional only.
+  ~44M). PATH B (approximation fix) is STRUCTURALLY BLOCKED: Gidney ≡ graduated bit-identical on SUMS,
+  but diverges on PHASE PROFILE — different MBU mechanisms (graduated = comparator-based
+  `controlled_erase_carry_gated_const` phase deposit cancelled across ~40 folds; Gidney = X-basis vent +
+  Z-discharge). The fold's correctness DEPENDS ON the graduated's phase-compounding; matching it inside
+  the Gidney suffix would replicate the comparator = defeats the 3-clean win. So landing q1152 needs
+  PATH C (deep island hunt ~3e-7, fleet — find a nonce where the phase compounding cancels → 0 pha) +
+  PATH A (per-nonce value-exact drop regen, DEAD_SCAN_REAL_SEAD=1 → avgT ~1,368,349, Q×T-positive). NOT a
+  cheap win; a real cut gated on fleet island-hunt + value-exact drops.
 - **Conditionally-clean cascade**: CLOSED (no donor at the peak; ripple floor).
 
 **THE PEAK +1 IS LOAD-BEARING**: int[0] of the s=2 chunk + the boundary `cout` (deferred-erase into the
