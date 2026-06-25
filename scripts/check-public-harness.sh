@@ -41,6 +41,7 @@ for path in \
   scripts/pebble-memory-ledger.sh \
   scripts/vandaele-comparator-ledger.sh \
   scripts/resident-footprint-ledger.sh \
+  scripts/uncompute-window-ledger.sh \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -71,6 +72,7 @@ for path in \
   skills/paper-conditionally-clean-ancillae.md \
   skills/paper-reversible-pebbling-memory-management.md \
   skills/paper-vandaele-optimal-comparator.md \
+  skills/paper-reqomp-space-constrained-uncompute.md \
   skills/paper-remaud-ancilla-free-adder.md \
   skills/paper-takahashi-no-ancilla-adder.md \
   skills/paper-roetteler-ecdlp-resource-estimate.md \
@@ -101,6 +103,7 @@ for path in \
   .agents/skills/paper-conditionally-clean-ancillae/SKILL.md \
   .agents/skills/paper-reversible-pebbling-memory-management/SKILL.md \
   .agents/skills/paper-vandaele-optimal-comparator/SKILL.md \
+  .agents/skills/paper-reqomp-space-constrained-uncompute/SKILL.md \
   .agents/skills/paper-remaud-ancilla-free-adder/SKILL.md \
   .agents/skills/paper-takahashi-no-ancilla-adder/SKILL.md \
   .agents/skills/paper-roetteler-ecdlp-resource-estimate/SKILL.md \
@@ -140,6 +143,7 @@ need_text docs/production-shape.md "private boundary" "private fleet config"
 need_text scripts/pebble-memory-ledger.sh "pebble ledger output" "Reversible pebbling memory gate"
 need_text scripts/vandaele-comparator-ledger.sh "vandaele ledger output" "Vandaele comparator gate"
 need_text scripts/resident-footprint-ledger.sh "resident footprint output" "Resident footprint gate"
+need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp uncompute window gate"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -165,6 +169,7 @@ need_text skills/conditionally-clean-cascade-cut.md "conditionally clean cascade
 need_text skills/paper-conditionally-clean-ancillae.md "conditionally clean" "conditionally clean"
 need_text skills/paper-reversible-pebbling-memory-management.md "reversible pebbling" "reversible pebbling"
 need_text skills/paper-vandaele-optimal-comparator.md "vandaele comparator" "arXiv:2603.12917"
+need_text skills/paper-reqomp-space-constrained-uncompute.md "reqomp uncompute" "Reqomp"
 need_text skills/paper-remaud-ancilla-free-adder.md "ancilla free" "no ancilla"
 need_text skills/paper-takahashi-no-ancilla-adder.md "no ancilla baseline" "no-ancilla"
 need_text skills/paper-roetteler-ecdlp-resource-estimate.md "prime field" "prime-field ECDLP"
