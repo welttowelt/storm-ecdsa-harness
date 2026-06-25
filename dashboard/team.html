@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ecdsa.fail — team Storm</title>
+<title>ecdsa.fail — team Storm snapshot</title>
+<link rel="icon" href="data:,">
 <style>
   :root{
     --bg:#0e3a2c; --panel:rgba(180,230,205,0.06); --panel-bd:rgba(180,230,205,0.16);
@@ -49,7 +50,7 @@
 <body>
 <div class="wrap">
   <div class="card">
-    <span class="eyebrow">storm · secp256k1 point-add · team contributions</span>
+    <span class="eyebrow">storm · secp256k1 point-add · dated team snapshot</span>
     <h1>team Storm on ecdsa.fail</h1>
     <p class="sub" id="sub"></p>
 
@@ -109,7 +110,7 @@ const contribs = [
 ];
 
 document.getElementById("sub").innerHTML =
-  `team Storm in the ecdsa.fail race for the cheapest reversible secp256k1 point-add. across June 2026 we landed <b>13 promoted frontier moves</b> on the main qubit×gate board, then pushed into the <b>sub-1000-qubit</b> race with measured rows down to 978q — on top of the open tooling and validation discipline below.`;
+  `dated public snapshot of team Storm in the ecdsa.fail race for the cheapest reversible secp256k1 point-add. across June 2026 we landed <b>13 promoted frontier moves</b> on the main qubit×gate board, then pushed into the <b>sub-1000-qubit</b> race with measured rows down to 978q — on top of the open tooling and validation discipline below.`;
 
 document.getElementById("stats").innerHTML = [
   {lbl:"promoted frontier moves", val:"13", sub2:"accepted main-board wins · jun 6–10"},
@@ -166,7 +167,7 @@ document.getElementById("spirit").innerHTML =
   `one team — every win is the team's win. four of us, all cooking hard on the secp256k1 point-add problem, run with our codex &amp; claude research agents.`;
 
 document.getElementById("src").innerHTML =
-  `promoted rows are primary qubit×gate wins; the sub-1000q rows are public measured low-Q evidence, not primary-board wins. figures from the public ecdsa.fail API (${ASOF} capture); our circuits are re-validated locally at 0/0/0 on the full 9024-shot trusted eval. this is a public resource-estimation benchmark for one secp256k1 point-add — not a live exploit or a full Shor run. illustrative team view · <a href="leaderboard.html">the record frontier</a> · <a href="https://www.ecdsa.fail/">ecdsa.fail</a>`;
+  `promoted rows are primary qubit×gate wins; the sub-1000q rows are public measured low-Q evidence, not primary-board wins. figures from the public ecdsa.fail API (${ASOF} capture), not live state; our circuits are re-validated locally at 0/0/0 on the full 9024-shot trusted eval. this is a public resource-estimation benchmark for one secp256k1 point-add — not a live exploit or a full Shor run. illustrative team view · <a href="leaderboard.html">dated frontier snapshot</a> · <a href="https://www.ecdsa.fail/">ecdsa.fail</a>`;
 </script>
 </body>
 </html>

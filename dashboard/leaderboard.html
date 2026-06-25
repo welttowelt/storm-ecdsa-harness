@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ecdsa.fail — record frontier</title>
+<title>ecdsa.fail — dated frontier snapshot</title>
+<link rel="icon" href="data:,">
 <style>
   :root{
     --bg:#0e3a2c; --panel:rgba(180,230,205,0.06); --panel-bd:rgba(180,230,205,0.16);
@@ -39,14 +40,14 @@
 <body>
 <div class="wrap">
   <div class="card">
-    <span class="eyebrow">secp256k1 point-add · qubit × gate frontier</span>
-    <h1>the record frontier</h1>
+    <span class="eyebrow">secp256k1 point-add · qubit × gate frontier · dated snapshot</span>
+    <h1>dated frontier snapshot</h1>
     <p class="sub" id="sub"></p>
 
     <section class="stats" id="stats"></section>
 
     <p class="caption">two goals: <b>fewer qubits</b> and <b>fewer gates</b> — better is toward the bottom-left.
-      the <b>line</b> connects the current record circuits. each one is best at something; together they're the frontier.</p>
+      the <b>line</b> connects the record circuits in this dated capture. each one is best at something; together they show the frontier at that time.</p>
 
     <div id="chart"></div>
 
@@ -85,7 +86,7 @@ const fewestT = live.reduce((a,b)=> b.toffoli < a.toffoli ? b : a);
 const baseline = submissions.find(d=>d.baseline);
 
 document.getElementById("sub").innerHTML =
-  `the field's best circuits, ${ASOF}. since the ~${baseline.qubits.toLocaleString()}-qubit Trail of Bits baseline, the frontier now reaches as few as ${fewestQ.qubits} qubits (${fewestQ.solver}) at one end and ${fmtT(fewestT.toffoli)} gates (${fewestT.solver}, ${fewestT.qubits}q) at the other.`;
+  `public dated capture, ${ASOF}. since the ~${baseline.qubits.toLocaleString()}-qubit Trail of Bits baseline, this snapshot reaches as few as ${fewestQ.qubits} qubits (${fewestQ.solver}) at one end and ${fmtT(fewestT.toffoli)} gates (${fewestT.solver}, ${fewestT.qubits}q) at the other.`;
 
 document.getElementById("stats").innerHTML = [
   {lbl:"fewest qubits", val:fewestQ.qubits, sub:fewestQ.solver},
@@ -134,7 +135,7 @@ s+=`</svg>`;
 document.getElementById("chart").innerHTML = s;
 
 document.getElementById("src").innerHTML =
-  `record rows from the public ecdsa.fail submissions (${ASOF}), including rejected low-Q public rows (the 959q corner trades gates for qubits — the sub-1000 challenge disregards gate count); q×t tip commit 1caf521 is mpjunior92 · baseline ~32.3M gates is the published Trail of Bits trailmix figure (approx). illustrative redesign of the trajectory chart, not the official board · <a href="team.html">team Storm</a> · <a href="https://www.ecdsa.fail/">ecdsa.fail</a>`;
+  `dated record rows from the public ecdsa.fail submissions (${ASOF}), including rejected low-Q public rows (the 959q corner trades gates for qubits — the sub-1000 challenge disregards gate count); q×t tip commit 1caf521 is mpjunior92 · baseline ~32.3M gates is the published Trail of Bits trailmix figure (approx). illustrative redesign of the trajectory chart, not live state or the official board · <a href="team.html">team Storm</a> · <a href="https://www.ecdsa.fail/">ecdsa.fail</a>`;
 </script>
 </body>
 </html>
