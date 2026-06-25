@@ -163,6 +163,8 @@ agent instructions or used as a preflight before route work:
 - `skills/paper-scalable-memory-recycling.md`: prevent lower-Q primitive
   swaps from silently changing dynamic headroom schedules; require schedule
   ledgers, frozen baseline replay, and explicit rebaked tables.
+- `skills/paper-dead-gate-elimination.md`: regenerate and audit dead-drop
+  index files after op-stream edits; never reuse stale `.idx` proof artifacts.
 
 Codex-style agents can also discover the PIP and audit cards through the
 repo-local bridges under `.agents/skills/`.
@@ -208,6 +210,7 @@ The bridge names are:
 - `paper-garn-kan-windowed-binary-ecdlp`
 - `paper-wire-recycling-lifetime-graph`
 - `paper-scalable-memory-recycling`
+- `paper-dead-gate-elimination`
 
 Useful global skills for ECDSA work, when installed in the agent environment:
 
