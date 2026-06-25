@@ -72,6 +72,31 @@ Schrottenloher modmul width — cycle-3 found NO concretely-promising paper, 29/
 Fig-5 cut landed via fleet island-hunt + value-exact drops. The nonce-variance island hunt (Akash) is
 the tractable live #1 path.
 
+## THE DEEPER ROOT CAUSE (Pharos footprint-invariant agent, 2026-06-26): ALLOCATOR-CASCADE, not stale-index
+
+The stale-index diagnosis (circuit-edit-integration-safety.md step 1) was a SYMPTOM. The structural root:
+**ANY peak cut CASCADES.** Peak reduction changes the allocation timeline; the LIFO free-pool reassigns
+every downstream qubit id → changes the FS seed (hashed over op qubit-ids + count) AND gate connectivity
+→ wrong function (9024cls/141pha/141anc, **even with DROP_DEAD_ROBUST_DISABLE=1**). This is NOT a stale
+idx and NOT an adder bug — it is allocator label-instability. Op-stream diff signature: common prefix
+~4818 ops then GLOBAL divergence. Both 1153 binders mapped: arith.rs:646 (FFG call 178) + gidney.rs:221.
+**q1152 therefore needs a label-stable op emitter (multi-day allocator refactor), not a localized swap.**
+Refuted escapes: lazy `int[i]` (peak stays 1153), per-call g+1 (peak ↑ 1155). This re-explains why
+Gidney Fig-5 / cascade / Fig-2 ALL integrated-dirty: they all touch the allocation timeline.
+
+## THE LIVE BEAT PATH (Pharos pivot, adopted): avgT-axis data-qubit Toffoli cuts at peak 1153
+
+A **value-exact Toffoli cut on DATA qubits** (a compute/uncompute pair, NO ancilla alloc/free) does NOT
+change the allocation timeline → stays value-exact → reseeds FS (clean nonce changes) but the FUNCTION
+is identical → scanner_deep re-hunts a clean island on the lower-avgT stream. Boundary vs #1
+1,577,850,522: need round(avgT) = 1,368,473 (current best nonce 930308424560 @ 1,368,473.626; need
+<1,368,473.5). A ~1-executed-Toffoli value-exact data-qubit shave + clean-island re-hunt =
+1,368,473×1153 = 1,577,849,169 (~1.35M under #1).
+**⚠ SAFETY (cascade warning):** ONLY data-qubit compute/uncompute pair removal is safe (no alloc/free →
+no timeline change). **ancilla-allocating pair removal AND dead-CCX (fired==0) removal DO cascade / dirty
+islands** (they touch the allocation timeline). Easy peephole cuts are already applied; new data-qubit
+pairs are a grind but it is the one live beat path this window.
+
 ## The peak anatomy (the one fact every candidate must pass)
 
 Peak 1153 is NOT a single adder's ripple carries. It is **4 INTER-CHUNK boundary `cout` ancillae**
