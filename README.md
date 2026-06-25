@@ -151,6 +151,8 @@ agent instructions or used as a preflight before route work:
   conditionally clean ancillae only with a branch-clean proof.
 - `skills/paper-reversible-pebbling-memory-management.md`: turn lower-Q
   cleanup/recompute ideas into explicit peak DAG and stale-drop gates.
+- `skills/paper-square-active-volume.md`: rank reuse, uncompute, and codec
+  timing candidates by the above-target active-volume rows they actually cover.
 - `skills/paper-vandaele-optimal-comparator.md`: apply Vandaele 2026
   comparator/incrementer circuits only after proving the comparator is the
   peak source or pairing it with the co-peak carry floor.

@@ -38,6 +38,7 @@ for path in \
   .agents/skills/bluesky-audit/SKILL.md \
   .agents/skills/redsky-audit/SKILL.md \
   docs/production-shape.md \
+  scripts/active-volume-ledger.sh \
   scripts/pebble-memory-ledger.sh \
   scripts/vandaele-comparator-ledger.sh \
   scripts/resident-footprint-ledger.sh \
@@ -71,6 +72,7 @@ for path in \
   skills/conditionally-clean-cascade-cut.md \
   skills/paper-conditionally-clean-ancillae.md \
   skills/paper-reversible-pebbling-memory-management.md \
+  skills/paper-square-active-volume.md \
   skills/paper-vandaele-optimal-comparator.md \
   skills/paper-reqomp-space-constrained-uncompute.md \
   skills/paper-remaud-ancilla-free-adder.md \
@@ -102,6 +104,7 @@ for path in \
   .agents/skills/conditionally-clean-cascade-cut/SKILL.md \
   .agents/skills/paper-conditionally-clean-ancillae/SKILL.md \
   .agents/skills/paper-reversible-pebbling-memory-management/SKILL.md \
+  .agents/skills/paper-square-active-volume/SKILL.md \
   .agents/skills/paper-vandaele-optimal-comparator/SKILL.md \
   .agents/skills/paper-reqomp-space-constrained-uncompute/SKILL.md \
   .agents/skills/paper-remaud-ancilla-free-adder/SKILL.md \
@@ -140,6 +143,7 @@ need_text .agents/skills/redsky-audit/SKILL.md "bridge" "Codex-discoverable brid
 need_text docs/production-shape.md "storm production" "STORM harness in production"
 need_text docs/production-shape.md "prefilter label" "Prefilter"
 need_text docs/production-shape.md "private boundary" "private fleet config"
+need_text scripts/active-volume-ledger.sh "square ledger output" "SQUARE active-volume gate"
 need_text scripts/pebble-memory-ledger.sh "pebble ledger output" "Reversible pebbling memory gate"
 need_text scripts/pebble-memory-ledger.sh "trace ledger" "TLM_TAPE"
 need_text scripts/vandaele-comparator-ledger.sh "vandaele ledger output" "Vandaele comparator gate"
@@ -169,6 +173,7 @@ need_text skills/paper-luo-register-sharing-eea.md "register sharing" "register-
 need_text skills/conditionally-clean-cascade-cut.md "conditionally clean cascade" "conditionally-clean cascade"
 need_text skills/paper-conditionally-clean-ancillae.md "conditionally clean" "conditionally clean"
 need_text skills/paper-reversible-pebbling-memory-management.md "reversible pebbling" "reversible pebbling"
+need_text skills/paper-square-active-volume.md "square active volume" "SQUARE active-volume"
 need_text skills/paper-vandaele-optimal-comparator.md "vandaele comparator" "arXiv:2603.12917"
 need_text skills/paper-reqomp-space-constrained-uncompute.md "reqomp uncompute" "Reqomp"
 need_text skills/paper-remaud-ancilla-free-adder.md "ancilla free" "no ancilla"
