@@ -76,7 +76,11 @@ restore=<exact inverse path> stale_drop_state=<none|historical|regenerated|fixed
    benchmark only after 0/0/0.
 
 Use `scripts/pebble-memory-ledger.sh` to normalize evidence from build/eval
-logs before posting to the mailbox. The helper intentionally records dirty
+logs before posting to the mailbox. When attacking transcript storage, pass a
+`TLM_TAPE`/`TLM_FFG` trace with `--trace-log`, `--trace-target-q`, and, when the
+peak occurs inside a child adder, `--trace-active-floor` for neighboring tape
+rows. The helper then records the plateau tape length, pending-window pressure,
+codec family, and coincident FFG calls. The helper intentionally records dirty
 results too; dirty evidence is how stale-drop and missing-consumer routes get
 closed.
 
@@ -105,6 +109,18 @@ work path B (+f-PAD/carry approximation) or the floor audit.
 Conclusion: use this skill to audit resident-base and transcript/fold
 dependencies, not to keep swapping adder implementations at the closed peak.
 
+2026-06-26 q1147 transcript/FFG plateau gate:
+
+- local 3-symbol dialog codec is entropy-tight (`ceil(log2(5^3)) = 7`), so a
+  useful cut needs schedule/pebble timing rather than another local 3-symbol
+  mapping;
+- apply this card by tracing `TLM_TAPE` rows next to `TLM_FFG` rows, then model
+  one segment as a producer/consumer DAG before trying to uncompute or replay
+  it;
+- the acceptance question is not "can we save a tape bit somewhere?" but "can we
+  save a resident bit at every q-target plateau row without adding more Toffoli
+  than the q-tier score headroom permits?"
+
 ## Output
 
 ```text
@@ -115,6 +131,7 @@ Reversible pebbling memory gate:
 - Removed or delayed value:
 - Producer / consumers:
 - Pebbling move:
+- Trace ledger:
 - Extra ops estimate:
 - Dead-drop state: none / historical / regenerated / fixed point
 - Residual evidence:

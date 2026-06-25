@@ -141,6 +141,7 @@ need_text docs/production-shape.md "storm production" "STORM harness in producti
 need_text docs/production-shape.md "prefilter label" "Prefilter"
 need_text docs/production-shape.md "private boundary" "private fleet config"
 need_text scripts/pebble-memory-ledger.sh "pebble ledger output" "Reversible pebbling memory gate"
+need_text scripts/pebble-memory-ledger.sh "trace ledger" "TLM_TAPE"
 need_text scripts/vandaele-comparator-ledger.sh "vandaele ledger output" "Vandaele comparator gate"
 need_text scripts/resident-footprint-ledger.sh "resident footprint output" "Resident footprint gate"
 need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp uncompute window gate"
