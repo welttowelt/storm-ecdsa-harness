@@ -97,6 +97,25 @@ no timeline change). **ancilla-allocating pair removal AND dead-CCX (fired==0) r
 islands** (they touch the allocation timeline). Easy peephole cuts are already applied; new data-qubit
 pairs are a grind but it is the one live beat path this window.
 
+## avgT-axis data-qubit pair-removal: CLOSED (2026-06-26, +f fold grind). Constprop is exhaustive.
+
+The avgT-axis pair-removal route is EXHAUSTED at the source level:
+- `avgT` = Σ over CCX/CCZ of executed_shots (sim.rs:85-86); CX/CZ/Z are Clifford = uncounted. **Only
+  CCX/CCZ removal drops avgT** — CX pair removal is score-dead.
+- constprop's `find_inverse_pairs` (constprop.rs) is SOUND + whole-stream (not window-limited): it
+  already cancels every cancellable CCX pair. The 722 near-misses it skips are load-bearing
+  (`CCX(a,b,t)...CX(t,q564)...CCX(a,b,t)` — t is READ between as the graduated-chunk carry-ripple
+  control; 0/722 phase-only-safe).
+- CCZ self-inverse pairs: constprop does NOT cancel them, but 0 cancellable CCZ pairs exist anyway.
+- The +f fold is measurement-vented throughout (HMR + CZ phase deposit, NOT a second CCX) → there are no
+  classical CCX compute/uncompute pairs on data qubits; the "uncompute" is an alloc-touching HMR
+  (cascade-unsafe regardless).
+CONCLUSION: any further avgT shave requires a STRUCTURAL change (adder re-factor / pair-complete /
+Gidney-Fig5 + fleet island-hunt / label-stable allocator refactor), NOT a pair removal.
+LATENT ROBUSTNESS NOTE (not a shave): `CONSTPROP_VERIFY=2` reports 11/37 inverse-pair cancellations
+unsound on a synthetic nonce distribution; production skips the revert branch (all 37 applied), and the
+live FS nonce avoids those 11 rare inputs (real eval passes). Latent risk, not actionable for score.
+
 ## The peak anatomy (the one fact every candidate must pass)
 
 Peak 1153 is NOT a single adder's ripple carries. It is **4 INTER-CHUNK boundary `cout` ancillae**
