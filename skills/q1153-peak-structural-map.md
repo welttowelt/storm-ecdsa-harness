@@ -19,6 +19,31 @@ simultaneously live; there is no transient borrow slot inside a stage. The condi
 can break the floor. The kill-test / MBU-baked-in / toffoli-vs-width / dead-bit-borrow sections below
 remain valid; only the peak SITE (internal carry, not boundary cout) is corrected.
 
+## DEFINITIVE (Fig-2 pilot, 2026-06-26): ALL adder-substitution routes CLOSED. Peak = width-1 (s=2) single-carry floor.
+
+The graduated staircase chunks are s=2..6; their max-active is **s=2 → 1153 (THE PEAK)**, s=3 → 1152,
+s=4 → 1151, s=5 → 1150, s=6 → 1149. The peak instance is a **single internal carry `int[0]` on a 1152
+resident floor** — a WIDTH-1 ripple. This closes every adder trick:
+- **Fig-2 vented-streaming** (arXiv:2507.23079 Fig 2): value-exact in isolation (5456/5456 selftest) but
+  keeps `cur+nxt = 2 carries` live for s=2 → peak 1154 (WORSE). Its non-ripple property is irrelevant when
+  the ripple is already width-1 (any adder needs ≥2 carries for s=2: c_1 feeds c_2=cout). It only wins for
+  s≥4 chunks, which sit BELOW the global peak → no score change. ROUTE CLOSED.
+- **Fig-5 3-clean** (arXiv:2507.23079 Fig 5): peak 1152 achieved + adder value-exact (anc=0, stale-index
+  confirmed), but Q×T-NEGATIVE raw (4n Toffoli > graduated clean-MBU → avgT ~1,407,928 → loses #1 by
+  ~44M). Q×T-positive only with provably-value-exact dead-CCX drops (path A, not cheaply value-exact) or
+  a +f-PAD approximation fix (path B). ROUTE CLOSED as a clean win; conditional only.
+- **Conditionally-clean cascade**: CLOSED (no donor at the peak; ripple floor).
+
+**THE PEAK +1 IS LOAD-BEARING**: int[0] of the s=2 chunk + the boundary `cout` (deferred-erase into the
+next chunk's carry-in). No adder substitution removes it.
+
+**ONLY REMAINING STRUCTURAL LEVERS** (all hard/unproven): (1) **pair-complete simplification**; (2)
+**Schrottenloher modmul/modadd width** (algebraic re-factor of the resident base, not the carry); (3)
+**staircase-reshape** — restructure the graduated staircase so the peak chunk is WIDE (s≥4), where the
+banked value-exact Fig-2/Fig-5 adders WOULD help (Fig-2 selftest banked in worktree for this). Until one
+of these lands, the q1153 peak cut is EXHAUSTED and the nonce-variance island hunt (Akash) is the only
+live #1 path.
+
 ## The peak anatomy (the one fact every candidate must pass)
 
 Peak 1153 is NOT a single adder's ripple carries. It is **4 INTER-CHUNK boundary `cout` ancillae**
