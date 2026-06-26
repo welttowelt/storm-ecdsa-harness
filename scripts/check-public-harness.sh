@@ -43,6 +43,7 @@ for path in \
   scripts/vandaele-comparator-ledger.sh \
   scripts/resident-footprint-ledger.sh \
   scripts/uncompute-window-ledger.sh \
+  scripts/dirty-borrow-ledger.sh \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -80,6 +81,7 @@ for path in \
   skills/paper-roetteler-ecdlp-resource-estimate.md \
   skills/paper-garn-kan-windowed-binary-ecdlp.md \
   skills/paper-wire-recycling-lifetime-graph.md \
+  skills/paper-dirty-borrowing-entanglement.md \
   skills/paper-dead-gate-elimination.md \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
@@ -112,6 +114,7 @@ for path in \
   .agents/skills/paper-roetteler-ecdlp-resource-estimate/SKILL.md \
   .agents/skills/paper-garn-kan-windowed-binary-ecdlp/SKILL.md \
   .agents/skills/paper-wire-recycling-lifetime-graph/SKILL.md \
+  .agents/skills/paper-dirty-borrowing-entanglement/SKILL.md \
   .agents/skills/paper-dead-gate-elimination/SKILL.md \
   dashboard/fixtures/status.json; do
   need_file "$path"
@@ -149,6 +152,7 @@ need_text scripts/pebble-memory-ledger.sh "trace ledger" "TLM_TAPE"
 need_text scripts/vandaele-comparator-ledger.sh "vandaele ledger output" "Vandaele comparator gate"
 need_text scripts/resident-footprint-ledger.sh "resident footprint output" "Resident footprint gate"
 need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp uncompute window gate"
+need_text scripts/dirty-borrow-ledger.sh "dirty borrow ledger output" "Dirty borrow entanglement gate"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -181,6 +185,7 @@ need_text skills/paper-takahashi-no-ancilla-adder.md "no ancilla baseline" "no-a
 need_text skills/paper-roetteler-ecdlp-resource-estimate.md "prime field" "prime-field ECDLP"
 need_text skills/paper-garn-kan-windowed-binary-ecdlp.md "binary field" "binary-field"
 need_text skills/paper-wire-recycling-lifetime-graph.md "wire recycling" "lifetime graph"
+need_text skills/paper-dirty-borrowing-entanglement.md "dirty borrow entanglement" "external entanglement"
 need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Gate Elimination"
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
