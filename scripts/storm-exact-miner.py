@@ -558,6 +558,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "ctrl=1,a0=1 toggles cy0, and later prefix rows with a[i]=1,ci=1 toggle next carry; omission loses the +f carry chain",
         "restoration_obligation": "the prefix carry is consumed by suffix handoff and reverse cleanup",
     },
+    ("fused.rs", 194, "92464e1dbe395025"): {
+        "primitive_family": "fused_fold_carry_live",
+        "support_domain": "source-hash-bound fused fold carry creation row",
+        "falsifier_template": "choose a reached fused fold row with y[i]=1 and incoming carry ci=1",
+        "witness": "line 194 toggles the next carry when y[i]=1 and ci=1; omission loses the carry through the fused fold chain",
+        "restoration_obligation": "the carry is consumed by later inline sums and reverse fold cleanup",
+    },
     ("comparator.rs", 68, "e2d291034f536196"): {
         "primitive_family": "comparator_top_carry_live",
         "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",
