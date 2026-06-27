@@ -49,6 +49,7 @@ for path in \
   scripts/apply-overlap-ledger.sh \
   scripts/storm-exact-miner.py \
   scripts/storm-audit-impact.py \
+  scripts/storm-source-certificate-scout.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -198,6 +199,7 @@ need_text scripts/storm-exact-miner.py "ledger command" "ledger"
 need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 need_text scripts/storm-exact-miner.py "Gidney trace context decoding" "trace_context_family"
 need_text scripts/storm-audit-impact.py "machine-readable audit metrics" "unknown_weight_abs_avgT_delta"
+need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -501,6 +503,55 @@ if ! scripts/apply-overlap-ledger.sh \
 elif ! grep -q 'Decision: overlap-restore-proof-missing' "$tmpdir/apply-overlap-restore-missing.out"; then
   printf 'public_harness_check=fail apply_overlap_restore_missing_decision\n' >&2
   cat "$tmpdir/apply-overlap-restore-missing.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/source-line-family-summary.tsv" <<'EOF'
+file	line	family	kind	count
+src/point_add/trailmix_ludicrous/gidney.rs	1297	gidney_thread_sum	CCX	100
+src/point_add/trailmix_ludicrous/comparator.rs	717	comparator_top_carry	CCX	40
+src/point_add/trailmix_ludicrous/arith.rs	834	unclassified	CCX	20
+EOF
+cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
+rank	count	kind	file	line	context	source_hash
+1	100	CCX	src/point_add/trailmix_ludicrous/gidney.rs	1297	none	fixture-source
+EOF
+if ! python3 scripts/storm-source-certificate-scout.py \
+  --summary "$tmpdir/source-line-family-summary.tsv" \
+  --closed "$tmpdir/closed-site-audit.tsv" \
+  --source-hash fixture-source \
+  --out "$tmpdir/context-scout.tsv" >"$tmpdir/context-scout.out" 2>"$tmpdir/context-scout.err"; then
+  printf 'public_harness_check=fail source_certificate_scout_failed\n' >&2
+  cat "$tmpdir/context-scout.err" >&2
+  fail=1
+elif ! grep -q 'source_certificate_scout=pass rows=1' "$tmpdir/context-scout.out" ||
+     ! grep -q 'comparator_top_carry' "$tmpdir/context-scout.tsv" ||
+     grep -q 'unclassified' "$tmpdir/context-scout.tsv"; then
+  printf 'public_harness_check=fail source_certificate_scout_output\n' >&2
+  cat "$tmpdir/context-scout.out" >&2
+  cat "$tmpdir/context-scout.tsv" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-exact-miner.py trace-facts \
+  --input "$tmpdir/context-scout.tsv" \
+  --frontier fixture-frontier/demo-source \
+  --source-base public-demo-source \
+  --stream-hash source-certificate-scout-demo \
+  --out "$tmpdir/context-scout-facts.jsonl" >"$tmpdir/context-scout-facts.out" 2>"$tmpdir/context-scout-facts.err"; then
+  printf 'public_harness_check=fail source_certificate_scout_trace_failed\n' >&2
+  cat "$tmpdir/context-scout-facts.err" >&2
+  fail=1
+elif ! python3 scripts/storm-exact-miner.py support-check \
+  --facts "$tmpdir/context-scout-facts.jsonl" \
+  --out "$tmpdir/context-scout-supported.jsonl" >"$tmpdir/context-scout-supported.out" 2>"$tmpdir/context-scout-supported.err"; then
+  printf 'public_harness_check=fail source_certificate_scout_support_failed\n' >&2
+  cat "$tmpdir/context-scout-supported.err" >&2
+  fail=1
+elif ! grep -q 'counterexample=1' "$tmpdir/context-scout-supported.out"; then
+  printf 'public_harness_check=fail source_certificate_scout_support_counts\n' >&2
+  cat "$tmpdir/context-scout-supported.out" >&2
+  cat "$tmpdir/context-scout-supported.jsonl" >&2
   fail=1
 fi
 
