@@ -109,6 +109,8 @@ agent instructions or used as a preflight before route work:
   after repeated failure, passive handoff, or unverified completion claims. This
   repo imports only the local prompt-card discipline, not plugin hooks,
   telemetry, feedback upload, or remote prompt loading.
+- `skills/exact-support-miner.md`: turn public op-trace facts into ranked
+  value-exact skip packets with proof and validation gates.
 - `skills/frontier-lock.md`: refresh and record the current public frontier
   before route, compute, note, or submit decisions.
 - `skills/validation-submit-gate.md`: keep evidence labels, trusted
@@ -198,6 +200,7 @@ The bridge names are:
 - `nasqret-playbook`
 - `deepseek-pressure-test`
 - `pip-discipline`
+- `exact-support-miner`
 - `frontier-lock`
 - `validation-submit-gate`
 - `route-compute-gate`
@@ -237,6 +240,8 @@ Useful global skills for ECDSA work, when installed in the agent environment:
 
 Common call chains:
 
+- Exact skip mining: `frontier-lock` -> `exact-support-miner` ->
+  `redsky-frontier-audit` -> `validation-submit-gate`.
 - Frontier shift: `frontier-lock` -> `nasqret-playbook` ->
   `circuit-diff-mining`.
 - New route: `frontier-lock` -> `bluesky-route-salvage` ->
