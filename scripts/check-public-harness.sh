@@ -56,6 +56,7 @@ for path in \
   scripts/storm-alloc-owner-summary.py \
   scripts/storm-peak-lifetime-ledger.py \
   scripts/storm-gidney-thread-join.py \
+  scripts/storm-windowed-carry-toy.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -213,6 +214,7 @@ need_text scripts/storm-source-certificate-scout.py "source certificate scout" "
 need_text scripts/storm-alloc-owner-summary.py "alloc owner summary" "alloc_owner_summary=pass"
 need_text scripts/storm-peak-lifetime-ledger.py "peak lifetime ledger" "peak_lifetime_ledger=pass"
 need_text scripts/storm-gidney-thread-join.py "gidney thread join" "gidney_thread_join=pass"
+need_text scripts/storm-windowed-carry-toy.py "windowed carry toy" "windowed_carry_toy="
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -866,6 +868,29 @@ elif ! grep -q 'gidney_boundary_toy=pass' "$tmpdir/gidney-boundary-toy.out" ||
      ! grep -q 'phase_proof=0 ancilla_proof=0' "$tmpdir/gidney-boundary-toy.out"; then
   printf 'public_harness_check=fail gidney_boundary_toy_summary\n' >&2
   cat "$tmpdir/gidney-boundary-toy.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-windowed-carry-toy.py \
+  --max-width 4 \
+  --window 3 \
+  --count-width 16 \
+  --count-window 15 >"$tmpdir/windowed-carry-toy.out" 2>"$tmpdir/windowed-carry-toy.err"; then
+  printf 'public_harness_check=fail windowed_carry_toy_failed\n' >&2
+  cat "$tmpdir/windowed-carry-toy.err" >&2
+  fail=1
+elif ! grep -q 'windowed_carry_toy=pass' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'value_mismatches=0' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'restore_mismatches=0' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'phase_mismatches=0' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'ancilla_mismatches=0' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'width=16 window=15 cout=1' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'saved_carries=1' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'delta_toffoli=1' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'score_positive=0' "$tmpdir/windowed-carry-toy.out" ||
+     ! grep -q 'source_edit_ready=0' "$tmpdir/windowed-carry-toy.out"; then
+  printf 'public_harness_check=fail windowed_carry_toy_output\n' >&2
+  cat "$tmpdir/windowed-carry-toy.out" >&2
   fail=1
 fi
 
