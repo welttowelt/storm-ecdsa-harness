@@ -93,6 +93,7 @@ for path in \
   skills/ecdsafail-cli-ops.md \
   skills/stormgate-prefilter.md \
   skills/q1152-structural-core.md \
+  skills/support-bounded-vented-dead-carry.md \
   skills/paper-gidney-constant-workspace-adder.md \
   skills/paper-mbu-modular-arithmetic.md \
   skills/paper-hrs-dirty-constant-adder.md \
@@ -247,6 +248,9 @@ need_text skills/ecdsafail-cli-ops.md "ecdsafail command" "ecdsafail benchmark"
 need_text skills/stormgate-prefilter.md "prefilter label" "stage-1 survivor"
 need_text skills/q1152-structural-core.md "q1152 structural core" "wall-gated count/eval loop"
 need_text skills/q1152-structural-core.md "trusted eval" "Trusted eval"
+need_text skills/support-bounded-vented-dead-carry.md "support bounded vent" "Support-Bounded Vented Dead-Carry"
+need_text skills/support-bounded-vented-dead-carry.md "dead predicate" "source-hash-bound"
+need_text skills/support-bounded-vented-dead-carry.md "headroom cap" "TLM_SQUARE_PEAK_CAP"
 need_text .agents/skills/q1152-structural-core/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text skills/paper-gidney-constant-workspace-adder.md "gidney source" "arXiv:2507.23079"
 need_text skills/paper-mbu-modular-arithmetic.md "mbu phase cleanup" "phase correction"
