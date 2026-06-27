@@ -63,7 +63,12 @@ peak_qubits="${peak_qubits:-unknown}"
 
 alloc_total="$(grep -c 'ALLOC_NEAR' "$trace" || true)"
 comparator_hits="$(grep 'ALLOC_NEAR' "$trace" | grep -Eci 'compare|comparator|arith.rs:769' || true)"
-add_carry_hits="$(grep 'ALLOC_NEAR' "$trace" | grep -Eci 'const_chunk_add_clean|arith.rs:658|arith.rs:700|carry' || true)"
+co_peak_carry_hits="$(
+  grep 'ALLOC_NEAR' "$trace" \
+    | grep -Evi 'compare|comparator|arith.rs:769' \
+    | grep -Eci 'gidney.rs:1217|arith.rs:1077|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859|const_chunk_add_clean|carry' \
+    || true
+)"
 
 exclusion_stats="$(
   awk '
@@ -83,7 +88,7 @@ exclusion_stats="$(
       if (caller !~ /arith.rs:769|comparator/) {
         if (active > no_comp) no_comp = active;
       }
-      if (caller !~ /arith.rs:658|arith.rs:769|comparator/) {
+      if (caller !~ /arith.rs:769|comparator|gidney.rs:1217|arith.rs:1077|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859/) {
         if (active > no_pair) no_pair = active;
       }
     }
@@ -113,12 +118,16 @@ first_peak="$(
 )"
 
 decision="park"
-if [ "${comparator_hits:-0}" -gt 0 ] && [ "${add_carry_hits:-0}" -eq 0 ]; then
-  decision="toy-port"
-elif [ "${comparator_hits:-0}" -gt 0 ] && [ "${add_carry_hits:-0}" -gt 0 ]; then
-  decision="paired-cut-required"
-  if [ "$max_without_main_pair" = "$peak_qubits" ]; then
+if [ "${comparator_hits:-0}" -gt 0 ]; then
+  if [ "$max_without_comparator" = "$peak_qubits" ] && [ "$peak_qubits" != "unknown" ]; then
     decision="plateau-cut-required"
+  elif [ "${co_peak_carry_hits:-0}" -gt 0 ]; then
+    decision="paired-cut-required"
+    if [ "$max_without_main_pair" = "$peak_qubits" ] && [ "$peak_qubits" != "unknown" ]; then
+      decision="plateau-cut-required"
+    fi
+  else
+    decision="toy-port"
   fi
 fi
 
@@ -129,7 +138,7 @@ Vandaele comparator gate:
 - Frontier/q/max avgT: ${frontier}/${q}/${max_avg}
 - Peak evidence: peak_qubits=${peak_qubits} alloc_near=${alloc_total}
 - Comparator peak hits: ${comparator_hits}
-- Co-peak add/carry hits: ${add_carry_hits}
+- Co-peak carry/fold wall hits: ${co_peak_carry_hits}
 - Max without comparator: ${max_without_comparator:-unknown}
 - Max without main comparator/add pair: ${max_without_main_pair:-unknown}
 - Dirty host: ${dirty_host}

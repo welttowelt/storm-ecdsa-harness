@@ -562,6 +562,26 @@ elif ! grep -q 'source_certificate_scout=pass rows=2' "$tmpdir/context-scout.out
   fail=1
 fi
 
+cat >"$tmpdir/vandaele-plateau.trace" <<'EOF'
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=10 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_inverse_gcd_forward_compare' ops_idx=20 free_pool=1 caller=src/point_add/trailmix_ludicrous/comparator.rs:707
+ALLOC_NEAR active=1151 next_idx=1151 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=30 free_pool=1 caller=src/point_add/trailmix_ludicrous/arith.rs:1194
+EOF
+if ! scripts/vandaele-comparator-ledger.sh \
+  --trace "$tmpdir/vandaele-plateau.trace" \
+  --frontier 1571592960 \
+  --q 1152 \
+  --route fixture \
+  --candidate comparator-only >"$tmpdir/vandaele-plateau.out" 2>"$tmpdir/vandaele-plateau.err"; then
+  printf 'public_harness_check=fail vandaele_plateau_failed\n' >&2
+  cat "$tmpdir/vandaele-plateau.err" >&2
+  fail=1
+elif ! grep -q 'Decision: plateau-cut-required' "$tmpdir/vandaele-plateau.out"; then
+  printf 'public_harness_check=fail vandaele_plateau_decision\n' >&2
+  cat "$tmpdir/vandaele-plateau.out" >&2
+  fail=1
+fi
+
 if ! python3 scripts/storm-exact-miner.py trace-facts \
   --input "$tmpdir/context-scout.tsv" \
   --frontier fixture-frontier/demo-source \
