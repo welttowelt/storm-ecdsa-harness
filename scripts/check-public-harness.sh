@@ -53,6 +53,7 @@ for path in \
   scripts/storm-mailbox-action-scan.py \
   scripts/storm-wall-owner-summary.py \
   scripts/storm-source-certificate-scout.py \
+  scripts/storm-alloc-owner-summary.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -207,6 +208,7 @@ need_text scripts/storm-audit-impact.py "machine-readable audit metrics" "unknow
 need_text scripts/storm-mailbox-action-scan.py "mailbox direct ask scanner" "mailbox_action_scan"
 need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_summary=pass"
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
+need_text scripts/storm-alloc-owner-summary.py "alloc owner summary" "alloc_owner_summary=pass"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -584,6 +586,30 @@ elif ! grep -q 'wall_owner_summary=pass input_rows=5 source_rows=4 family_rows=3
   cat "$tmpdir/wall-owner-summary.out" >&2
   cat "$tmpdir/generated-source-line-family-summary.tsv" >&2
   cat "$tmpdir/generated-family-kind-summary.tsv" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/alloc-near.raw" <<'EOF'
+ALLOC_NEAR active=1146 next_idx=1145 phase='tlm_apply_inverse_mod_sub_register' ops_idx=10 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=11 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_fold' ops_idx=12 free_pool=0 caller=src/point_add/trailmix_ludicrous/arith.rs:1077
+ALLOC_NEAR active=1151 next_idx=1150 phase='tlm_inverse_gcd_forward_compare' ops_idx=13 free_pool=1 caller=src/point_add/trailmix_ludicrous/comparator.rs:707
+CONSTPROP TOTAL iters=1 dropped=0
+EOF
+if ! python3 scripts/storm-alloc-owner-summary.py \
+  --input "$tmpdir/alloc-near.raw" \
+  --summary-out "$tmpdir/alloc-owner-summary.tsv" \
+  --peak 1152 >"$tmpdir/alloc-owner-summary.out" 2>"$tmpdir/alloc-owner-summary.err"; then
+  printf 'public_harness_check=fail alloc_owner_summary_failed\n' >&2
+  cat "$tmpdir/alloc-owner-summary.err" >&2
+  fail=1
+elif ! grep -q 'alloc_owner_summary=pass input_rows=4 caller_rows=3 peak_owner_rows=2 peak_phase_rows=2' "$tmpdir/alloc-owner-summary.out" ||
+     ! grep -q $'gidney.rs\t1217\ttlm_apply_inverse_mod_sub_register\t2\t1146\t1152\t1\t1\ttlm_apply_inverse_mod_sub_register' "$tmpdir/alloc-owner-summary.tsv" ||
+     ! grep -q $'arith.rs\t1077\ttlm_apply_forward_mod_add_fold\t1\t1152\t1152\t1\t1\ttlm_apply_forward_mod_add_fold' "$tmpdir/alloc-owner-summary.tsv" ||
+     ! grep -q $'comparator.rs\t707\ttlm_inverse_gcd_forward_compare\t1\t1151\t1151\t0\t0\t' "$tmpdir/alloc-owner-summary.tsv"; then
+  printf 'public_harness_check=fail alloc_owner_summary_output\n' >&2
+  cat "$tmpdir/alloc-owner-summary.out" >&2
+  cat "$tmpdir/alloc-owner-summary.tsv" >&2
   fail=1
 fi
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
