@@ -91,6 +91,12 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "falsifier_template": "set both carry controls to 1 and compare the next sum bit",
         "witness": "n=2, a=01, b=01; skipping the carry changes 1+1 from 10 to 00",
     },
+    ("arith.rs", 1090): {
+        "primitive_family": "const_chunk_carry_live",
+        "support_domain": "constant chunk carry creation",
+        "falsifier_template": "choose local inputs where a[i]=1 and cin_ref=1",
+        "witness": "a[i]=1 and cin_ref=1 toggles the chunk carry output; omission changes the next sum bit",
+    },
     ("square.rs", 151): {
         "primitive_family": "square_cross_live",
         "support_domain": "symmetric square off-diagonal cross product",

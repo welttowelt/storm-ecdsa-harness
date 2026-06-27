@@ -97,6 +97,7 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `fused.rs:1943`
 - `fused.rs:2008`
 - `arith.rs:1322`
+- `arith.rs:1090`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
