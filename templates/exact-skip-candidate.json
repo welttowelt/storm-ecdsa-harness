@@ -1,0 +1,17 @@
+{
+  "route_id": "exact-skip-demo",
+  "frontier": "fixture-frontier/demo-source",
+  "source_base": "public-demo-source",
+  "stream_hash": "demo-stream-hash",
+  "source_location": "src/point_add/demo.rs:42",
+  "op_class": "ccx",
+  "executed_weight": 1.0,
+  "allocator_unchanged": true,
+  "proof_kind": "qcp",
+  "proof_status": "UNKNOWN",
+  "proof_hash": "",
+  "expected_avgT_delta": -1.0,
+  "evidence_label": "Prefilter",
+  "validation_target": "trusted full 0/0/0 after source proof",
+  "kill_gate": "block compute if allocator changes, proof is UNKNOWN, or any cls/pha/anc dirt appears"
+}

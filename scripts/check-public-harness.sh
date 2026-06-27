@@ -45,15 +45,21 @@ for path in \
   scripts/uncompute-window-ledger.sh \
   scripts/dirty-borrow-ledger.sh \
   scripts/dialog-codec-entropy-ledger.sh \
+  scripts/storm-exact-miner.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
   examples/route-packet.example.md \
   examples/compute-request.example.md \
   examples/public-note.example.md \
+  examples/op-trace-facts.example.jsonl \
+  examples/exact-skip-candidates.example.jsonl \
+  templates/exact-skip-candidate.json \
+  docs/exact-support-miner.md \
   skills/nasqret-playbook.md \
   skills/deepseek-pressure-test.md \
   skills/pip-discipline.md \
+  skills/exact-support-miner.md \
   skills/frontier-lock.md \
   skills/validation-submit-gate.md \
   skills/route-compute-gate.md \
@@ -88,6 +94,7 @@ for path in \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
   .agents/skills/pip-discipline/SKILL.md \
+  .agents/skills/exact-support-miner/SKILL.md \
   .agents/skills/frontier-lock/SKILL.md \
   .agents/skills/validation-submit-gate/SKILL.md \
   .agents/skills/route-compute-gate/SKILL.md \
@@ -157,6 +164,8 @@ need_text scripts/resident-footprint-ledger.sh "resident footprint output" "Resi
 need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp uncompute window gate"
 need_text scripts/dirty-borrow-ledger.sh "dirty borrow ledger output" "Dirty borrow entanglement gate"
 need_text scripts/dialog-codec-entropy-ledger.sh "dialog codec ledger output" "Dialog codec entropy gate"
+need_text scripts/storm-exact-miner.py "exact miner command" "trace-facts"
+need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -166,6 +175,12 @@ need_text examples/mailbox-entry.example.md "read receipt requested" "Read recei
 need_text examples/route-packet.example.md "stop condition" "Stop condition"
 need_text examples/compute-request.example.md "zero paid compute" "zero"
 need_text examples/public-note.example.md "not a candidate" "not a candidate"
+need_text examples/op-trace-facts.example.jsonl "public demo source" "public-demo-source"
+need_text examples/exact-skip-candidates.example.jsonl "proof packet" "proof_status"
+need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
+need_text docs/exact-support-miner.md "exact support miner" "Exact Support Miner"
+need_text docs/exact-support-miner.md "redsky gate" "Redsky"
+need_text docs/exact-support-miner.md "pip gate" "PIP"
 need_text dashboard/fixtures/status.json "public fixture" "public fixture|fixture data"
 need_text skills/bluesky-route-salvage.md "bluesky salvage" "Bluesky salvage"
 need_text skills/redsky-frontier-audit.md "redsky audit" "Redsky audit"
@@ -195,6 +210,8 @@ need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Ga
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
 need_text skills/pip-discipline.md "pip discipline" "PIP Evidence Discipline"
+need_text skills/exact-support-miner.md "exact miner" "storm-exact-miner.py"
+need_text .agents/skills/exact-support-miner/SKILL.md "bridge" "Codex-discoverable bridge"
 
 if [ "$fail" -ne 0 ]; then
   exit 1
