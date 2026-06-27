@@ -472,6 +472,50 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
 }
 
 
+D44_SOURCE_LABELS = {
+    "d44cad3",
+    "d44cad3-current",
+    "d44cad386f2e121e2d952edcdcc3693f97d13153",
+}
+
+
+D44_SOURCE_MAP_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
+    ("arith.rs", 262): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "CONST_CHUNK_DEAD_RANGES source-map row",
+        "falsifier_template": "bind the row to an executable circuit-emission site before treating it as a removable const-chunk CCX",
+        "witness": "clean d44cad3 arith.rs:262 is static dead-range table data, not a circ.ccx emission site",
+    },
+    ("codec.rs", 546): {
+        "primitive_family": "codec_step0_source_map_mismatch",
+        "support_domain": "Step0 codec source-map row does not bind to an executable clean d44cad3 source hook",
+        "falsifier_template": "bind the row to clean d44cad3 before treating it as a removable codec CCX",
+        "witness": "clean d44cad3 codec.rs:546 is blank, while dirty local mappings at that line are live Step0 codec work",
+        "restoration_obligation": "Step0 codec compression must preserve the two-bit code used by later decompression",
+    },
+    ("codec.rs", 561): {
+        "primitive_family": "codec_step0_source_map_mismatch",
+        "support_domain": "Step0 codec source-map row is beyond clean d44cad3 EOF",
+        "falsifier_template": "bind the row to clean d44cad3 before treating it as a removable codec CCX",
+        "witness": "clean d44cad3 codec.rs has 556 lines, so codec.rs:561 is not an executable source hook for the promoted source",
+        "restoration_obligation": "Step0 codec decompression must rebuild raw symbol slots for inverse dialog restoration",
+    },
+    ("fused.rs", 987): {
+        "primitive_family": "source_context_not_op_site",
+        "support_domain": "fused LAST_AND lifetime-boundary constant",
+        "falsifier_template": "bind the row to an executable fused-fold emission site before treating it as a removable CCX",
+        "witness": "clean d44cad3 fused.rs:987 is `const LAST_AND: usize = 11`, not a circuit emission site",
+    },
+    ("gcd.rs", 750): {
+        "primitive_family": "gcd_mod_double_source_context",
+        "support_domain": "controlled_mod_double source-map context row",
+        "falsifier_template": "bind the row to clean d44cad3 executable source before treating it as a removable GCD CCX",
+        "witness": "clean d44cad3 gcd.rs:750 is a comment/context row, not an emitted gate; controlled_mod_double rows remain live unless separately certified",
+        "restoration_obligation": "controlled_mod_double must restore its transient overflow and shifted work view",
+    },
+}
+
+
 SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
     ("gidney.rs", 302, "a3ba4f6fc6be9865"): {
         "primitive_family": "gidney_thread_forward_carry_live",
@@ -1121,16 +1165,23 @@ def source_site_key(source_location: str) -> tuple[str, int] | None:
     return (match.group(1), int(match.group(2)))
 
 
-def classify_source_site(source_location: str, source_hash: str = "") -> dict[str, str]:
+def classify_source_site(source_location: str, source_hash: str = "", source_base: str = "") -> dict[str, str]:
     key = source_site_key(source_location)
     if key is None:
         return {}
     source_hash = str(source_hash or "").strip()
+    source_base = str(source_base or "").strip()
     if source_hash:
         classifier = SOURCE_HASH_SITE_CLASSIFIERS.get((key[0], key[1], source_hash))
         if classifier is not None:
             return classifier
-    return SITE_CLASSIFIERS.get(key, {})
+    classifier = SITE_CLASSIFIERS.get(key)
+    if classifier is not None:
+        return classifier
+    source_tokens = {source_hash, source_base}
+    if source_tokens.intersection(D44_SOURCE_LABELS):
+        return D44_SOURCE_MAP_CLASSIFIERS.get(key, {})
+    return {}
 
 
 def parse_trace_context(context: str) -> int | None:
@@ -1157,6 +1208,30 @@ def decode_trace_context(context: str) -> dict[str, Any]:
         "trace_context_call": (value >> 8) & 0xFFFF,
         "trace_context_bit": value & 0xFF,
     }
+
+
+def context_info_from_record(record: dict[str, Any], context: str) -> dict[str, Any]:
+    context_info = decode_trace_context(context)
+    family = (
+        record.get("trace_context_family")
+        or record.get("family")
+        or record.get("source_family")
+        or ""
+    )
+    if family and str(family).strip().lower() not in {"unclassified", "unknown", "none"}:
+        context_info.setdefault("trace_context_family", str(family).strip())
+    for input_key, output_key in (
+        ("trace_context_call", "trace_context_call"),
+        ("call", "trace_context_call"),
+        ("trace_context_bit", "trace_context_bit"),
+        ("bit", "trace_context_bit"),
+        ("trace_context_value", "trace_context_value"),
+        ("context_hex", "trace_context_value"),
+    ):
+        value = record.get(input_key, "")
+        if value != "" and output_key not in context_info:
+            context_info[output_key] = value
+    return context_info
 
 
 def classify_trace_context(context_info: dict[str, Any]) -> dict[str, str]:
@@ -1281,8 +1356,13 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
         source_location = f"{source_file}:{source_line}"
     else:
         source_location = "unknown"
-    context = str(record.get("branch_context", record.get("context", "")))
-    context_info = decode_trace_context(context)
+    context = str(
+        record.get(
+            "branch_context",
+            record.get("context", record.get("context_hex", record.get("trace_context_value", ""))),
+        )
+    )
+    context_info = context_info_from_record(record, context)
     rank = str(record.get("rank", ""))
     first_idx = str(record.get("first_idx", ""))
     last_idx = str(record.get("last_idx", ""))
@@ -1304,7 +1384,7 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
         op_id = str(record.get("index", index))
     classifier = {
         **classify_trace_context(context_info),
-        **classify_source_site(source_location, source_hash),
+        **classify_source_site(source_location, source_hash, source_base),
     }
 
     fact = {
@@ -1508,7 +1588,9 @@ def reclassify_missing_support_fields(fact: dict[str, Any]) -> dict[str, Any]:
     )
     context_info: dict[str, Any] = {}
     if raw_context:
-        context_info.update(decode_trace_context(str(raw_context)))
+        context_info.update(context_info_from_record(enriched, str(raw_context)))
+    else:
+        context_info.update(context_info_from_record(enriched, ""))
     if enriched.get("trace_context_family"):
         context_info["trace_context_family"] = enriched.get("trace_context_family")
     if enriched.get("trace_context_call") != "":
@@ -1522,6 +1604,7 @@ def reclassify_missing_support_fields(fact: dict[str, Any]) -> dict[str, Any]:
         classify_source_site(
             str(enriched.get("source_location", "")),
             str(enriched.get("source_hash", "")),
+            str(enriched.get("source_base", "")),
         )
     )
 

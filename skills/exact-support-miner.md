@@ -34,6 +34,10 @@ Use fixture or public trace facts only.
    Preserve `TRACE_OP_SITES` context values when available; the miner decodes
    Gidney threaded/hybrid adder contexts into family/call/bit fields so binder
    rows can be ledgered without collapsing distinct callsites.
+   Source-line summary TSVs with a `family` column are also family-bearing
+   inputs: `gidney_thread_sum`, `fused_chunk_fold_carry`, comparator carry, and
+   similar known live families should classify as `COUNTEREXAMPLE`, not
+   `UNKNOWN`, even when the branch context is `none`.
 4. Mine candidates:
    `python3 scripts/storm-exact-miner.py mine --facts <supported-or-facts.jsonl> --out <candidates.jsonl>`.
    For source-site TSVs without proof annotations, add
@@ -94,6 +98,13 @@ template and witness. External counterexample evidence is allowed to omit
 `primitive_family`; certification rules are unchanged.
 For `primitive_family=dirty_host`, restoration or phase obligation text is not
 enough; the row also needs truthy `restore_proof` and `phase_proof` fields.
+
+Treat source-map/table/context rows as closure evidence, not as executable
+candidate sites. Examples include dead-range table origins, helper constants,
+blank/beyond-EOF source-map rows, and source-context rows that do not directly
+emit a scored operation. These should be recorded as `COUNTEREXAMPLE` or
+source-map artifact NACKs unless a worker supplies an emitted-op binding and a
+fresh source certificate.
 
 If the miner emits `COUNTEREXAMPLE`, record the NACK and move on. If it emits
 `UNKNOWN`, the next worker must supply a bounded invariant or falsifier before

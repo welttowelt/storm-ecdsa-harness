@@ -496,6 +496,85 @@ elif ! grep -q 'certified=0 unknown=0 counterexample=1' "$tmpdir/stale-context-s
 fi
 
 printf '%s\n' \
+  'rank	count	kind	file	line	family	source_hash' \
+  '1	100	CCX	src/point_add/trailmix_ludicrous/gidney.rs	1297	gidney_thread_sum	d44cad3-current' \
+  '2	7	CCX	src/point_add/trailmix_ludicrous/codec.rs	561	unclassified	d44cad3-current' \
+  '3	5	CCX	src/point_add/trailmix_ludicrous/fused.rs	987	unclassified	d44cad3-current' \
+  > "$tmpdir/source-summary-artifacts.tsv"
+if ! python3 scripts/storm-exact-miner.py trace-facts \
+  --input "$tmpdir/source-summary-artifacts.tsv" \
+  --frontier fixture-frontier/demo-source \
+  --source-base public-demo-source \
+  --stream-hash source-summary-artifacts-demo \
+  --out "$tmpdir/source-summary-artifacts-facts.jsonl" >"$tmpdir/source-summary-artifacts-trace.out" 2>"$tmpdir/source-summary-artifacts-trace.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_trace_failed\n' >&2
+  cat "$tmpdir/source-summary-artifacts-trace.err" >&2
+  fail=1
+elif ! grep -q '"trace_context_family":"gidney_thread_sum"' "$tmpdir/source-summary-artifacts-facts.jsonl"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_family_lost\n' >&2
+  cat "$tmpdir/source-summary-artifacts-facts.jsonl" >&2
+  fail=1
+elif ! python3 scripts/storm-exact-miner.py support-check \
+  --facts "$tmpdir/source-summary-artifacts-facts.jsonl" \
+  --out "$tmpdir/source-summary-artifacts-support.jsonl" >"$tmpdir/source-summary-artifacts-support.out" 2>"$tmpdir/source-summary-artifacts-support.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_support_failed\n' >&2
+  cat "$tmpdir/source-summary-artifacts-support.err" >&2
+  fail=1
+elif ! grep -q 'certified=0 unknown=0 counterexample=3' "$tmpdir/source-summary-artifacts-support.out" \
+  || ! grep -q 'codec_step0_source_map_mismatch' "$tmpdir/source-summary-artifacts-support.jsonl" \
+  || ! grep -q 'source_context_not_op_site' "$tmpdir/source-summary-artifacts-support.jsonl"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_counts\n' >&2
+  cat "$tmpdir/source-summary-artifacts-support.out" >&2
+  cat "$tmpdir/source-summary-artifacts-support.jsonl" >&2
+  fail=1
+elif ! python3 scripts/storm-exact-miner.py mine \
+  --facts "$tmpdir/source-summary-artifacts-support.jsonl" \
+  --include-unknown-sites \
+  --max-unknown-sites 0 \
+  --out "$tmpdir/source-summary-artifacts-candidates.jsonl" >"$tmpdir/source-summary-artifacts-mine.out" 2>"$tmpdir/source-summary-artifacts-mine.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_mine_failed\n' >&2
+  cat "$tmpdir/source-summary-artifacts-mine.err" >&2
+  fail=1
+elif ! python3 scripts/storm-exact-miner.py prove \
+  --candidates "$tmpdir/source-summary-artifacts-candidates.jsonl" \
+  --out "$tmpdir/source-summary-artifacts-proofs.jsonl" >"$tmpdir/source-summary-artifacts-prove.out" 2>"$tmpdir/source-summary-artifacts-prove.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_prove_failed\n' >&2
+  cat "$tmpdir/source-summary-artifacts-prove.err" >&2
+  fail=1
+elif [ "$(grep -c '"proof_status":"COUNTEREXAMPLE"' "$tmpdir/source-summary-artifacts-proofs.jsonl")" -ne 3 ] \
+  || grep -q '"proof_status":"UNKNOWN"' "$tmpdir/source-summary-artifacts-proofs.jsonl"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_artifacts_proof_status\n' >&2
+  cat "$tmpdir/source-summary-artifacts-proofs.jsonl" >&2
+  fail=1
+fi
+
+printf '%s\n' \
+  'rank	count	kind	file	line	family	source_hash' \
+  '1	7	CCX	src/point_add/trailmix_ludicrous/codec.rs	561	unclassified	future-source' \
+  > "$tmpdir/source-summary-future.tsv"
+if ! python3 scripts/storm-exact-miner.py trace-facts \
+  --input "$tmpdir/source-summary-future.tsv" \
+  --frontier fixture-frontier/future-source \
+  --source-base future-source \
+  --stream-hash source-summary-future-demo \
+  --out "$tmpdir/source-summary-future-facts.jsonl" >"$tmpdir/source-summary-future-trace.out" 2>"$tmpdir/source-summary-future-trace.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_future_trace_failed\n' >&2
+  cat "$tmpdir/source-summary-future-trace.err" >&2
+  fail=1
+elif ! python3 scripts/storm-exact-miner.py support-check \
+  --facts "$tmpdir/source-summary-future-facts.jsonl" \
+  --out "$tmpdir/source-summary-future-support.jsonl" >"$tmpdir/source-summary-future-support.out" 2>"$tmpdir/source-summary-future-support.err"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_future_support_failed\n' >&2
+  cat "$tmpdir/source-summary-future-support.err" >&2
+  fail=1
+elif ! grep -q 'certified=0 unknown=1 counterexample=0' "$tmpdir/source-summary-future-support.out"; then
+  printf 'public_harness_check=fail exact_miner_source_summary_future_overclosed\n' >&2
+  cat "$tmpdir/source-summary-future-support.out" >&2
+  cat "$tmpdir/source-summary-future-support.jsonl" >&2
+  fail=1
+fi
+
+printf '%s\n' \
   'rank	count	kind	file	line	context	first_idx	last_idx' \
   '1	5	CCX	src/point_add/trailmix_ludicrous/arith.rs	834	none	10	20' \
   '2	4	CCX	src/point_add/trailmix_ludicrous/comparator.rs	702	none	30	40' \
