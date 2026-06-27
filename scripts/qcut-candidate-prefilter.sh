@@ -30,16 +30,27 @@ if [ "$s" -le 2 ] 2>/dev/null; then g2="KILL-g2: peak chunk is width-1 (s=$s). A
 else g2="PASS-g2: peak chunk s=$s (wide) — adder tricks applicable / below-peak-irrelevant."; fi
 
 # Gate 3: product-test (Toffoli factor must not eat the qubit win)
+g3="$(
 awk -v tf="$tf" 'BEGIN{
   # rough: a width-1 cut (peak 1153->1152) buys ~0.087% (1/1153); the Toffoli factor must stay under ~1.0009 to net win
   cut_frac = 1.0/1153.0
   if (tf > 1.0 + cut_frac) print "KILL-g3: Toffoli factor " tf " > width win " cut_frac " → round(new_avgT)x1152 >= old_score (asymptotic adder loses the product at narrow n)."
   else print "PASS-g3: Toffoli factor " tf " within the width-win budget — run the build, then CONFIRM round(new_avgT)x1152 < old_score."
 }'
+)"
+echo "$g3"
 
 echo ""
 echo "=== VERDICT for restore=$rm peak_s=$s toffoli_factor=$tf ==="
 echo "g1 [restore]: $g1"
 echo "g2 [floor]:   $g2"
-echo "g3 [product]: (see above)"
-case "$g1" in KILL*) echo "→ KILL (gate 1). Do not build.";; *) echo "→ apply gates 2 & 3 before any island compute.";; esac
+echo "g3 [product]: $g3"
+if [[ "$g1" == KILL* ]]; then
+  echo "→ KILL (gate 1). Do not build."
+elif [[ "$g2" == KILL* ]]; then
+  echo "→ KILL (gate 2). Do not build."
+elif [[ "$g3" == KILL* ]]; then
+  echo "→ KILL (gate 3). Do not build."
+else
+  echo "→ CHASE only after build confirms score and restore/phase/ancilla checks."
+fi

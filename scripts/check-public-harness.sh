@@ -47,6 +47,7 @@ for path in \
   scripts/dirty-borrow-ledger.sh \
   scripts/dialog-codec-entropy-ledger.sh \
   scripts/apply-overlap-ledger.sh \
+  scripts/qcut-candidate-prefilter.sh \
   scripts/storm-exact-miner.py \
   scripts/storm-audit-impact.py \
   scripts/storm-wall-owner-summary.py \
@@ -193,6 +194,7 @@ need_text scripts/dirty-borrow-ledger.sh "dirty borrow ledger output" "Dirty bor
 need_text scripts/dialog-codec-entropy-ledger.sh "dialog codec ledger output" "Dialog codec entropy gate"
 need_text scripts/apply-overlap-ledger.sh "apply overlap ledger output" "Apply overlap ledger"
 need_text scripts/apply-overlap-ledger.sh "live d44 tail rows" "TLM_\\(TAPE|TAIL\\)"
+need_text scripts/qcut-candidate-prefilter.sh "qcut gate output" "KILL \\(gate 3\\)"
 need_text scripts/storm-exact-miner.py "exact miner command" "trace-facts"
 need_text scripts/storm-exact-miner.py "support checker command" "support-check"
 need_text scripts/storm-exact-miner.py "falsify command" "falsify"
@@ -598,6 +600,16 @@ if ! scripts/vandaele-comparator-ledger.sh \
 elif ! grep -q 'Decision: plateau-cut-required' "$tmpdir/vandaele-q1147-plateau.out"; then
   printf 'public_harness_check=fail vandaele_q1147_plateau_decision\n' >&2
   cat "$tmpdir/vandaele-q1147-plateau.out" >&2
+  fail=1
+fi
+if ! scripts/qcut-candidate-prefilter.sh bennett 126 2.0 >"$tmpdir/qcut-factor2.out" 2>"$tmpdir/qcut-factor2.err"; then
+  printf 'public_harness_check=fail qcut_factor2_failed\n' >&2
+  cat "$tmpdir/qcut-factor2.err" >&2
+  fail=1
+elif ! grep -q 'KILL-g3' "$tmpdir/qcut-factor2.out" ||
+   ! grep -q 'KILL (gate 3)' "$tmpdir/qcut-factor2.out"; then
+  printf 'public_harness_check=fail qcut_factor2_decision\n' >&2
+  cat "$tmpdir/qcut-factor2.out" >&2
   fail=1
 fi
 

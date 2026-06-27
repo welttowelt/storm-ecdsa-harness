@@ -31,8 +31,10 @@ value, and phase as the clean-ladder segment it replaces.
 1. Identify the shortest suffix that overlaps the peak.
 2. Estimate Toffoli growth before writing code.
 3. Reject full-width replacements unless the lower q tier has score headroom.
-4. Build a reduced-width suffix toy with the same carry boundary.
-5. Port one callsite and run count/residual before widening.
+4. Run `scripts/qcut-candidate-prefilter.sh`; any final `KILL (gate N)` verdict
+   blocks a source hook.
+5. Build a reduced-width suffix toy with the same carry boundary.
+6. Port one callsite and run count/residual before widening.
 
 ## Output
 
@@ -52,3 +54,6 @@ Remaud ancilla-free adder:
 If the Toffoli delta cannot fit the target q tier, do not port it just to make
 a count-only peak line smaller.
 
+For current d44/q1152 work, treat full-width or factor-2 replacements as parked
+unless a fresh product calculation proves otherwise. This paper is a suffix
+pressure-release tool, not a broad carry-ladder replacement.

@@ -21,6 +21,13 @@ This paper is directly actionable for lower-q work. It gives:
 It maps to TLM inverse-fold pressure where a resident clean carry ladder
 creates the peak qubit.
 
+Current local hooks from the d44/q1152 traces:
+
+- `arith.rs:1077/1090` for `const_chunk_add_clean`;
+- `arith.rs:1194/1196` for `compare_geq_const_cin_middle`;
+- lower-q inverse-fold traces that expose `arith.rs:875/1085` as co-peak
+  carry pressure.
+
 ## Apply To
 
 - `src/point_add/trailmix_ludicrous/arith.rs`
@@ -40,9 +47,12 @@ borrowed hosts, clean ancillae, and phase for every reachable input.
    and carry-in mode.
 2. Build a reduced-width exhaustive toy covering nonzero carry-in and arbitrary
    dirty borrowed hosts.
-3. Only after the toy is value/phase/ancilla clean, port one callsite.
-4. Run count first, then fresh serialized build plus `residual_probe`.
-5. Widen to multiple callsites only after one callsite is clean.
+3. Run `scripts/qcut-candidate-prefilter.sh` for the proposed restore class and
+   a conservative Toffoli factor. Treat any `KILL (gate N)` verdict as a hard
+   park.
+4. Only after the toy is value/phase/ancilla clean, port one callsite.
+5. Run count first, then fresh serialized build plus `residual_probe`.
+6. Widen to multiple callsites only after one callsite is clean.
 
 ## Output
 
@@ -61,3 +71,9 @@ Gidney constant-workspace adder:
 
 Park the route on any classical, phase, or borrowed-host dirt. A count-only
 q-drop is not evidence of correctness.
+
+Also park if the q-tier product gate does not clear. For the current
+`d44cad3/q1152` frontier, a q1151 route has only `+1185` average-Toffoli
+headroom over the current `1364230` average, and q1147 has `+5946`; full-width
+or 2x-style replacements are not viable without a much narrower suffix or a
+separate same-tier Toffoli reduction.
