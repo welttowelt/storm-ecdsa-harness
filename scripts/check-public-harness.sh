@@ -848,6 +848,8 @@ if ! python3 scripts/storm-gidney-boundary-toy.py \
 elif ! grep -q 'gidney_boundary_toy=pass' "$tmpdir/gidney-boundary-toy.out" ||
      ! grep -q 'dead_boundary_mismatches=0' "$tmpdir/gidney-boundary-toy.out" ||
      ! grep -q 'nondead_formula_mismatches=0' "$tmpdir/gidney-boundary-toy.out" ||
+     ! grep -q 'nondead_degree_with_cin=3' "$tmpdir/gidney-boundary-toy.out" ||
+     ! grep -q 'needs_degree3_or_product_scratch=1' "$tmpdir/gidney-boundary-toy.out" ||
      ! grep -q 'phase_proof=0 ancilla_proof=0' "$tmpdir/gidney-boundary-toy.out"; then
   printf 'public_harness_check=fail gidney_boundary_toy_summary\n' >&2
   cat "$tmpdir/gidney-boundary-toy.out" >&2
