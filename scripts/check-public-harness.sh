@@ -28,6 +28,7 @@ for path in \
   templates/operator-card.md \
   templates/audit-card.md \
   templates/mailbox-entry.md \
+  templates/kimi-handoff.md \
   templates/route-packet.md \
   templates/compute-request.md \
   templates/public-note.md \
@@ -49,6 +50,8 @@ for path in \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
+  examples/mailbox-entry.kimi-deep.example.md \
+  examples/kimi-handoff.example.md \
   examples/route-packet.example.md \
   examples/compute-request.example.md \
   examples/public-note.example.md \
@@ -56,6 +59,14 @@ for path in \
   examples/exact-skip-candidates.example.jsonl \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
+  docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
+  operators/codex-storm.md \
+  operators/deep-storm.md \
+  operators/file-handoff-protocol.md \
+  operators/handoff-protocol.md \
+  operators/kimi-storm.md \
+  routes/tobitvector-cswap-body-trim-q1170.md \
+  routes/tobitvector-cswap-body-trim-q1170.rci-audit.md \
   skills/nasqret-playbook.md \
   skills/deepseek-pressure-test.md \
   skills/pip-discipline.md \
@@ -142,6 +153,8 @@ need_text templates/compute-request.md "validator" "Validator"
 need_text templates/compute-request.md "kill condition" "Kill condition"
 need_text templates/mailbox-entry.md "purpose limits" "Purpose/limits"
 need_text templates/mailbox-entry.md "read receipt requested" "Read receipt requested"
+need_text templates/kimi-handoff.md "kimi handoff" "KIMI_HANDOFF"
+need_text templates/kimi-handoff.md "ack status" "ack"
 need_text templates/public-note.md "purpose and limits" "Purpose And Limits"
 need_text templates/public-note.md "evidence label" "Evidence label"
 need_text skills/tony-rci-audit.md "smallest useful fix" "Smallest useful fix"
@@ -181,6 +194,15 @@ need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_u
 need_text docs/exact-support-miner.md "exact support miner" "Exact Support Miner"
 need_text docs/exact-support-miner.md "redsky gate" "Redsky"
 need_text docs/exact-support-miner.md "pip gate" "PIP"
+need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "current source" "f8e215b"
+need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "no submit gate" "No clean winning candidate"
+need_text operators/kimi-storm.md "kimi boss" "operator boss"
+need_text operators/deep-storm.md "deep reviewer" "Redsky auditor"
+need_text operators/codex-storm.md "codex pressure test" "pressure-test"
+need_text operators/handoff-protocol.md "prefilter boundary" "Prefilter"
+need_text operators/file-handoff-protocol.md "private file boundary" "Keep the file outside the public repo"
+need_text routes/tobitvector-cswap-body-trim-q1170.md "parked route" "parked / falsified"
+need_text routes/tobitvector-cswap-body-trim-q1170.rci-audit.md "rci fixes applied" "Fixes applied"
 need_text dashboard/fixtures/status.json "public fixture" "public fixture|fixture data"
 need_text skills/bluesky-route-salvage.md "bluesky salvage" "Bluesky salvage"
 need_text skills/redsky-frontier-audit.md "redsky audit" "Redsky audit"

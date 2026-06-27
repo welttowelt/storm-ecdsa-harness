@@ -81,6 +81,10 @@ endorsement where there was only inspiration.
 - A current-target-first operating model.
 - A production-shape map for the live STORM controller.
 - Worker role cards and handoff templates.
+- Public operator cards under `operators/` for Kimi Storm, Deep Storm, and
+  Codex Storm handoffs.
+- Historical route packets under `routes/` with falsification status where
+  known.
 - Critique-before-compute audit loop.
 - Evidence labels and validation gates.
 - Route packet and compute request templates.

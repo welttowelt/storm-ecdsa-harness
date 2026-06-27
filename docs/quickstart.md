@@ -35,11 +35,14 @@ Start with:
 - `templates/route-packet.md`
 - `templates/compute-request.md`
 - `templates/public-note.md`
+- `templates/kimi-handoff.md`
 
 Use these as formats, not as a mandate. The core rule is that every compute
 request should have an owner, validator, kill gate, and evidence label.
 
-If you want a filled safe example first, read `examples/`.
+If you want a filled safe example first, read `examples/`. If you need a
+three-worker operating loop, read `operators/handoff-protocol.md` and the role
+cards in `operators/`.
 
 Use `docs/audit-loop.md` when you want the RCI/Tony plus Bluesky/Redsky review
 cycle before changing docs, dispatching compute, or writing a public note.

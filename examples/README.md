@@ -6,6 +6,7 @@ not a live `ecdsa.fail` route.
 Use them to teach agents the workflow:
 
 - every directed message requests a read receipt,
+- two-worker and file-backed handoffs keep ACKs explicit,
 - every route has a falsifier,
 - every route can receive a Bluesky and Redsky audit pass,
 - every compute request has a validator and kill gate,
