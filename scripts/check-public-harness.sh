@@ -62,6 +62,7 @@ for path in \
   scripts/storm-mcx-incrementer-budget.py \
   scripts/storm-square-static-gap-audit.py \
   scripts/storm-single-ccx-fanout-ledger.py \
+  scripts/storm-q1152-avgt-theorem.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -125,6 +126,7 @@ for path in \
   skills/paper-wire-recycling-lifetime-graph.md \
   skills/paper-dirty-borrowing-entanglement.md \
   skills/paper-dead-gate-elimination.md \
+  skills/paper-score-condition-discount.md \
   skills/apply-overlap-ledger.md \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
@@ -162,6 +164,7 @@ for path in \
   .agents/skills/paper-wire-recycling-lifetime-graph/SKILL.md \
   .agents/skills/paper-dirty-borrowing-entanglement/SKILL.md \
   .agents/skills/paper-dead-gate-elimination/SKILL.md \
+  .agents/skills/paper-score-condition-discount/SKILL.md \
   .agents/skills/apply-overlap-ledger/SKILL.md \
   dashboard/fixtures/status.json; do
   need_file "$path"
@@ -228,6 +231,8 @@ need_text scripts/storm-square-static-gap-audit.py "square static gap audit" "sq
 need_text scripts/storm-square-static-gap-audit.py "zero bit trim decision" "no-executable-zero-bit-trim"
 need_text scripts/storm-single-ccx-fanout-ledger.py "single ccx fanout ledger" "single_ccx_fanout_ledger=pass"
 need_text scripts/storm-single-ccx-fanout-ledger.py "trusted eval nack" "trusted-eval-nack"
+need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
+need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -296,6 +301,8 @@ need_text skills/paper-garn-kan-windowed-binary-ecdlp.md "binary field" "binary-
 need_text skills/paper-wire-recycling-lifetime-graph.md "wire recycling" "lifetime graph"
 need_text skills/paper-dirty-borrowing-entanglement.md "dirty borrow entanglement" "external entanglement"
 need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Gate Elimination"
+need_text skills/paper-score-condition-discount.md "score condition discount" "Score Condition Discount"
+need_text skills/paper-score-condition-discount.md "average toffoli scorer" "average-Toffoli"
 need_text skills/apply-overlap-ledger.md "apply overlap" "apply/codec/fold overlap"
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
@@ -838,6 +845,91 @@ elif ! grep -q 'single_ccx_fanout_ledger=pass' "$tmpdir/single-ccx-fanout-ledger
      ! grep -q 'decision=trusted-eval-nack' "$tmpdir/single-ccx-fanout-ledger.out"; then
   printf 'public_harness_check=fail single_ccx_fanout_ledger_output\n' >&2
   cat "$tmpdir/single-ccx-fanout-ledger.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/q1152-avgt-sim.rs" <<'EOF'
+match op.kind {
+    OperationType::CCZ | OperationType::CCX => {
+        self.stats.toffoli_gates += executed_shots;
+    }
+    _ => {}
+}
+let mut current_base_condition = u64::MAX;
+if op.c_condition != NO_BIT {
+    cond &= self.bit(op.c_condition);
+}
+let executed_shots = cond.count_ones();
+EOF
+cat >"$tmpdir/q1152-avgt-eval.rs" <<'EOF'
+fn write_score(avg_tof: f64, qubits: u64) {
+    let toffoli = avg_tof.round() as u64;
+    let score = toffoli.saturating_mul(qubits);
+}
+EOF
+cat >"$tmpdir/q1152-avgt-circuit.rs" <<'EOF'
+pub enum OperationType {
+    CCX = 13,
+    CCZ = 14,
+    PushCondition = 15,
+    PopCondition = 16,
+}
+match self.kind {
+    OperationType::CCX | OperationType::CCZ => {
+        c_condition_flag = ALLOWED;
+    }
+    OperationType::PushCondition => {
+        c_condition_flag = REQUIRED;
+    }
+    _ => {}
+}
+EOF
+cat >"$tmpdir/q1152-avgt-mod.rs" <<'EOF'
+fn push_condition(&mut self, cond: BitId) {}
+fn pop_condition(&mut self) {}
+EOF
+cat >"$tmpdir/q1152-avgt-paper.md" <<'EOF'
+- 2020-10-01 Efficient Construction of a Control Modular Adder on a Carry-Lookahead Adder Using Relative-phase Toffoli Gates
+- 2024-01-31 Optimizing T and CNOT Gates in Quantum Ripple-Carry Adders and Comparators
+EOF
+python3 - "$tmpdir/q1152-avgt-ops.bin" <<'PY'
+import struct
+import sys
+NO = (1 << 64) - 1
+ops = [
+    (13, NO),
+    (15, 0),
+    (14, NO),
+    (16, NO),
+    (13, 1),
+]
+with open(sys.argv[1], "wb") as f:
+    f.write(b"QECCOPS1")
+    f.write(struct.pack("<Q", len(ops)))
+    for kind, c_condition in ops:
+        f.write(struct.pack("<IIQQQQQQ", kind, 0, NO, NO, NO, NO, c_condition, NO))
+PY
+if ! python3 scripts/storm-q1152-avgt-theorem.py \
+  --sim-rs "$tmpdir/q1152-avgt-sim.rs" \
+  --eval-circuit-rs "$tmpdir/q1152-avgt-eval.rs" \
+  --circuit-rs "$tmpdir/q1152-avgt-circuit.rs" \
+  --point-add-mod-rs "$tmpdir/q1152-avgt-mod.rs" \
+  --ops-bin "$tmpdir/q1152-avgt-ops.bin" \
+  --paper-summary "$tmpdir/q1152-avgt-paper.md" \
+  --summary-out "$tmpdir/q1152-avgt-summary.tsv" \
+  --report-out "$tmpdir/q1152-avgt-report.md" \
+  >"$tmpdir/q1152-avgt-theorem.out" 2>"$tmpdir/q1152-avgt-theorem.err"; then
+  printf 'public_harness_check=fail q1152_avgt_theorem_failed\n' >&2
+  cat "$tmpdir/q1152-avgt-theorem.err" >&2
+  fail=1
+elif ! grep -q 'q1152_avgt_theorem=pass' "$tmpdir/q1152-avgt-theorem.out" ||
+     ! grep -q 'paper_toffoli_hits=2' "$tmpdir/q1152-avgt-theorem.out" ||
+     ! grep -q 'toy_quantum_sparse_ccx=64' "$tmpdir/q1152-avgt-theorem.out" ||
+     ! grep -q 'toy_classical_conditioned_ccx=32' "$tmpdir/q1152-avgt-theorem.out" ||
+     ! grep -q 'discount_bearing_toffoli=2' "$tmpdir/q1152-avgt-theorem.out" ||
+     ! grep -q 'decision=source-theorem-packet' "$tmpdir/q1152-avgt-theorem.out"; then
+  printf 'public_harness_check=fail q1152_avgt_theorem_output\n' >&2
+  cat "$tmpdir/q1152-avgt-theorem.out" >&2
   fail=1
 fi
 
