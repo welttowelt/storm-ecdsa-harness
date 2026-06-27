@@ -3,8 +3,8 @@
 
 This is a public-safe text scanner. It reads a redacted mailbox tail or any
 similar coordination transcript from a file or stdin and prints lines that look
-like direct asks to the operator. It does not contact hosts, read private paths,
-dispatch compute, submit, or decide whether an ask is already answered.
+like direct asks to the operator since the latest operator steering post. It
+does not contact hosts, read private paths, dispatch compute, or submit.
 """
 
 from __future__ import annotations
@@ -66,6 +66,24 @@ def line_speaker(line: str, current: str) -> str:
     return current
 
 
+def header_speaker(line: str) -> str:
+    match = HEADER_FROM_RE.search(line)
+    if match:
+        return match.group(1).strip()
+    return ""
+
+
+def line_is_operator_ack(line: str, targets: list[str]) -> bool:
+    stripped = line.strip().lower()
+    for target in targets:
+        target_lower = target.lower()
+        if stripped.startswith(f"ack {target_lower} "):
+            return True
+        if stripped.startswith(f"nack {target_lower} "):
+            return True
+    return False
+
+
 def target_hit(line: str, targets: list[str]) -> str:
     lower = line.lower()
     for target in targets:
@@ -102,9 +120,17 @@ def scan(text: str, targets: list[str], context_lines: int) -> list[ReviewLine]:
     current_speaker = "unknown"
     recent_target = ""
     recent_target_ttl = 0
+    start_index = 0
 
-    for index, line in enumerate(lines, start=1):
+    for index, line in enumerate(lines):
+        speaker = header_speaker(line)
+        if (speaker and speaker_is_target(speaker, targets)) or line_is_operator_ack(line, targets):
+            start_index = index
+
+    for index, line in enumerate(lines[start_index:], start=start_index + 1):
         current_speaker = line_speaker(line, current_speaker)
+        if line_is_operator_ack(line, targets):
+            current_speaker = target_hit(line, targets) or current_speaker
         hit = target_hit(line, targets)
         if hit:
             recent_target = hit

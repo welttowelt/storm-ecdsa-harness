@@ -321,6 +321,27 @@ elif ! grep -q 'mailbox_action_scan=review count=2' "$tmpdir/mailbox-action.out"
   fail=1
 fi
 
+cat >"$tmpdir/mailbox-action-answered.md" <<'EOF'
+## 2026-06-27T00:00:00Z from: Worker-A - bounded check
+
+Storm-Codex: confirm whether I should produce one fresh trace or hold.
+
+## 2026-06-27T00:03:00Z from: Storm-Codex - ACK
+
+ACK Storm-Codex CLAIM worker-a-fresh-trace skill=redsky file=demo next=produce-one-trace no_submit_ack=yes
+Worker-A is authorized for one bounded trace. No submit.
+EOF
+if ! python3 scripts/storm-mailbox-action-scan.py \
+  --input "$tmpdir/mailbox-action-answered.md" >"$tmpdir/mailbox-action-answered.out" 2>"$tmpdir/mailbox-action-answered.err"; then
+  printf 'public_harness_check=fail mailbox_action_scan_answered_failed\n' >&2
+  cat "$tmpdir/mailbox-action-answered.err" >&2
+  fail=1
+elif ! grep -q 'mailbox_action_scan=pass count=0' "$tmpdir/mailbox-action-answered.out"; then
+  printf 'public_harness_check=fail mailbox_action_scan_answered_counts\n' >&2
+  cat "$tmpdir/mailbox-action-answered.out" >&2
+  fail=1
+fi
+
 cat >"$tmpdir/mailbox-action-clean.md" <<'EOF'
 ## 2026-06-27T00:02:00Z from: Worker-C - status
 
