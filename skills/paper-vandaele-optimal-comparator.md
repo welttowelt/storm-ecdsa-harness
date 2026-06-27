@@ -42,6 +42,9 @@ phase callback contract is part of the invariant, not an implementation detail.
    cut or an entry-active reduction. If other callsites remain at the same q
    after excluding that pair, widen the proof to the whole plateau before
    porting code.
+   If `scripts/vandaele-comparator-ledger.sh` reports
+   `max_without_comparator == peak_qubits`, a comparator-only port is blocked:
+   the paper hook is real, but it cannot lower the current wall by itself.
 3. Build a reduced-width toy that exposes the same carry-in, const bits, dirty
    host, and middle callback.
 4. Count the one-callsite port before widening.
@@ -71,7 +74,7 @@ Vandaele comparator gate:
 - Dirty host:
 - Middle callback preserved:
 - Toy/count/residual:
-- Decision: toy-port / paired-cut-required / park
+- Decision: toy-port / paired-cut-required / plateau-cut-required / park
 ```
 
 ## Kill Gate
