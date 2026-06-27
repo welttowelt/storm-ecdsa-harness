@@ -597,6 +597,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 1087 binds the const-chunk carry context for the following ccx; a[i]=1 and cin_ref=1 toggles cout_ref, so omission loses the carry",
         "restoration_obligation": "the carry target is consumed by subsequent HMR/reset and reverse cleanup",
     },
+    ("arith.rs", 1139, "0d02314f3d7bd53b"): {
+        "primitive_family": "const_chunk_drop_cout_phase_live",
+        "support_domain": "source-hash-bound const_chunk_add_clean_drop_cout HMR phase correction",
+        "falsifier_template": "choose a reached drop-cout cleanup row with hmr bit=1, a[i]=1, and cin_ref=1",
+        "witness": "line 1139 binds the drop-cout chunk loop whose reverse pass measures int_i and applies cz_if_bit(a[i], cin_ref, b); a[i]=cin_ref=1 under b=1 stamps a required CCZ phase",
+        "phase_obligation": "omission leaves HMR deferred phase dirt even if the classical carry value path is unchanged",
+    },
     ("codec.rs", 304, "011131e1db1721fe"): {
         "primitive_family": "dialog_codec_normalizer_live",
         "support_domain": "source-hash-bound Triple dialog-codec normalizer CCX row",
