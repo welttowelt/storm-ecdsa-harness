@@ -472,6 +472,16 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
 }
 
 
+SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
+    ("comparator.rs", 196, "c9c97c7ce21070ea"): {
+        "primitive_family": "comparator_cin_carry_live",
+        "support_domain": "source-hash-bound compare_geq_cin_middle carry",
+        "falsifier_template": "choose cin=1,a_in=1,b_in=0 so the derived carry controls are both 1",
+        "witness": "cin=1 gives ci=0; after the local X/CX folds a[i]=1,b[i]=1, so line 196 toggles next carry and omission leaves it 0",
+    },
+}
+
+
 TRACE_CONTEXT_FAMILIES: dict[int, str] = {
     0x0100_0000: "ffg_prefix_carry",
     0x0200_0000: "cuccaro_forward_carry",
@@ -691,10 +701,15 @@ def source_site_key(source_location: str) -> tuple[str, int] | None:
     return (match.group(1), int(match.group(2)))
 
 
-def classify_source_site(source_location: str) -> dict[str, str]:
+def classify_source_site(source_location: str, source_hash: str = "") -> dict[str, str]:
     key = source_site_key(source_location)
     if key is None:
         return {}
+    source_hash = str(source_hash or "").strip()
+    if source_hash:
+        classifier = SOURCE_HASH_SITE_CLASSIFIERS.get((key[0], key[1], source_hash))
+        if classifier is not None:
+            return classifier
     return SITE_CLASSIFIERS.get(key, {})
 
 
@@ -869,7 +884,7 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
         op_id = str(record.get("index", index))
     classifier = {
         **classify_trace_context(context_info),
-        **classify_source_site(source_location),
+        **classify_source_site(source_location, source_hash),
     }
 
     fact = {
@@ -1083,7 +1098,12 @@ def reclassify_missing_support_fields(fact: dict[str, Any]) -> dict[str, Any]:
 
     classifier: dict[str, str] = {}
     classifier.update(classify_trace_context(context_info))
-    classifier.update(classify_source_site(str(enriched.get("source_location", ""))))
+    classifier.update(
+        classify_source_site(
+            str(enriched.get("source_location", "")),
+            str(enriched.get("source_hash", "")),
+        )
+    )
 
     for key in (
         "primitive_family",
