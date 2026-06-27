@@ -639,30 +639,36 @@ elif ! grep -q 'counterexample=2' "$tmpdir/context-scout-supported.out"; then
   fail=1
 fi
 
-cat >"$tmpdir/source-hash-bound-comparator.tsv" <<'EOF'
+cat >"$tmpdir/source-hash-bound-scout.tsv" <<'EOF'
 rank	count	kind	file	line	context	source_hash
-1	121702	CCX	src/point_add/trailmix_ludicrous/comparator.rs	196	none	c9c97c7ce21070ea
+1	264146	CCX	src/point_add/trailmix_ludicrous/gidney.rs	344	none	b9b8bfcd03cc3e53
+2	263344	CCX	src/point_add/trailmix_ludicrous/gidney.rs	302	none	a3ba4f6fc6be9865
+3	121702	CCX	src/point_add/trailmix_ludicrous/comparator.rs	196	none	c9c97c7ce21070ea
+4	70900	CCX	src/point_add/trailmix_ludicrous/gcd.rs	690	none	870820f1ca5c6974
+5	70900	CCX	src/point_add/trailmix_ludicrous/gcd.rs	697	none	7ff9c8a1b028c409
+6	70390	CCX	src/point_add/trailmix_ludicrous/gcd.rs	904	none	ee3a5c0b13bf21e2
+7	70372	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1386	none	f76620b45753b899
 EOF
 if ! python3 scripts/storm-exact-miner.py trace-facts \
-  --input "$tmpdir/source-hash-bound-comparator.tsv" \
+  --input "$tmpdir/source-hash-bound-scout.tsv" \
   --frontier fixture-frontier/demo-source \
   --source-base public-demo-source \
-  --stream-hash source-hash-bound-comparator196 \
-  --out "$tmpdir/source-hash-bound-comparator-facts.jsonl" >"$tmpdir/source-hash-bound-comparator-facts.out" 2>"$tmpdir/source-hash-bound-comparator-facts.err"; then
-  printf 'public_harness_check=fail source_hash_bound_comparator_trace_failed\n' >&2
-  cat "$tmpdir/source-hash-bound-comparator-facts.err" >&2
+  --stream-hash source-hash-bound-scout-backlog \
+  --out "$tmpdir/source-hash-bound-scout-facts.jsonl" >"$tmpdir/source-hash-bound-scout-facts.out" 2>"$tmpdir/source-hash-bound-scout-facts.err"; then
+  printf 'public_harness_check=fail source_hash_bound_scout_trace_failed\n' >&2
+  cat "$tmpdir/source-hash-bound-scout-facts.err" >&2
   fail=1
 elif ! python3 scripts/storm-exact-miner.py support-check \
-  --facts "$tmpdir/source-hash-bound-comparator-facts.jsonl" \
-  --out "$tmpdir/source-hash-bound-comparator-supported.jsonl" >"$tmpdir/source-hash-bound-comparator-supported.out" 2>"$tmpdir/source-hash-bound-comparator-supported.err"; then
-  printf 'public_harness_check=fail source_hash_bound_comparator_support_failed\n' >&2
-  cat "$tmpdir/source-hash-bound-comparator-supported.err" >&2
+  --facts "$tmpdir/source-hash-bound-scout-facts.jsonl" \
+  --out "$tmpdir/source-hash-bound-scout-supported.jsonl" >"$tmpdir/source-hash-bound-scout-supported.out" 2>"$tmpdir/source-hash-bound-scout-supported.err"; then
+  printf 'public_harness_check=fail source_hash_bound_scout_support_failed\n' >&2
+  cat "$tmpdir/source-hash-bound-scout-supported.err" >&2
   fail=1
-elif ! grep -q 'counterexample=1' "$tmpdir/source-hash-bound-comparator-supported.out" ||
-     ! grep -q 'unknown=0' "$tmpdir/source-hash-bound-comparator-supported.out"; then
-  printf 'public_harness_check=fail source_hash_bound_comparator_support_counts\n' >&2
-  cat "$tmpdir/source-hash-bound-comparator-supported.out" >&2
-  cat "$tmpdir/source-hash-bound-comparator-supported.jsonl" >&2
+elif ! grep -q 'counterexample=7' "$tmpdir/source-hash-bound-scout-supported.out" ||
+     ! grep -q 'unknown=0' "$tmpdir/source-hash-bound-scout-supported.out"; then
+  printf 'public_harness_check=fail source_hash_bound_scout_support_counts\n' >&2
+  cat "$tmpdir/source-hash-bound-scout-supported.out" >&2
+  cat "$tmpdir/source-hash-bound-scout-supported.jsonl" >&2
   fail=1
 fi
 

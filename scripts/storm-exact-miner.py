@@ -473,11 +473,51 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
 
 
 SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
+    ("gidney.rs", 302, "a3ba4f6fc6be9865"): {
+        "primitive_family": "gidney_thread_forward_carry_live",
+        "support_domain": "source-hash-bound controlled_clean_add_threaded forward carry after cin fold",
+        "falsifier_template": "choose a reached forward carry row where folded a[i] and b[i] are both 1",
+        "witness": "with ci=0,a[i]=1,b[i]=1 or ci=1,a[i]=0,b[i]=0 after the preceding CX folds, line 302 toggles co; omission loses the carry",
+        "restoration_obligation": "the co carry is consumed by boundary extraction or reverse cleanup",
+    },
+    ("gidney.rs", 344, "b9b8bfcd03cc3e53"): {
+        "primitive_family": "gidney_thread_sum_live",
+        "support_domain": "source-hash-bound controlled_clean_add_threaded reverse gated sum",
+        "falsifier_template": "choose a reached reverse sum row with ctrl=1, b[i]=1, and a[i]=0",
+        "witness": "ctrl=1,b[i]=1,a[i]=0 before line 344 makes the baseline toggle a[i] to 1; omission leaves a[i]=0",
+        "restoration_obligation": "reverse threaded-add sum rows are required before restoring b[i]",
+    },
     ("comparator.rs", 196, "c9c97c7ce21070ea"): {
         "primitive_family": "comparator_cin_carry_live",
         "support_domain": "source-hash-bound compare_geq_cin_middle carry",
         "falsifier_template": "choose cin=1,a_in=1,b_in=0 so the derived carry controls are both 1",
         "witness": "cin=1 gives ci=0; after the local X/CX folds a[i]=1,b[i]=1, so line 196 toggles next carry and omission leaves it 0",
+    },
+    ("gcd.rs", 690, "870820f1ca5c6974"): {
+        "primitive_family": "gcd_right_shift_cswap_live",
+        "support_domain": "source-hash-bound controlled_right_shift cswap",
+        "falsifier_template": "choose ctrl=1 with adjacent active limbs unequal",
+        "witness": "ctrl=1,v[i]=1,v[i+1]=0 swaps to 0,1; omission leaves 1,0",
+    },
+    ("gcd.rs", 697, "7ff9c8a1b028c409"): {
+        "primitive_family": "gcd_left_shift_cswap_live",
+        "support_domain": "source-hash-bound controlled_left_shift inverse cswap",
+        "falsifier_template": "choose ctrl=1 with adjacent active limbs unequal",
+        "witness": "ctrl=1,v[i]=1,v[i-1]=0 swaps to 0,1; omission leaves 1,0",
+        "restoration_obligation": "left-shift cswaps are the inverse of controlled_right_shift and are required for register restoration",
+    },
+    ("gcd.rs", 904, "ee3a5c0b13bf21e2"): {
+        "primitive_family": "gcd_forward_cswap_live",
+        "support_domain": "source-hash-bound forward jump-GCD u/v cswap",
+        "falsifier_template": "choose a reached row with swp=1 and u[j] != v[j]",
+        "witness": "swp=1,u[j]=1,v[j]=0 swaps to 0,1; omission leaves the old register order",
+    },
+    ("gcd.rs", 1386, "f76620b45753b899"): {
+        "primitive_family": "gcd_reverse_cswap_live",
+        "support_domain": "source-hash-bound reverse jump-GCD u/v cswap",
+        "falsifier_template": "choose a reached reverse row with swp=1 and u[j] != v[j]",
+        "witness": "swp=1,u[j]=0,v[j]=1 swaps to 1,0 during inverse restoration; omission leaves the old order",
+        "restoration_obligation": "reverse cswap rows are required to restore the GCD registers",
     },
 }
 
