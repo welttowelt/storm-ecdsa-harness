@@ -742,6 +742,18 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 998 is the d&!e derived-control setup; raw rows are kept inverse-fold CCX carry-chain operations, and d&!e=1 with carry=1 toggles the next fold carry",
         "restoration_obligation": "the fold carry chain and later reverse cleanup depend on the derived d&!e control",
     },
+    ("fused.rs", 131, "be2dffe287a5dfa3"): {
+        "primitive_family": "source_context_not_op_site",
+        "support_domain": "source-hash-bound fused dirty-fold skip guard context row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating the guard as a removable fused-fold CCX",
+        "witness": "d44cad3 fused.rs:131 is the TLM_FUSED_SKIP_STRUCTURAL_DEAD_DIRTY_FOLD env-guard line, not a circuit emission site; origin rows are kept fused-fold CCX work, so no executable source-hook exists here",
+    },
+    ("fused.rs", 267, "1d624234070becf3"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound FUSED_CLEAN_FOLD_DEAD_RANGES table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable fused-fold CCX",
+        "witness": "d44cad3 fused.rs:267 is static FUSED_CLEAN_FOLD_DEAD_RANGES data `(376, 31, 31)`, while origin rows are kept fused-fold CCX in forward/inverse fold phases; no executable source-hook exists here",
+    },
     ("comparator.rs", 57, "d1a924ee4e28795f"): {
         "primitive_family": "table_origin_not_op_site",
         "support_domain": "source-hash-bound COMPARE_CIN_STRUCTURAL_DEAD_RANGES table-origin row",
