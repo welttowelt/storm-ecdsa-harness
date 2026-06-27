@@ -597,6 +597,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 1087 binds the const-chunk carry context for the following ccx; a[i]=1 and cin_ref=1 toggles cout_ref, so omission loses the carry",
         "restoration_obligation": "the carry target is consumed by subsequent HMR/reset and reverse cleanup",
     },
+    ("codec.rs", 304, "011131e1db1721fe"): {
+        "primitive_family": "dialog_codec_normalizer_live",
+        "support_domain": "source-hash-bound Triple dialog-codec normalizer CCX row",
+        "falsifier_template": "choose a reached Triple-codec normalizer state whose affine prefix sets both CCX controls",
+        "witness": "NORMALIZER_OPS contains live CCX normalizer rows; for example the affine prefix can set controls 6 and 7 before a (2,6,7,8) row, and omission changes the 9-to-7 codec mapping",
+        "restoration_obligation": "the reverse codec relies on the exact normalized codeword to restore raw dialog bits and freed wires",
+    },
     ("comparator.rs", 68, "e2d291034f536196"): {
         "primitive_family": "comparator_top_carry_live",
         "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",
