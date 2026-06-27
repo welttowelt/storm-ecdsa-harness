@@ -54,6 +54,7 @@ for path in \
   scripts/storm-wall-owner-summary.py \
   scripts/storm-source-certificate-scout.py \
   scripts/storm-alloc-owner-summary.py \
+  scripts/storm-peak-lifetime-ledger.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -209,6 +210,7 @@ need_text scripts/storm-mailbox-action-scan.py "mailbox direct ask scanner" "mai
 need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_summary=pass"
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
 need_text scripts/storm-alloc-owner-summary.py "alloc owner summary" "alloc_owner_summary=pass"
+need_text scripts/storm-peak-lifetime-ledger.py "peak lifetime ledger" "peak_lifetime_ledger=pass"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -631,6 +633,34 @@ elif ! grep -q 'alloc_owner_summary=pass input_rows=4 caller_rows=3 peak_owner_r
   printf 'public_harness_check=fail alloc_owner_summary_output\n' >&2
   cat "$tmpdir/alloc-owner-summary.out" >&2
   cat "$tmpdir/alloc-owner-summary.tsv" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/peak-lifetime.raw" <<'EOF'
+ALLOC_NEAR active=1146 next_idx=1145 phase='tlm_apply_inverse_mod_sub_register' ops_idx=10 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=11 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_fold' ops_idx=11 free_pool=0 caller=src/point_add/trailmix_ludicrous/arith.rs:1077
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_fold' ops_idx=12 free_pool=0 caller=src/point_add/trailmix_ludicrous/arith.rs:1077
+ALLOC_NEAR active=1151 next_idx=1150 phase='tlm_inverse_gcd_forward_compare' ops_idx=13 free_pool=1 caller=src/point_add/trailmix_ludicrous/comparator.rs:707
+EOF
+if ! python3 scripts/storm-peak-lifetime-ledger.py \
+  --input "$tmpdir/peak-lifetime.raw" \
+  --caller-out "$tmpdir/peak-lifetime-callers.tsv" \
+  --phase-out "$tmpdir/peak-lifetime-phases.tsv" \
+  --active-out "$tmpdir/peak-lifetime-active.tsv" \
+  --peak 1152 >"$tmpdir/peak-lifetime.out" 2>"$tmpdir/peak-lifetime.err"; then
+  printf 'public_harness_check=fail peak_lifetime_ledger_failed\n' >&2
+  cat "$tmpdir/peak-lifetime.err" >&2
+  fail=1
+elif ! grep -q 'peak_lifetime_ledger=pass input_rows=5 active_min=1146 active_max=1152 peak=1152 peak_allocs=3 peak_ops=2 peak_ops_allocs_min=1 peak_ops_allocs_max=2 peak_ops_allocs_median=1.5 caller_rows=3 phase_rows=3' "$tmpdir/peak-lifetime.out" ||
+     ! grep -q $'src/point_add/trailmix_ludicrous/arith.rs\t1077\ttlm_apply_forward_mod_add_fold\t2\t2\t2\t11\t12\t1\t1152\t1152\t1\ttlm_apply_forward_mod_add_fold' "$tmpdir/peak-lifetime-callers.tsv" ||
+     ! grep -q $'src/point_add/trailmix_ludicrous/gidney.rs\t1217\ttlm_apply_inverse_mod_sub_register\t2\t1\t1\t1146\t1152\t1' "$tmpdir/peak-lifetime-phases.tsv" ||
+     ! grep -q $'1152\t3' "$tmpdir/peak-lifetime-active.tsv"; then
+  printf 'public_harness_check=fail peak_lifetime_ledger_output\n' >&2
+  cat "$tmpdir/peak-lifetime.out" >&2
+  cat "$tmpdir/peak-lifetime-callers.tsv" >&2
+  cat "$tmpdir/peak-lifetime-phases.tsv" >&2
+  cat "$tmpdir/peak-lifetime-active.tsv" >&2
   fail=1
 fi
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
