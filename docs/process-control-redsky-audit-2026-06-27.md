@@ -106,6 +106,8 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `arith.rs:537`
 - `gcd.rs:784`
 - `gcd.rs:812`
+- `arith.rs:1865`
+- `arith.rs:1880`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
@@ -171,6 +173,8 @@ Evidence source:
   `state/autonomous-research/structural-alpha-20260627/artifacts/cycle48-wall-owner-certificate-backlog/ranked.jsonl`
 - Current rerun command: the full cycle48 classifier pipeline in the
   verification section below, using the same `wall-owner-site-audit.tsv`.
+- Machine-readable fixture: `examples/cycle48-audit-impact.example.json`
+- Snapshot emitter: `scripts/storm-audit-impact.py`
 
 Measured output:
 
@@ -180,12 +184,13 @@ Measured output:
 | Before passes 6-10 | 14 | 43 | 12 | 42 | 42 | 17818 | 816644 |
 | After passes 6-10 | 8 | 49 | 6 | 48 | 48 | 2056 | 832406 |
 | After pass 11 | 6 | 51 | 4 | 50 | 50 | 1032 | 833430 |
+| After pass 12 | 4 | 53 | 2 | 52 | 52 | 42 | 834420 |
 
 Result:
 
-- Ranked UNKNOWN rows fell from `23` to `4`, an `82.6%` reduction.
-- Ranked UNKNOWN weight fell from `709580` to `1032`, a `99.9%` reduction.
-- Durable NACK ledger rows rose from `31` to `50`.
+- Ranked UNKNOWN rows fell from `23` to `2`, a `91.3%` reduction.
+- Ranked UNKNOWN weight fell from `709580` to `42`, a `99.99%` reduction.
+- Durable NACK ledger rows rose from `31` to `52`.
 - Certified rows stayed at `0`, so the audit improved proof routing but did not
   create a submission candidate.
 
@@ -196,10 +201,10 @@ After the cycle48 audit-impact sync, the next public top UNKNOWN rows were
 `gcd.rs:784` and `gcd.rs:812`.
 
 Evidence:
-Both rows are source-site CSWAPs in the controlled modular double pair. The
-forward row at `gcd.rs:784` shifts the `a ++ ovf` view under `ctrl`; the reverse
-row at `gcd.rs:812` restores the same view during inverse controlled modular
-doubling.
+Both rows are source-site aggregates produced by the `#[track_caller]` CSWAP
+expansion in the controlled modular double pair. They map to the forward
+`controlled_mod_double` and reverse `controlled_mod_double_reverse` shift over
+the `a ++ ovf` view.
 
 Effect:
 With `ctrl=1` and adjacent shift-view bits unequal, the CSWAP changes register
@@ -214,6 +219,31 @@ Gate:
 No source hook, count claim, residual/eval, pod dispatch, alert, WINNER, or
 submit follows from these rows. The next worker must prove or falsify
 `arith.rs:1865` before touching compute.
+
+## Pass 12 - Vented Plain Carry Alias Sync
+
+Problem:
+After pass 11, the next public fixture UNKNOWN was `arith.rs:1865`, with
+`arith.rs:1880` still open in the full cycle48 ranked backlog.
+
+Evidence:
+Both rows sit in `add_cout_vented_skip_dead`. Row `1865` is the non-vented
+carry creation branch when `dead(i)=false` and vent budget is exhausted. Row
+`1880` is the mirrored reverse CCX needed after the sum bit is written.
+
+Effect:
+With `a[i]=1` and `b[i]=1`, row `1865` toggles `b[i+1]` and feeds the following
+sum path. Row `1880` is the restoration mirror; skipping it leaves the carry
+lane dirty.
+
+Fix:
+Added explicit NACK-only source aliases for `arith.rs:1865` and `arith.rs:1880`,
+then advanced the fixture to leave `arith.rs:1375` as the next visible UNKNOWN.
+
+Gate:
+No source hook, count claim, residual/eval, pod dispatch, alert, WINNER, or
+submit follows from these rows. The next worker must prove or falsify
+`arith.rs:1375` before touching compute.
 
 ## Verification Commands
 
