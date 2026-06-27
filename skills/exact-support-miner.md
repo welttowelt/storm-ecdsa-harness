@@ -26,18 +26,26 @@ Use fixture or public trace facts only.
    `python3 scripts/storm-exact-miner.py trace-facts --input <public.jsonl> --out <facts.jsonl>`.
    If the input is a raw source-site TSV, provide `--frontier`,
    `--source-base`, and `--stream-hash` defaults.
-3. Mine candidates:
-   `python3 scripts/storm-exact-miner.py mine --facts <facts.jsonl> --out <candidates.jsonl>`.
+3. Run support checking when facts include source-site rows:
+   `python3 scripts/storm-exact-miner.py support-check --facts <facts.jsonl> --out <supported.jsonl>`.
+   This marks known generic-live rows as counterexamples and keeps dirty-host
+   rows unknown unless restoration, phase, and public certificate fields exist.
+4. Mine candidates:
+   `python3 scripts/storm-exact-miner.py mine --facts <supported-or-facts.jsonl> --out <candidates.jsonl>`.
    For source-site TSVs without proof annotations, add
    `--include-unknown-sites --max-unknown-sites <n>` to emit rankable UNKNOWN
    proof backlog packets. The miner tags known generic-live source rows with
    `primitive_family`, `falsifier_template`, and `witness`, then marks them
    `COUNTEREXAMPLE` during `prove`; only unclassified rows remain UNKNOWN.
-4. Build proof packets:
+5. Build proof packets:
    `python3 scripts/storm-exact-miner.py prove --candidates <candidates.jsonl> --out <proofs.jsonl>`.
-5. Rank packets:
-   `python3 scripts/storm-exact-miner.py rank --proofs <proofs.jsonl> --out <ranked.jsonl>`.
-6. Apply Redsky review before any patch: strongest objection, fastest falsifier,
+6. Apply falsifiers and optional NACK ledger:
+   `python3 scripts/storm-exact-miner.py falsify --packets <proofs.jsonl> --out <falsified.jsonl>`.
+7. Emit reusable public NACK entries:
+   `python3 scripts/storm-exact-miner.py ledger --packets <falsified.jsonl> --out <ledger.jsonl>`.
+8. Rank packets:
+   `python3 scripts/storm-exact-miner.py rank --proofs <falsified-or-proofs.jsonl> --out <ranked.jsonl>`.
+9. Apply Redsky review before any patch: strongest objection, fastest falsifier,
    dirty classes, expected score movement, validation target, and kill gate.
 
 ## Output

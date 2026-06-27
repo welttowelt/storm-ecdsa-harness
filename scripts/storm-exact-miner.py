@@ -56,6 +56,8 @@ PROOF_STATUS_ORDER = {
     "COUNTEREXAMPLE": 2,
 }
 
+SUPPORTED_STATUSES = set(PROOF_STATUS_ORDER)
+
 
 SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
     ("gcd.rs", 1460): {
@@ -359,9 +361,23 @@ def parse_args() -> argparse.Namespace:
         help="minimum executed weight for --include-unknown-sites packets",
     )
 
+    support = sub.add_parser("support-check", help="enrich normalized facts with support/falsifier status")
+    support.add_argument("--facts", required=True, help="normalized facts JSONL")
+    support.add_argument("--out", required=True, help="support-enriched facts JSONL")
+
     prove = sub.add_parser("prove", help="create proof packets from candidates")
     prove.add_argument("--candidates", required=True, help="candidate JSONL")
     prove.add_argument("--out", required=True, help="proof packet JSONL output path")
+
+    falsify = sub.add_parser("falsify", help="apply source counterexamples and optional NACK ledger")
+    falsify.add_argument("--packets", required=True, help="candidate/proof packet JSONL")
+    falsify.add_argument("--out", required=True, help="falsified proof packet JSONL")
+    falsify.add_argument("--ledger", default="", help="optional public NACK ledger JSONL")
+
+    ledger = sub.add_parser("ledger", help="emit public NACK ledger entries from counterexample packets")
+    ledger.add_argument("--packets", required=True, help="proof packet JSONL")
+    ledger.add_argument("--out", required=True, help="NACK ledger JSONL")
+    ledger.add_argument("--merge", action="append", default=[], help="existing ledger JSONL to merge")
 
     rank = sub.add_parser("rank", help="rank proof packets for fleet intake")
     rank.add_argument("--proofs", required=True, help="proof packet JSONL")
@@ -466,6 +482,13 @@ def as_int_maybe(value: Any) -> int | None:
         return None
 
 
+def status_field(value: Any, default: str = "") -> str:
+    text = str(value or default).strip().upper()
+    if text in SUPPORTED_STATUSES:
+        return text
+    return ""
+
+
 def stable_id(prefix: str, *parts: Any) -> str:
     h = hashlib.sha256()
     for part in parts:
@@ -562,10 +585,93 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
             "restoration_obligation",
             classifier.get("restoration_obligation", ""),
         ),
+        "proof_method": text_field(record, "proof_method", classifier.get("proof_method", "")),
+        "support_status": status_field(record.get("support_status", "")),
+        "support_note": text_field(record, "support_note", ""),
+        "support_hash": text_field(record, "support_hash", ""),
+        "witness_hash": text_field(record, "witness_hash", ""),
         "value_max": record.get("value_max", ""),
         "modulus": record.get("modulus", ""),
     }
     return fact
+
+
+def witness_hash(value: Any) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    return stable_id("witness", text)
+
+
+def support_result_for_fact(fact: dict[str, Any]) -> dict[str, str]:
+    preset = status_field(fact.get("support_status", ""))
+    method = str(fact.get("proof_method", "") or "").strip()
+    note = str(fact.get("support_note", "") or "").strip()
+    family = str(fact.get("primitive_family", "") or "").strip()
+
+    if preset:
+        status = preset
+        method = method or "external_support_status"
+        note = note or "support status supplied by input fact"
+    elif has_source_counterexample(fact):
+        status = "COUNTEREXAMPLE"
+        method = "source_support_enum"
+        note = "source witness falsifies this omission"
+    elif family == "dirty_host":
+        if fact.get("support_certificate") and fact.get("restoration_obligation") and fact.get("phase_obligation"):
+            status = "CERTIFIED"
+            method = "dirty_host_restoration"
+            note = "public certificate supplies restoration and phase obligations"
+        else:
+            status = "UNKNOWN"
+            method = "dirty_host_restoration"
+            note = "dirty-host route needs restoration, phase, and support certificate"
+    elif fact.get("exact_remainder"):
+        value_max = as_int_maybe(fact.get("value_max"))
+        modulus = as_int_maybe(fact.get("modulus"))
+        if value_max is not None and modulus is not None and value_max < modulus:
+            status = "CERTIFIED"
+            method = "exact_remainder"
+            note = "built-in range check proves value_max < modulus"
+        else:
+            status = "UNKNOWN"
+            method = "exact_remainder"
+            note = "exact-remainder fact needs value_max < modulus or a public certificate"
+    elif fact.get("support_certificate") and (
+        fact.get("known_zero_controls") or fact.get("dead_targets") or not fact.get("target_live", True)
+    ):
+        status = "CERTIFIED"
+        method = "support_certificate"
+        note = "public support certificate supplied for fixed-control or dead-target fact"
+    else:
+        status = "UNKNOWN"
+        method = method or "manual_source_invariant"
+        note = note or "manual source invariant required before compute"
+
+    return {
+        "support_status": status,
+        "proof_method": method,
+        "support_note": note,
+        "witness_hash": witness_hash(fact.get("witness", "")),
+        "support_hash": stable_id(
+            "support",
+            fact.get("fact_id", ""),
+            status,
+            method,
+            note,
+            fact.get("witness", ""),
+            fact.get("support_certificate", ""),
+        ),
+    }
+
+
+def support_check_facts(facts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    checked = []
+    for fact in facts:
+        enriched = dict(fact)
+        enriched.update(support_result_for_fact(enriched))
+        checked.append(enriched)
+    return checked
 
 
 def build_candidate(fact: dict[str, Any], reason: str, proof_kind: str, proof_inputs: dict[str, Any]) -> dict[str, Any]:
@@ -598,18 +704,32 @@ def build_candidate(fact: dict[str, Any], reason: str, proof_kind: str, proof_in
         "witness": fact.get("witness", ""),
         "phase_obligation": fact.get("phase_obligation", ""),
         "restoration_obligation": fact.get("restoration_obligation", ""),
+        "proof_method": fact.get("proof_method", ""),
+        "support_status": fact.get("support_status", ""),
+        "support_note": fact.get("support_note", ""),
+        "support_hash": fact.get("support_hash", ""),
+        "witness_hash": fact.get("witness_hash", ""),
         "fastest_falsifier": "derive the source invariant, then run a toy/support enumeration or trace witness before any circuit edit",
     }
 
 
 def has_source_counterexample(fact: dict[str, Any]) -> bool:
     family = str(fact.get("primitive_family", ""))
-    return bool(family and fact.get("falsifier_template") and fact.get("witness"))
+    status = status_field(fact.get("support_status", ""))
+    return bool((status == "COUNTEREXAMPLE") or (family and fact.get("falsifier_template") and fact.get("witness")))
 
 
 def source_site_backlog_candidate(fact: dict[str, Any]) -> dict[str, Any]:
-    proof_kind = "source_counterexample" if has_source_counterexample(fact) else "manual_source_invariant"
-    reason = "source-site-counterexample" if proof_kind == "source_counterexample" else "source-site-proof-backlog"
+    support_status = status_field(fact.get("support_status", ""))
+    if has_source_counterexample(fact):
+        proof_kind = "source_counterexample"
+        reason = "source-site-counterexample"
+    elif support_status == "CERTIFIED":
+        proof_kind = "support_certificate"
+        reason = "source-site-support-certified"
+    else:
+        proof_kind = "manual_source_invariant"
+        reason = "source-site-proof-backlog"
     return build_candidate(
         fact,
         reason,
@@ -627,6 +747,11 @@ def source_site_backlog_candidate(fact: dict[str, Any]) -> dict[str, Any]:
             "witness": fact.get("witness", ""),
             "phase_obligation": fact.get("phase_obligation", ""),
             "restoration_obligation": fact.get("restoration_obligation", ""),
+            "proof_method": fact.get("proof_method", ""),
+            "support_status": fact.get("support_status", ""),
+            "support_note": fact.get("support_note", ""),
+            "support_hash": fact.get("support_hash", ""),
+            "witness_hash": fact.get("witness_hash", ""),
         },
     )
 
@@ -737,12 +862,19 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     packet = dict(candidate)
     inputs = packet.get("proof_inputs", {})
     certificate = str(inputs.get("support_certificate", "")).strip()
+    input_support_status = status_field(inputs.get("support_status", ""))
     status = "UNKNOWN"
     note = "manual proof required before compute"
 
     if not packet.get("allocator_unchanged", False):
         status = "COUNTEREXAMPLE"
         note = "allocator order changed; this route is outside fixed-allocation exact-skip scope"
+    elif input_support_status == "COUNTEREXAMPLE":
+        status = "COUNTEREXAMPLE"
+        note = str(inputs.get("support_note", "") or "support checker supplied a counterexample")
+    elif input_support_status == "CERTIFIED":
+        status = "CERTIFIED"
+        note = str(inputs.get("support_note", "") or "support checker supplied a public certificate")
     elif packet["proof_kind"] == "source_counterexample":
         template = str(inputs.get("falsifier_template", "")).strip()
         witness = str(inputs.get("witness", "")).strip()
@@ -752,6 +884,10 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         else:
             status = "UNKNOWN"
             note = "source counterexample packet is missing falsifier_template or witness"
+    elif packet["proof_kind"] == "support_certificate":
+        if certificate or inputs.get("support_hash"):
+            status = "CERTIFIED"
+            note = "public support checker certificate supplied"
     elif packet["proof_kind"] == "bitvec_unsat":
         value_max = as_int_maybe(inputs.get("value_max"))
         modulus = as_int_maybe(inputs.get("modulus"))
@@ -769,6 +905,82 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     packet["proof_note"] = note
     packet["proof_hash"] = stable_id("proof", packet["route_id"], packet["proof_kind"], status, inputs)
     return packet
+
+
+def trace_span_key(value: Any) -> str:
+    if not isinstance(value, dict):
+        return ""
+    first = str(value.get("first_idx", "") or "")
+    last = str(value.get("last_idx", "") or "")
+    if not first and not last:
+        return ""
+    return f"{first}-{last}"
+
+
+def ledger_key(packet: dict[str, Any]) -> str:
+    return stable_id(
+        "nack",
+        packet.get("source_location", ""),
+        packet.get("primitive_family", ""),
+        trace_span_key(packet.get("trace_span", {})),
+    )
+
+
+def load_ledger(path: str) -> dict[str, dict[str, Any]]:
+    if not path:
+        return {}
+    entries = load_records(path)
+    ledger: dict[str, dict[str, Any]] = {}
+    for entry in entries:
+        key = str(entry.get("ledger_key", "") or "")
+        if key:
+            ledger[key] = entry
+    return ledger
+
+
+def falsify_packets(packets: list[dict[str, Any]], ledger: dict[str, dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    ledger = ledger or {}
+    out = []
+    for packet in packets:
+        enriched = prove_candidate(packet) if packet.get("proof_status") == "UNPROVEN" else dict(packet)
+        key = ledger_key(enriched)
+        if key in ledger and enriched.get("proof_status") != "CERTIFIED":
+            entry = ledger[key]
+            enriched["proof_status"] = "COUNTEREXAMPLE"
+            enriched["proof_note"] = str(entry.get("nack_note", "NACK ledger matched this source-site family"))
+            enriched["proof_hash"] = stable_id("proof", enriched["route_id"], enriched["proof_kind"], "COUNTEREXAMPLE", key)
+        enriched["ledger_key"] = key
+        enriched["auto_nack"] = enriched.get("proof_status") == "COUNTEREXAMPLE"
+        out.append(enriched)
+    return out
+
+
+def ledger_entry_from_packet(packet: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "ledger_key": ledger_key(packet),
+        "source_location": packet.get("source_location", ""),
+        "primitive_family": packet.get("primitive_family", ""),
+        "trace_span": packet.get("trace_span", {}),
+        "witness_hash": packet.get("witness_hash", witness_hash(packet.get("witness", ""))),
+        "proof_hash": packet.get("proof_hash", ""),
+        "proof_kind": packet.get("proof_kind", ""),
+        "nack_note": packet.get("proof_note", "source counterexample closes this omission"),
+    }
+
+
+def build_ledger_entries(packets: list[dict[str, Any]], existing: list[dict[str, Any]] | None = None) -> list[dict[str, Any]]:
+    entries: dict[str, dict[str, Any]] = {}
+    for entry in existing or []:
+        key = str(entry.get("ledger_key", "") or "")
+        if key:
+            entries[key] = entry
+    for packet in packets:
+        if packet.get("proof_status") != "COUNTEREXAMPLE":
+            continue
+        entry = ledger_entry_from_packet(packet)
+        if entry["ledger_key"]:
+            entries[entry["ledger_key"]] = entry
+    return sorted(entries.values(), key=lambda item: (item.get("source_location", ""), item.get("primitive_family", "")))
 
 
 def rank_key(packet: dict[str, Any]) -> tuple[Any, ...]:
@@ -802,11 +1014,42 @@ def main() -> int:
             )
             write_jsonl(args.out, candidates)
             print(f"storm_exact_miner=pass command=mine candidates={len(candidates)}")
+        elif args.command == "support-check":
+            facts = load_records(args.facts)
+            checked = support_check_facts(facts)
+            write_jsonl(args.out, checked)
+            counts: dict[str, int] = {}
+            for fact in checked:
+                status = status_field(fact.get("support_status", "")) or "UNKNOWN"
+                counts[status] = counts.get(status, 0) + 1
+            print(
+                "storm_exact_miner=pass command=support-check "
+                f"facts={len(checked)} certified={counts.get('CERTIFIED', 0)} "
+                f"unknown={counts.get('UNKNOWN', 0)} counterexample={counts.get('COUNTEREXAMPLE', 0)}"
+            )
         elif args.command == "prove":
             candidates = load_records(args.candidates)
             proof_packets = [prove_candidate(candidate) for candidate in candidates]
             write_jsonl(args.out, proof_packets)
             print(f"storm_exact_miner=pass command=prove packets={len(proof_packets)}")
+        elif args.command == "falsify":
+            packets = load_records(args.packets)
+            ledger = load_ledger(args.ledger)
+            falsified = falsify_packets(packets, ledger)
+            write_jsonl(args.out, falsified)
+            counterexamples = sum(1 for packet in falsified if packet.get("proof_status") == "COUNTEREXAMPLE")
+            print(
+                "storm_exact_miner=pass command=falsify "
+                f"packets={len(falsified)} counterexample={counterexamples}"
+            )
+        elif args.command == "ledger":
+            packets = load_records(args.packets)
+            existing: list[dict[str, Any]] = []
+            for path in args.merge:
+                existing.extend(load_records(path))
+            entries = build_ledger_entries(packets, existing)
+            write_jsonl(args.out, entries)
+            print(f"storm_exact_miner=pass command=ledger entries={len(entries)}")
         elif args.command == "rank":
             proof_packets = load_records(args.proofs)
             for packet in proof_packets:

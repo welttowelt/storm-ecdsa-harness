@@ -57,6 +57,8 @@ for path in \
   examples/public-note.example.md \
   examples/op-trace-facts.example.jsonl \
   examples/site-audit.example.tsv \
+  examples/support-facts.example.jsonl \
+  examples/nack-ledger.example.jsonl \
   examples/exact-skip-candidates.example.jsonl \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
@@ -179,6 +181,9 @@ need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp unco
 need_text scripts/dirty-borrow-ledger.sh "dirty borrow ledger output" "Dirty borrow entanglement gate"
 need_text scripts/dialog-codec-entropy-ledger.sh "dialog codec ledger output" "Dialog codec entropy gate"
 need_text scripts/storm-exact-miner.py "exact miner command" "trace-facts"
+need_text scripts/storm-exact-miner.py "support checker command" "support-check"
+need_text scripts/storm-exact-miner.py "falsify command" "falsify"
+need_text scripts/storm-exact-miner.py "ledger command" "ledger"
 need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
@@ -191,9 +196,13 @@ need_text examples/compute-request.example.md "zero paid compute" "zero"
 need_text examples/public-note.example.md "not a candidate" "not a candidate"
 need_text examples/op-trace-facts.example.jsonl "public demo source" "public-demo-source"
 need_text examples/site-audit.example.tsv "site audit fixture" "src/point_add/trailmix_ludicrous/gcd.rs"
+need_text examples/support-facts.example.jsonl "support fixture" "dirty_host"
+need_text examples/nack-ledger.example.jsonl "nack ledger fixture" "nack_note"
 need_text examples/exact-skip-candidates.example.jsonl "proof packet" "proof_status"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
+need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text docs/exact-support-miner.md "exact support miner" "Exact Support Miner"
+need_text docs/exact-support-miner.md "support checker" "support-check"
 need_text docs/exact-support-miner.md "redsky gate" "Redsky"
 need_text docs/exact-support-miner.md "pip gate" "PIP"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "current source" "f8e215b"

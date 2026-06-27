@@ -68,6 +68,37 @@ Known generic-live source families are tagged with `primitive_family`,
 source sites remain `UNKNOWN` and must receive a real source invariant before
 any circuit edit, residual, compute, alert, or submit step.
 
+For proof-routing runs, insert the support checker and ledger:
+
+```bash
+python3 scripts/storm-exact-miner.py support-check \
+  --facts /tmp/storm-site-facts.jsonl \
+  --out /tmp/storm-site-supported.jsonl
+
+python3 scripts/storm-exact-miner.py mine \
+  --facts /tmp/storm-site-supported.jsonl \
+  --include-unknown-sites \
+  --out /tmp/storm-site-candidates.jsonl
+
+python3 scripts/storm-exact-miner.py prove \
+  --candidates /tmp/storm-site-candidates.jsonl \
+  --out /tmp/storm-site-proofs.jsonl
+
+python3 scripts/storm-exact-miner.py falsify \
+  --packets /tmp/storm-site-proofs.jsonl \
+  --ledger examples/nack-ledger.example.jsonl \
+  --out /tmp/storm-site-falsified.jsonl
+
+python3 scripts/storm-exact-miner.py ledger \
+  --packets /tmp/storm-site-falsified.jsonl \
+  --out /tmp/storm-nack-ledger.jsonl
+```
+
+`support-check` is intentionally conservative. It can mark known source
+counterexamples, exact-remainder checks, and externally certified support facts;
+dirty-host rows remain `UNKNOWN` unless restoration, phase, and public support
+evidence are all present.
+
 ## Packet Fields
 
 Each packet records:
@@ -75,6 +106,7 @@ Each packet records:
 - route id, frontier, source base, stream hash, and source location;
 - op class and executed weight;
 - primitive family, support domain, falsifier template, and witness when known;
+- proof method, support status, support note, support hash, and witness hash;
 - allocator unchanged flag;
 - proof kind and proof status;
 - expected average-Toffoli delta;
