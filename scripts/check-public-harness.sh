@@ -563,9 +563,9 @@ elif ! grep -q 'source_certificate_scout=pass rows=2' "$tmpdir/context-scout.out
 fi
 
 cat >"$tmpdir/vandaele-plateau.trace" <<'EOF'
-ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=10 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=10 free_pool=0 caller=src/point_add/trailmix_ludicrous/arith.rs:875
 ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_inverse_gcd_forward_compare' ops_idx=20 free_pool=1 caller=src/point_add/trailmix_ludicrous/comparator.rs:707
-ALLOC_NEAR active=1151 next_idx=1151 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=30 free_pool=1 caller=src/point_add/trailmix_ludicrous/arith.rs:1194
+ALLOC_NEAR active=1151 next_idx=1151 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=30 free_pool=1 caller=src/point_add/trailmix_ludicrous/arith.rs:1085
 EOF
 if ! scripts/vandaele-comparator-ledger.sh \
   --trace "$tmpdir/vandaele-plateau.trace" \

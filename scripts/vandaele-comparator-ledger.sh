@@ -66,7 +66,7 @@ comparator_hits="$(grep 'ALLOC_NEAR' "$trace" | grep -Eci 'compare|comparator|ar
 co_peak_carry_hits="$(
   grep 'ALLOC_NEAR' "$trace" \
     | grep -Evi 'compare|comparator|arith.rs:769' \
-    | grep -Eci 'gidney.rs:1217|arith.rs:1077|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859|const_chunk_add_clean|carry' \
+    | grep -Eci 'gidney.rs:1217|arith.rs:875|arith.rs:1077|arith.rs:1085|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859|const_chunk_add_clean|carry' \
     || true
 )"
 
@@ -88,7 +88,7 @@ exclusion_stats="$(
       if (caller !~ /arith.rs:769|comparator/) {
         if (active > no_comp) no_comp = active;
       }
-      if (caller !~ /arith.rs:769|comparator|gidney.rs:1217|arith.rs:1077|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859/) {
+      if (caller !~ /arith.rs:769|comparator|gidney.rs:1217|arith.rs:875|arith.rs:1077|arith.rs:1085|arith.rs:1194|fused.rs:1621|fused.rs:1622|mcx.rs:318|arith.rs:1859/) {
         if (active > no_pair) no_pair = active;
       }
     }
