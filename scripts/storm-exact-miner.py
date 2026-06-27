@@ -635,6 +635,12 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable fused-fold CCX",
         "witness": "d44cad3 fused.rs:611 is static FUSED_CLEAN_FOLD_DEAD_RANGES data `(7, 1, 3)`, while origin rows are kept fused-fold CCX in forward/inverse fold phases; no executable source-hook exists here",
     },
+    ("fused.rs", 463, "34d28414151b35be"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound FUSED_CLEAN_FOLD_DEAD_RANGES table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable fused-fold CCX",
+        "witness": "d44cad3 fused.rs:463 is static FUSED_CLEAN_FOLD_DEAD_RANGES data `(181, 31, 31)`, while origin rows are kept fused-fold CCX in forward/inverse fold phases; no executable source-hook exists here",
+    },
     ("fused.rs", 832, "30dc96d7748fab35"): {
         "primitive_family": "table_origin_not_op_site",
         "support_domain": "source-hash-bound FUSED_CHUNK_FOLD_REMAINDER_KEYS table-origin row",
