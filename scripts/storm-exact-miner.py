@@ -716,6 +716,20 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable comparator CCX",
         "witness": "d44cad3 comparator.rs:89 is static COMPARE_CIN_STRUCTURAL_DEAD_RANGES data `(1760, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
     },
+    ("gcd.rs", 734, "04ff46f341beed08"): {
+        "primitive_family": "controlled_mod_double_context_live",
+        "support_domain": "source-hash-bound controlled_mod_double source context row",
+        "falsifier_template": "choose ctrl=1 with adjacent shift-view bits unequal, or ovf=1 for the gated +f fold",
+        "witness": "d44cad3 gcd.rs:734 is a section boundary for controlled_mod_double, while the origin rows are live shift/fold operations in the same function; ctrl=1 with unequal shift-view bits or ovf=1 changes the modular-double value",
+        "restoration_obligation": "controlled_mod_double must restore the transient overflow after the gated +f fold",
+    },
+    ("gcd.rs", 762, "d11d7bb4ae684f23"): {
+        "primitive_family": "controlled_mod_double_reverse_context_live",
+        "support_domain": "source-hash-bound controlled_mod_double_reverse source context row",
+        "falsifier_template": "choose ctrl=1 and a[0]=1 before reverse folding, then skip the rebuilt overflow path",
+        "witness": "d44cad3 gcd.rs:762 allocates the reverse overflow scratch; the mapped origin rows are the live inverse overflow rebuild, subtract-f fold, and reverse shift, so omission breaks inverse modular doubling",
+        "restoration_obligation": "reverse controlled modular double rows are required to restore a ++ ovf and free ovf cleanly",
+    },
     ("mcx.rs", 80, "4ccf2146ceb1eb50"): {
         "primitive_family": "mcx_prefix_live",
         "support_domain": "source-hash-bound KG prefix emit span ending at mcx.rs:80",
