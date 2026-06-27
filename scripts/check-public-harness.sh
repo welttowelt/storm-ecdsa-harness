@@ -55,6 +55,7 @@ for path in \
   scripts/storm-source-certificate-scout.py \
   scripts/storm-alloc-owner-summary.py \
   scripts/storm-peak-lifetime-ledger.py \
+  scripts/storm-gidney-thread-join.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -211,6 +212,7 @@ need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_s
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
 need_text scripts/storm-alloc-owner-summary.py "alloc owner summary" "alloc_owner_summary=pass"
 need_text scripts/storm-peak-lifetime-ledger.py "peak lifetime ledger" "peak_lifetime_ledger=pass"
+need_text scripts/storm-gidney-thread-join.py "gidney thread join" "gidney_thread_join=pass"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -661,6 +663,36 @@ elif ! grep -q 'peak_lifetime_ledger=pass input_rows=5 active_min=1146 active_ma
   cat "$tmpdir/peak-lifetime-callers.tsv" >&2
   cat "$tmpdir/peak-lifetime-phases.tsv" >&2
   cat "$tmpdir/peak-lifetime-active.tsv" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/gidney-thread-trace.raw" <<'EOF'
+TLM_GIDNEY_THREAD call=7 phase=tlm_apply_inverse_mod_sub_register width=8 cin=1 cout=1 vents=0 ops_start=100 ops_end=180
+ALLOC_NEAR active=1151 next_idx=1150 phase='tlm_apply_inverse_mod_sub_register' ops_idx=100 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=100 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+TLM_GIDNEY_THREAD call=9 phase=tlm_apply_forward_mod_add_register width=8 cin=1 cout=1 vents=0 ops_start=200 ops_end=280
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_register' ops_idx=200 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=300 free_pool=0 caller=src/point_add/trailmix_ludicrous/arith.rs:1077
+EOF
+cat >"$tmpdir/gidney.rs" <<'EOF'
+const GIDNEY_THREAD_BOUNDARY_DEAD_CALLS: &[usize] = &[
+    7,
+];
+EOF
+if ! python3 scripts/storm-gidney-thread-join.py \
+  --input "$tmpdir/gidney-thread-trace.raw" \
+  --out "$tmpdir/gidney-thread-join.tsv" \
+  --gidney-source "$tmpdir/gidney.rs" \
+  --peak 1152 >"$tmpdir/gidney-thread-join.out" 2>"$tmpdir/gidney-thread-join.err"; then
+  printf 'public_harness_check=fail gidney_thread_join_failed\n' >&2
+  cat "$tmpdir/gidney-thread-join.err" >&2
+  fail=1
+elif ! grep -q 'gidney_thread_join=pass thread_rows=2 alloc_rows=3 alloc_ops=2 joined_rows=2 unmatched_alloc_ops=0 dead_calls=1 dead_boundary_peak_candidates=1' "$tmpdir/gidney-thread-join.out" ||
+     ! grep -q $'7\ttlm_apply_inverse_mod_sub_register\t8\t1\t1\t0\t100\t180\t2\t1\t1151\t1152\t1\t1\t1152:1,1151:1' "$tmpdir/gidney-thread-join.tsv" ||
+     ! grep -q $'9\ttlm_apply_forward_mod_add_register\t8\t1\t1\t0\t200\t280\t1\t1\t1152\t1152\t0\t0\t1152:1' "$tmpdir/gidney-thread-join.tsv"; then
+  printf 'public_harness_check=fail gidney_thread_join_output\n' >&2
+  cat "$tmpdir/gidney-thread-join.out" >&2
+  cat "$tmpdir/gidney-thread-join.tsv" >&2
   fail=1
 fi
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
