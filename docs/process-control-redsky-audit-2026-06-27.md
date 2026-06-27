@@ -278,9 +278,10 @@ Problem:
 After pass 13, `gcd.rs:800` was the only ranked UNKNOWN packet left.
 
 Evidence:
-Row `800` is the inverse overflow rebuild in `controlled_mod_double_reverse`:
-`ovf = ctrl & a[0]`. The following subtract-`f` fold is gated on `ovf`, then the
-inverse shift returns the `a ++ ovf` view to zero overflow.
+Trace-attributed row `800` maps to the inverse overflow rebuild in
+`controlled_mod_double_reverse`: `ovf = ctrl & a[0]`. The following subtract-`f`
+fold is gated on `ovf`, then the inverse shift returns the `a ++ ovf` view to
+zero overflow.
 
 Effect:
 With `ctrl=1` and `a[0]=1`, the rebuild CCX must fire. Skipping it loses the

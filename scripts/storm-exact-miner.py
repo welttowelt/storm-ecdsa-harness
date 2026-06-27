@@ -353,7 +353,7 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "primitive_family": "controlled_mod_double_reverse_overflow_live",
         "support_domain": "controlled_mod_double_reverse overflow rebuild",
         "falsifier_template": "set ctrl=1 and low output bit a[0]=1 before reverse folding",
-        "witness": "line 800 rebuilds ovf = ctrl & a[0]; skipping loses the inverse subtract-f control",
+        "witness": "the trace-attributed row rebuilds ovf = ctrl & a[0]; skipping loses the inverse subtract-f control",
         "restoration_obligation": "skipping breaks inverse controlled modular doubling",
     },
     ("gcd.rs", 899): {
