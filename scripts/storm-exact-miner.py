@@ -499,6 +499,20 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable comparator CCX",
         "witness": "d44cad3 comparator.rs:158 is static COMPARE_CIN_STRUCTURAL_DEAD_RANGES data `(3168, 0, 2)`, while origin rows are kept comparator CCX operations; no executable source-hook exists here",
     },
+    ("mod.rs", 73, "d44cad3-current"): {
+        "primitive_family": "phase_wrapper_context_not_skip",
+        "support_domain": "source-bound BExt::z phase-emitter wrapper",
+        "falsifier_template": "remove a reached Z phase correction emitted through the wrapper",
+        "witness": "d44cad3 mod.rs:73 is the generic BExt::z push_op site; Z flips simulator phase by cond & qubit(target), so a caller-bound phase-cancel certificate is required before any omission",
+        "phase_obligation": "Z rows are phase corrections, not dead arithmetic rows",
+    },
+    ("mod.rs", 87, "d44cad3-current"): {
+        "primitive_family": "phase_wrapper_context_not_skip",
+        "support_domain": "source-bound BExt::neg phase-emitter wrapper",
+        "falsifier_template": "remove a reached Neg phase correction emitted through the wrapper",
+        "witness": "d44cad3 mod.rs:87 is the generic BExt::neg push_op site; Neg flips simulator phase under the current condition, so a caller-bound phase-cancel certificate is required before any omission",
+        "phase_obligation": "Neg rows are phase corrections, not dead arithmetic rows",
+    },
     ("gcd.rs", 690, "870820f1ca5c6974"): {
         "primitive_family": "gcd_right_shift_cswap_live",
         "support_domain": "source-hash-bound controlled_right_shift cswap",
