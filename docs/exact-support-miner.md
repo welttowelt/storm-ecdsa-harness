@@ -44,7 +44,7 @@ python3 scripts/storm-exact-miner.py rank \
 ```
 
 For public `site_audit` TSVs that contain only source locations and weights,
-normalize the TSV and opt into UNKNOWN backlog packets:
+normalize the TSV and opt into source-site backlog packets:
 
 ```bash
 python3 scripts/storm-exact-miner.py trace-facts \
@@ -61,8 +61,12 @@ python3 scripts/storm-exact-miner.py mine \
   --out /tmp/storm-site-candidates.jsonl
 ```
 
-These packets are rankable proof targets only. They do not certify an omission;
-they name the highest-weight source site and the next falsifier.
+These packets are rankable proof targets only. They do not certify an omission.
+Known generic-live source families are tagged with `primitive_family`,
+`support_domain`, `falsifier_template`, and `witness`, then proven as
+`COUNTEREXAMPLE` so they cannot be confused with candidate work. Unclassified
+source sites remain `UNKNOWN` and must receive a real source invariant before
+any circuit edit, residual, compute, alert, or submit step.
 
 ## Packet Fields
 
@@ -70,6 +74,7 @@ Each packet records:
 
 - route id, frontier, source base, stream hash, and source location;
 - op class and executed weight;
+- primitive family, support domain, falsifier template, and witness when known;
 - allocator unchanged flag;
 - proof kind and proof status;
 - expected average-Toffoli delta;
@@ -81,13 +86,15 @@ The output schema is represented by
 
 ## Proof Discipline
 
-The v1 miner can certify only simple public-safe obligations:
+The v1 miner can certify or reject only simple public-safe obligations:
 
 - an external public certificate was supplied with the trace fact;
 - a built-in exact-remainder range check proves `value_max < modulus`.
+- a source-site classifier supplies a generic-live counterexample witness.
 
 Everything else is emitted as `UNKNOWN`. `UNKNOWN` packets are useful backlog,
-but they do not authorize compute, circuit edits, win language, or submit work.
+but they do not authorize compute, circuit edits, win language, alerting, or
+submit work.
 
 ## Redsky And PIP Gates
 

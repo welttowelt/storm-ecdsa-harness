@@ -57,6 +57,165 @@ PROOF_STATUS_ORDER = {
 }
 
 
+SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
+    ("gcd.rs", 1460): {
+        "primitive_family": "apply_cswap_live",
+        "support_domain": "GCD apply symbol with swp=1 and unequal coordinate registers",
+        "falsifier_template": "choose a reachable apply symbol with swp=1 and x_reg[j] != y_reg[j]",
+        "witness": "step0 apply model: swp=1, forward xr=1 yr=0, reverse xr=0 yr=1",
+    },
+    ("gcd.rs", 1508): {
+        "primitive_family": "apply_cswap_live",
+        "support_domain": "GCD inverse-apply symbol with swp=1 and unequal coordinate registers",
+        "falsifier_template": "choose a reachable apply symbol with swp=1 and x_reg[j] != y_reg[j]",
+        "witness": "step0 apply model: swp=1, forward xr=1 yr=0, reverse xr=0 yr=1",
+    },
+    ("arith.rs", 834): {
+        "primitive_family": "adder_carry_live",
+        "support_domain": "plain Gidney carry creation",
+        "falsifier_template": "set both carry controls to 1 and compare the next sum bit",
+        "witness": "n=2, a=01, b=01; skipping the carry changes 1+1 from 10 to 00",
+    },
+    ("square.rs", 151): {
+        "primitive_family": "square_cross_live",
+        "support_domain": "symmetric square off-diagonal cross product",
+        "falsifier_template": "set the two source square bits to 1",
+        "witness": "n=2, x=11; skipping the cross term changes x^2 from 1001 to 0101",
+    },
+    ("square.rs", 180): {
+        "primitive_family": "square_cross_live",
+        "support_domain": "reverse symmetric square off-diagonal cross product",
+        "falsifier_template": "start from a valid product row whose cross term is 1",
+        "witness": "n=2, x=11; reverse row must rebuild the cross term to drain prod",
+    },
+    ("codec.rs", 272): {
+        "primitive_family": "codec_table_live",
+        "support_domain": "compressed-dialog pair/triple codec support",
+        "falsifier_template": "enumerate valid compressed symbols and find a true-control row",
+        "witness": "valid codec triples over {001,100,101,110,111} make every logical CCX live",
+    },
+    ("arith.rs", 1196): {
+        "primitive_family": "const_comparator_carry_live",
+        "support_domain": "+f HMR phase-recovery comparator carry",
+        "falsifier_template": "choose constant bit0, cin=0, and a0=1",
+        "witness": "F_SECP256K1 bit0=1 gives ci=1 and next carry=1",
+        "phase_obligation": "missing carry changes the CCZ/CZ phase discharge",
+    },
+    ("arith.rs", 1240): {
+        "primitive_family": "phase_recovery_live",
+        "support_domain": "HMR phase-recovery CCZ",
+        "falsifier_template": "set ctrl, a_top, and cy_top to 1 under the HMR condition",
+        "witness": "ctrl=1, a_top=1, cy_top=1 stamps a required phase",
+        "phase_obligation": "omission is phase dirt even if the value path is unchanged",
+    },
+    ("arith.rs", 1312): {
+        "primitive_family": "ffg_prefix_carry0_live",
+        "support_domain": "+f prefix carry0, f bit0 is one",
+        "falsifier_template": "set ctrl=1 and a0=1",
+        "witness": "cy0 = ctrl & a0 is 1 for f bit0",
+    },
+    ("arith.rs", 1854): {
+        "primitive_family": "vented_carry_live",
+        "support_domain": "support-bounded carry after dead(i) guard is false",
+        "falsifier_template": "set a[i]=1 and b[i]=1 on a reached live bit",
+        "witness": "line is emitted only when dead(i)=false; a=b=1 produces carry",
+    },
+    ("arith.rs", 1859): {
+        "primitive_family": "carry_live",
+        "support_domain": "non-vented carry creation after dead(i) guard is false",
+        "falsifier_template": "set a[i]=1 and b[i]=1 on a reached live bit",
+        "witness": "a=b=1 toggles b[i+1]",
+    },
+    ("arith.rs", 1874): {
+        "primitive_family": "carry_uncompute_live",
+        "support_domain": "non-vented carry uncompute after dead(i) guard is false",
+        "falsifier_template": "start from a valid live carry with a[i]=b[i]=1",
+        "witness": "reverse CCX is needed to restore the carry lane",
+        "restoration_obligation": "skipping leaves the carry lane dirty",
+    },
+    ("arith.rs", 504): {
+        "primitive_family": "cuccaro_sum_live",
+        "support_domain": "controlled Cuccaro gated sum",
+        "falsifier_template": "set ctrl=1, xi=1, yi=0",
+        "witness": "baseline toggles yi; omission leaves yi unchanged",
+    },
+    ("comparator.rs", 702): {
+        "primitive_family": "comparator_carry_live",
+        "support_domain": "bottom comparator carry",
+        "falsifier_template": "one-bit comparator witness with a=0,b=1,split=1",
+        "witness": "skipping flips the comparison predicate",
+    },
+    ("comparator.rs", 740): {
+        "primitive_family": "comparator_carry_uncompute_live",
+        "support_domain": "reverse bottom comparator carry cleanup",
+        "falsifier_template": "start from the forward comparator witness state",
+        "witness": "reverse omission leaves a,b,c dirty",
+        "restoration_obligation": "skipping leaves comparator scratch dirty",
+    },
+    ("comparator.rs", 821): {
+        "primitive_family": "comparator_predicate_live",
+        "support_domain": "controlled comparator predicate deposit",
+        "falsifier_template": "set ctrl=1 and carry=0 in the X-sandwich body",
+        "witness": "ctrl=1, carry=0 toggles target after carry is inverted",
+    },
+    ("gcd.rs", 748): {
+        "primitive_family": "controlled_double_cswap_live",
+        "support_domain": "controlled modular double left-shift",
+        "falsifier_template": "set ctrl=1 and adjacent shifted bits unequal",
+        "witness": "controlled shift changes the value when neighboring bits differ",
+    },
+    ("gcd.rs", 776): {
+        "primitive_family": "controlled_double_cswap_live",
+        "support_domain": "controlled modular double reverse shift",
+        "falsifier_template": "set ctrl=1 and adjacent shifted bits unequal",
+        "witness": "reverse controlled shift is needed to restore the value",
+    },
+    ("mcx.rs", 54): {
+        "primitive_family": "mcx_prefix_live",
+        "support_domain": "two-control prefix target toggle",
+        "falsifier_template": "set both controls to 1 and target to 0",
+        "witness": "a=b=1 toggles target",
+    },
+    ("mcx.rs", 77): {
+        "primitive_family": "mcx_prefix_live",
+        "support_domain": "scheduled prefix-control CCX",
+        "falsifier_template": "set both controls to 1 and target to 0",
+        "witness": "a=b=1 toggles target",
+    },
+    ("fused.rs", 991): {
+        "primitive_family": "fold_control_live",
+        "support_domain": "fold derived control e&d",
+        "falsifier_template": "set fold controls e=1 and d=1",
+        "witness": "e=d=1 sets cc=1",
+    },
+    ("fused.rs", 1096): {
+        "primitive_family": "fold_control_live",
+        "support_domain": "rebuilt fold derived control e&d",
+        "falsifier_template": "set fold controls e=1 and d=1",
+        "witness": "reverse fold needs cc rebuilt for cleanup/phase",
+        "restoration_obligation": "skipping breaks fold control cleanup",
+    },
+    ("fused.rs", 1170): {
+        "primitive_family": "fold_control_live",
+        "support_domain": "chunked fold derived control e&d",
+        "falsifier_template": "set fold controls e=1 and d=1",
+        "witness": "e=d=1 sets cc=1",
+    },
+    ("fused.rs", 1562): {
+        "primitive_family": "fold_carry_live",
+        "support_domain": "fused fold conditional carry helper",
+        "falsifier_template": "set the two carry controls to 1",
+        "witness": "c1=c2=1 toggles the fold carry target",
+    },
+    ("fused.rs", 1990): {
+        "primitive_family": "fold_s2_y1_live",
+        "support_domain": "inverse cdouble fold d=s2&y1",
+        "falsifier_template": "set s2=1 and y1=1",
+        "witness": "s2=y1=1 sets d=1",
+    },
+}
+
+
 class ExactMinerError(Exception):
     pass
 
@@ -210,6 +369,27 @@ def stable_id(prefix: str, *parts: Any) -> str:
     return f"{prefix}-{h.hexdigest()[:16]}"
 
 
+def source_site_key(source_location: str) -> tuple[str, int] | None:
+    match = re.search(r"([^/:]+\.rs):(\d+)$", source_location)
+    if not match:
+        return None
+    return (match.group(1), int(match.group(2)))
+
+
+def classify_source_site(source_location: str) -> dict[str, str]:
+    key = source_site_key(source_location)
+    if key is None:
+        return {}
+    return SITE_CLASSIFIERS.get(key, {})
+
+
+def text_field(record: dict[str, Any], name: str, default: str = "") -> str:
+    value = record.get(name, default)
+    if value is None:
+        return default
+    return str(value)
+
+
 def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] | None = None) -> dict[str, Any]:
     defaults = defaults or {}
     frontier = str(record.get("frontier") or defaults.get("frontier") or "unknown")
@@ -236,6 +416,7 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
         op_id = f"rank={rank or index};context={context or 'none'};span={first_idx or '?'}-{last_idx or '?'}"
     else:
         op_id = str(record.get("index", index))
+    classifier = classify_source_site(source_location)
 
     fact = {
         "fact_id": stable_id("fact", frontier, stream_hash, op_id, source_location, op_class),
@@ -262,6 +443,20 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
             "first_idx": first_idx,
             "last_idx": last_idx,
         },
+        "primitive_family": text_field(record, "primitive_family", classifier.get("primitive_family", "")),
+        "support_domain": text_field(record, "support_domain", classifier.get("support_domain", "")),
+        "falsifier_template": text_field(
+            record,
+            "falsifier_template",
+            classifier.get("falsifier_template", ""),
+        ),
+        "witness": text_field(record, "witness", classifier.get("witness", "")),
+        "phase_obligation": text_field(record, "phase_obligation", classifier.get("phase_obligation", "")),
+        "restoration_obligation": text_field(
+            record,
+            "restoration_obligation",
+            classifier.get("restoration_obligation", ""),
+        ),
         "value_max": record.get("value_max", ""),
         "modulus": record.get("modulus", ""),
     }
@@ -292,15 +487,28 @@ def build_candidate(fact: dict[str, Any], reason: str, proof_kind: str, proof_in
         "branch_context": fact.get("branch_context", ""),
         "site_rank": fact.get("site_rank", ""),
         "trace_span": fact.get("trace_span", {}),
+        "primitive_family": fact.get("primitive_family", ""),
+        "support_domain": fact.get("support_domain", ""),
+        "falsifier_template": fact.get("falsifier_template", ""),
+        "witness": fact.get("witness", ""),
+        "phase_obligation": fact.get("phase_obligation", ""),
+        "restoration_obligation": fact.get("restoration_obligation", ""),
         "fastest_falsifier": "derive the source invariant, then run a toy/support enumeration or trace witness before any circuit edit",
     }
 
 
+def has_source_counterexample(fact: dict[str, Any]) -> bool:
+    family = str(fact.get("primitive_family", ""))
+    return bool(family and fact.get("falsifier_template") and fact.get("witness"))
+
+
 def source_site_backlog_candidate(fact: dict[str, Any]) -> dict[str, Any]:
+    proof_kind = "source_counterexample" if has_source_counterexample(fact) else "manual_source_invariant"
+    reason = "source-site-counterexample" if proof_kind == "source_counterexample" else "source-site-proof-backlog"
     return build_candidate(
         fact,
-        "source-site-proof-backlog",
-        "manual_source_invariant",
+        reason,
+        proof_kind,
         {
             "source_location": fact["source_location"],
             "op_class": fact["op_class"],
@@ -308,6 +516,12 @@ def source_site_backlog_candidate(fact: dict[str, Any]) -> dict[str, Any]:
             "site_rank": fact.get("site_rank", ""),
             "trace_span": fact.get("trace_span", {}),
             "support_certificate": fact["support_certificate"],
+            "primitive_family": fact.get("primitive_family", ""),
+            "support_domain": fact.get("support_domain", ""),
+            "falsifier_template": fact.get("falsifier_template", ""),
+            "witness": fact.get("witness", ""),
+            "phase_obligation": fact.get("phase_obligation", ""),
+            "restoration_obligation": fact.get("restoration_obligation", ""),
         },
     )
 
@@ -424,6 +638,15 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     if not packet.get("allocator_unchanged", False):
         status = "COUNTEREXAMPLE"
         note = "allocator order changed; this route is outside fixed-allocation exact-skip scope"
+    elif packet["proof_kind"] == "source_counterexample":
+        template = str(inputs.get("falsifier_template", "")).strip()
+        witness = str(inputs.get("witness", "")).strip()
+        if template and witness:
+            status = "COUNTEREXAMPLE"
+            note = "source witness falsifies this omission"
+        else:
+            status = "UNKNOWN"
+            note = "source counterexample packet is missing falsifier_template or witness"
     elif packet["proof_kind"] == "bitvec_unsat":
         value_max = as_int_maybe(inputs.get("value_max"))
         modulus = as_int_maybe(inputs.get("modulus"))

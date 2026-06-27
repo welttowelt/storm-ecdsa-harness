@@ -30,7 +30,9 @@ Use fixture or public trace facts only.
    `python3 scripts/storm-exact-miner.py mine --facts <facts.jsonl> --out <candidates.jsonl>`.
    For source-site TSVs without proof annotations, add
    `--include-unknown-sites --max-unknown-sites <n>` to emit rankable UNKNOWN
-   proof backlog packets.
+   proof backlog packets. The miner tags known generic-live source rows with
+   `primitive_family`, `falsifier_template`, and `witness`, then marks them
+   `COUNTEREXAMPLE` during `prove`; only unclassified rows remain UNKNOWN.
 4. Build proof packets:
    `python3 scripts/storm-exact-miner.py prove --candidates <candidates.jsonl> --out <proofs.jsonl>`.
 5. Rank packets:
@@ -49,6 +51,7 @@ Exact support miner:
 - Candidates:
 - Certified:
 - Unknown:
+- Counterexample:
 - Top packet:
 - Fastest falsifier:
 - Next gate:
@@ -60,3 +63,16 @@ A mined packet is `Prefilter` evidence. It becomes actionable only after proof
 status is `CERTIFIED`, allocator order is unchanged, and a trusted validation
 plan is named. No compute, submit, mobile alert, or win language follows from
 the miner alone.
+
+## Source-Site Classifier
+
+Raw source-site weights are not proof. Before promoting a source-site packet,
+require one of:
+
+- a public support certificate proving a control is fixed or a target is dead;
+- an exact-remainder certificate;
+- a source counterexample witness that closes the row as generic-live.
+
+If the miner emits `COUNTEREXAMPLE`, record the NACK and move on. If it emits
+`UNKNOWN`, the next worker must supply a bounded invariant or falsifier before
+the row reaches residual validation.
