@@ -604,6 +604,12 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "NORMALIZER_OPS contains live CCX normalizer rows; for example the affine prefix can set controls 6 and 7 before a (2,6,7,8) row, and omission changes the 9-to-7 codec mapping",
         "restoration_obligation": "the reverse codec relies on the exact normalized codeword to restore raw dialog bits and freed wires",
     },
+    ("gidney.rs", 311, "799c8637a66df13e"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound GIDNEY_THREAD_BOUNDARY_DEAD_CALLS table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and joined trace rows before treating it as a removable CCX",
+        "witness": "d44cad3 gidney.rs:311 is static dead-boundary call-list data, while origin rows are kept CCX in register phases; no executable source-hook exists at this line",
+    },
     ("comparator.rs", 68, "e2d291034f536196"): {
         "primitive_family": "comparator_top_carry_live",
         "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",

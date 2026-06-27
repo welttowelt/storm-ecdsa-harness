@@ -810,9 +810,10 @@ rank	count	kind	file	line	context	source_hash
 18	7054	CCX	src/point_add/trailmix_ludicrous/arith.rs	258	none	af5bcd7ca1721225
 19	6023	CCX	src/point_add/trailmix_ludicrous/arith.rs	1087	none	0fc7492380703c0e
 20	5610	CCX	src/point_add/trailmix_ludicrous/codec.rs	304	none	011131e1db1721fe
-21	49510	CCX	src/point_add/trailmix_ludicrous/comparator.rs	68	none	e2d291034f536196
-22	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	154	none	5db1c7a68cd9a333
-23	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	183	none	dfd7339142550728
+21	5291	CCX	src/point_add/trailmix_ludicrous/gidney.rs	311	none	799c8637a66df13e
+22	49510	CCX	src/point_add/trailmix_ludicrous/comparator.rs	68	none	e2d291034f536196
+23	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	154	none	5db1c7a68cd9a333
+24	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	183	none	dfd7339142550728
 EOF
 if ! python3 scripts/storm-exact-miner.py trace-facts \
   --input "$tmpdir/source-hash-bound-scout.tsv" \
@@ -829,11 +830,25 @@ elif ! python3 scripts/storm-exact-miner.py support-check \
   printf 'public_harness_check=fail source_hash_bound_scout_support_failed\n' >&2
   cat "$tmpdir/source-hash-bound-scout-supported.err" >&2
   fail=1
-elif ! grep -q 'counterexample=23' "$tmpdir/source-hash-bound-scout-supported.out" ||
+elif ! grep -q 'counterexample=24' "$tmpdir/source-hash-bound-scout-supported.out" ||
      ! grep -q 'unknown=0' "$tmpdir/source-hash-bound-scout-supported.out"; then
   printf 'public_harness_check=fail source_hash_bound_scout_support_counts\n' >&2
   cat "$tmpdir/source-hash-bound-scout-supported.out" >&2
   cat "$tmpdir/source-hash-bound-scout-supported.jsonl" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-gidney-boundary-toy.py \
+  --max-width 4 >"$tmpdir/gidney-boundary-toy.out" 2>"$tmpdir/gidney-boundary-toy.err"; then
+  printf 'public_harness_check=fail gidney_boundary_toy_failed\n' >&2
+  cat "$tmpdir/gidney-boundary-toy.err" >&2
+  fail=1
+elif ! grep -q 'gidney_boundary_toy=pass' "$tmpdir/gidney-boundary-toy.out" ||
+     ! grep -q 'dead_boundary_mismatches=0' "$tmpdir/gidney-boundary-toy.out" ||
+     ! grep -q 'nondead_formula_mismatches=0' "$tmpdir/gidney-boundary-toy.out" ||
+     ! grep -q 'phase_proof=0 ancilla_proof=0' "$tmpdir/gidney-boundary-toy.out"; then
+  printf 'public_harness_check=fail gidney_boundary_toy_summary\n' >&2
+  cat "$tmpdir/gidney-boundary-toy.out" >&2
   fail=1
 fi
 
