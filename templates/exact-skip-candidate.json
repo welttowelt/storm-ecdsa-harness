@@ -12,6 +12,8 @@
   "witness": "n=2, a=01, b=01",
   "phase_obligation": "",
   "restoration_obligation": "",
+  "restore_proof": "",
+  "phase_proof": "",
   "executed_weight": 1.0,
   "allocator_unchanged": true,
   "proof_kind": "qcp",

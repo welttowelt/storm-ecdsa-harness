@@ -763,6 +763,8 @@ def normalize_fact(record: dict[str, Any], index: int, defaults: dict[str, str] 
             "restoration_obligation",
             classifier.get("restoration_obligation", ""),
         ),
+        "restore_proof": text_field(record, "restore_proof", text_field(record, "restore", "")),
+        "phase_proof": text_field(record, "phase_proof", text_field(record, "phase_clean", "")),
         "proof_method": text_field(record, "proof_method", classifier.get("proof_method", "")),
         "support_status": status_field(record.get("support_status", "")),
         "support_note": text_field(record, "support_note", ""),
@@ -793,6 +795,21 @@ def witness_hash(value: Any) -> str:
     return stable_id("witness", text)
 
 
+def truthy_proof_field(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return value != 0
+    text = str(value or "").strip().lower()
+    return text in {"1", "true", "yes", "ok", "clean", "certified", "pass", "proved", "valid"}
+
+
+def has_dirty_host_restore_phase_proofs(fact: dict[str, Any]) -> bool:
+    restore = fact.get("restore_proof", fact.get("restore", ""))
+    phase = fact.get("phase_proof", fact.get("phase_clean", ""))
+    return truthy_proof_field(restore) and truthy_proof_field(phase)
+
+
 def support_result_for_fact(fact: dict[str, Any]) -> dict[str, str]:
     preset = status_field(fact.get("support_status", ""))
     method = str(fact.get("proof_method", "") or "").strip()
@@ -802,7 +819,20 @@ def support_result_for_fact(fact: dict[str, Any]) -> dict[str, str]:
     source_hash = str(fact.get("source_hash", "") or "").strip()
     certificate_bound = bool(certificate and source_hash)
 
-    if preset == "CERTIFIED" and certificate_bound:
+    if family == "dirty_host":
+        if preset == "COUNTEREXAMPLE" and has_counterexample_evidence(fact):
+            status = "COUNTEREXAMPLE"
+            method = method or "external_source_counterexample"
+            note = note or "input witness falsifies this dirty-host route"
+        elif certificate_bound and has_dirty_host_restore_phase_proofs(fact):
+            status = "CERTIFIED"
+            method = "dirty_host_restoration"
+            note = "public certificate supplies restore_proof=1 and phase_proof=1"
+        else:
+            status = "UNKNOWN"
+            method = "dirty_host_restoration"
+            note = "dirty-host route needs restore_proof=1, phase_proof=1, and source-hash-bound support certificate"
+    elif preset == "CERTIFIED" and certificate_bound:
         status = "CERTIFIED"
         method = method or "external_support_certificate"
         note = note or "source-hash-bound public support certificate supplied by input fact"
@@ -814,15 +844,6 @@ def support_result_for_fact(fact: dict[str, Any]) -> dict[str, str]:
         status = "COUNTEREXAMPLE"
         method = "source_support_enum"
         note = "source witness falsifies this omission"
-    elif family == "dirty_host":
-        if certificate_bound and fact.get("restoration_obligation") and fact.get("phase_obligation"):
-            status = "CERTIFIED"
-            method = "dirty_host_restoration"
-            note = "public certificate supplies restoration and phase obligations"
-        else:
-            status = "UNKNOWN"
-            method = "dirty_host_restoration"
-            note = "dirty-host route needs restoration, phase, and support certificate"
     elif fact.get("exact_remainder"):
         value_max = as_int_maybe(fact.get("value_max"))
         modulus = as_int_maybe(fact.get("modulus"))
@@ -979,6 +1000,8 @@ def build_candidate(fact: dict[str, Any], reason: str, proof_kind: str, proof_in
         "witness": fact.get("witness", ""),
         "phase_obligation": fact.get("phase_obligation", ""),
         "restoration_obligation": fact.get("restoration_obligation", ""),
+        "restore_proof": fact.get("restore_proof", ""),
+        "phase_proof": fact.get("phase_proof", ""),
         "proof_method": fact.get("proof_method", ""),
         "support_status": fact.get("support_status", ""),
         "support_note": fact.get("support_note", ""),
@@ -1035,6 +1058,8 @@ def source_site_backlog_candidate(fact: dict[str, Any]) -> dict[str, Any]:
             "witness": fact.get("witness", ""),
             "phase_obligation": fact.get("phase_obligation", ""),
             "restoration_obligation": fact.get("restoration_obligation", ""),
+            "restore_proof": fact.get("restore_proof", ""),
+            "phase_proof": fact.get("phase_proof", ""),
             "proof_method": fact.get("proof_method", ""),
             "support_status": fact.get("support_status", ""),
             "support_note": fact.get("support_note", ""),
@@ -1157,6 +1182,9 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     source_hash = str(inputs.get("source_hash", "") or packet.get("source_hash", "") or "").strip()
     certificate_bound = bool(certificate and source_hash)
     input_support_status = status_field(inputs.get("support_status", ""))
+    primitive_family = str(inputs.get("primitive_family", "") or packet.get("primitive_family", "") or "").strip()
+    dirty_host_requires_proof = primitive_family == "dirty_host"
+    dirty_host_proofs_ok = has_dirty_host_restore_phase_proofs({**packet, **inputs})
     source_witness = str(inputs.get("witness", "") or "").strip()
     source_template = str(inputs.get("falsifier_template", "") or "").strip()
     status = "UNKNOWN"
@@ -1171,6 +1199,9 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
     elif input_support_status == "COUNTEREXAMPLE":
         status = "UNKNOWN"
         note = "counterexample status ignored without falsifier_template and witness"
+    elif dirty_host_requires_proof and not dirty_host_proofs_ok:
+        status = "UNKNOWN"
+        note = "dirty-host route needs restore_proof=1 and phase_proof=1 before certificate promotion"
     elif input_support_status == "CERTIFIED" and certificate_bound:
         status = "CERTIFIED"
         note = str(inputs.get("support_note", "") or "support checker supplied a source-hash-bound public certificate")
@@ -1188,7 +1219,10 @@ def prove_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
             status = "UNKNOWN"
             note = "source counterexample packet is missing falsifier_template or witness"
     elif packet["proof_kind"] == "support_certificate":
-        if certificate_bound:
+        if dirty_host_requires_proof and not dirty_host_proofs_ok:
+            status = "UNKNOWN"
+            note = "dirty-host support_certificate ignored without restore_proof=1 and phase_proof=1"
+        elif certificate_bound:
             status = "CERTIFIED"
             note = "source-hash-bound public support checker certificate supplied"
         elif certificate:

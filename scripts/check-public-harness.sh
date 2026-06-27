@@ -359,6 +359,53 @@ elif ! grep -q 'certified=0 unknown=1 counterexample=0' "$tmpdir/unbound-cert-su
   fail=1
 fi
 
+printf '%s\n' \
+  '{"frontier":"fixture-frontier/demo-source","source_base":"public-demo-source","source_hash":"fixture-source-hash","stream_hash":"dirty-host-obligation-demo","op_id":"dirty-host-obligation","source_location":"src/point_add/trailmix_ludicrous/demo.rs:12","op_class":"ccx","executed_weight":1,"primitive_family":"dirty_host","restoration_obligation":"restore text only","phase_obligation":"phase text only","support_status":"CERTIFIED","support_certificate":"bound but proof flags absent"}' \
+  > "$tmpdir/dirty-host-obligation.jsonl"
+if ! python3 scripts/storm-exact-miner.py support-check \
+  --facts "$tmpdir/dirty-host-obligation.jsonl" \
+  --out "$tmpdir/dirty-host-obligation-support.jsonl" >"$tmpdir/dirty-host-obligation-support.out" 2>"$tmpdir/dirty-host-obligation-support.err"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_obligation_support_failed\n' >&2
+  cat "$tmpdir/dirty-host-obligation-support.err" >&2
+  fail=1
+elif ! grep -q 'certified=0 unknown=1 counterexample=0' "$tmpdir/dirty-host-obligation-support.out"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_obligation_counts\n' >&2
+  cat "$tmpdir/dirty-host-obligation-support.out" >&2
+  cat "$tmpdir/dirty-host-obligation-support.jsonl" >&2
+  fail=1
+fi
+
+printf '%s\n' \
+  '{"frontier":"fixture-frontier/demo-source","source_base":"public-demo-source","source_hash":"fixture-source-hash","stream_hash":"dirty-host-proof-demo","op_id":"dirty-host-proof","source_location":"src/point_add/trailmix_ludicrous/demo.rs:13","op_class":"ccx","executed_weight":1,"primitive_family":"dirty_host","restore_proof":"1","phase_proof":"1","support_certificate":"bound public dirty-host certificate"}' \
+  > "$tmpdir/dirty-host-proof.jsonl"
+if ! python3 scripts/storm-exact-miner.py support-check \
+  --facts "$tmpdir/dirty-host-proof.jsonl" \
+  --out "$tmpdir/dirty-host-proof-support.jsonl" >"$tmpdir/dirty-host-proof-support.out" 2>"$tmpdir/dirty-host-proof-support.err"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_proof_support_failed\n' >&2
+  cat "$tmpdir/dirty-host-proof-support.err" >&2
+  fail=1
+elif ! grep -q 'certified=1 unknown=0 counterexample=0' "$tmpdir/dirty-host-proof-support.out"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_proof_counts\n' >&2
+  cat "$tmpdir/dirty-host-proof-support.out" >&2
+  cat "$tmpdir/dirty-host-proof-support.jsonl" >&2
+  fail=1
+fi
+
+printf '%s\n' \
+  '{"route_id":"dirty-host-packet-demo","frontier":"fixture-frontier/demo-source","source_base":"public-demo-source","source_hash":"fixture-source-hash","stream_hash":"dirty-host-packet-demo","fact_id":"dirty-host-packet-demo","source_location":"src/point_add/trailmix_ludicrous/demo.rs:14","op_class":"ccx","executed_weight":1,"allocator_unchanged":true,"proof_kind":"support_certificate","proof_status":"UNPROVEN","proof_inputs":{"source_hash":"fixture-source-hash","support_certificate":"bound packet cert","primitive_family":"dirty_host","support_status":"CERTIFIED"},"expected_avgT_delta":-1,"evidence_label":"Prefilter","validation_target":"trusted full 0/0/0 after source proof","kill_gate":"block compute if proof is UNKNOWN","primitive_family":"dirty_host"}' \
+  > "$tmpdir/dirty-host-packet.jsonl"
+if ! python3 scripts/storm-exact-miner.py prove \
+  --candidates "$tmpdir/dirty-host-packet.jsonl" \
+  --out "$tmpdir/dirty-host-packet-proof.jsonl" >"$tmpdir/dirty-host-packet-proof.out" 2>"$tmpdir/dirty-host-packet-proof.err"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_packet_prove_failed\n' >&2
+  cat "$tmpdir/dirty-host-packet-proof.err" >&2
+  fail=1
+elif ! grep -q '"proof_status":"UNKNOWN"' "$tmpdir/dirty-host-packet-proof.jsonl"; then
+  printf 'public_harness_check=fail exact_miner_dirty_host_packet_promoted\n' >&2
+  cat "$tmpdir/dirty-host-packet-proof.jsonl" >&2
+  fail=1
+fi
+
 if ! scripts/apply-overlap-ledger.sh \
   --trace examples/apply-overlap-trace.example.txt \
   --frontier 1571592960 \

@@ -29,7 +29,8 @@ Use fixture or public trace facts only.
 3. Run support checking when facts include source-site rows:
    `python3 scripts/storm-exact-miner.py support-check --facts <facts.jsonl> --out <supported.jsonl>`.
    This marks known generic-live rows as counterexamples and keeps dirty-host
-   rows unknown unless restoration, phase, and public certificate fields exist.
+   rows unknown unless `restore_proof=1`, `phase_proof=1`, and a source-hash-bound
+   public certificate exist.
    Preserve `TRACE_OP_SITES` context values when available; the miner decodes
    Gidney threaded/hybrid adder contexts into family/call/bit fields so binder
    rows can be ledgered without collapsing distinct callsites.
@@ -89,6 +90,8 @@ Do not accept bare `support_status` as proof. A certified row needs a public
 certificate or built-in proof, and a counterexample row needs both a falsifier
 template and witness. External counterexample evidence is allowed to omit
 `primitive_family`; certification rules are unchanged.
+For `primitive_family=dirty_host`, restoration or phase obligation text is not
+enough; the row also needs truthy `restore_proof` and `phase_proof` fields.
 
 If the miner emits `COUNTEREXAMPLE`, record the NACK and move on. If it emits
 `UNKNOWN`, the next worker must supply a bounded invariant or falsifier before

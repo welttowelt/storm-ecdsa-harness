@@ -112,8 +112,9 @@ the packet stream. To write a new ledger, run the separate `ledger` command.
 
 `support-check` is intentionally conservative. It can mark known source
 counterexamples, exact-remainder checks, and externally certified support facts;
-dirty-host rows remain `UNKNOWN` unless restoration, phase, and public support
-evidence are all present.
+dirty-host rows remain `UNKNOWN` unless `restore_proof=1`, `phase_proof=1`, and
+a source-hash-bound public support certificate are all present. Restoration or
+phase obligation text alone is not a proof.
 
 ## Packet Fields
 
@@ -142,6 +143,8 @@ The v1 miner can certify or reject only simple public-safe obligations:
   fact;
 - a built-in exact-remainder range check proves `value_max < modulus`.
 - a source-site classifier supplies a generic-live counterexample witness.
+- a dirty-host route supplies `restore_proof=1`, `phase_proof=1`, and a
+  source-hash-bound public certificate.
 
 Bare input statuses are not proof. `CERTIFIED` requires a public
 `support_certificate` bound to `source_hash`, or a built-in proof such as an
@@ -149,6 +152,9 @@ exact-remainder range check; `COUNTEREXAMPLE` requires both a falsifier
 template and witness. An external counterexample witness does not need a named
 `primitive_family`; the ledger key will use the source location, optional
 source hash, trace context, and trace span when the family is blank.
+For `primitive_family=dirty_host`, a bound certificate still remains
+`UNKNOWN` until the row also carries truthy `restore_proof` and `phase_proof`
+fields.
 
 Everything else is emitted as `UNKNOWN`. `UNKNOWN` packets are useful backlog,
 but they do not authorize compute, circuit edits, win language, alerting, or
