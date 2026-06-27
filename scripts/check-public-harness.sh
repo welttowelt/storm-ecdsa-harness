@@ -64,6 +64,7 @@ for path in \
   scripts/storm-single-ccx-fanout-ledger.py \
   scripts/storm-q1152-avgt-theorem.py \
   scripts/storm-cout-host-row-gate.py \
+  scripts/storm-zero-host-accounting-gate.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -128,6 +129,7 @@ for path in \
   skills/paper-dirty-borrowing-entanglement.md \
   skills/paper-dead-gate-elimination.md \
   skills/paper-score-condition-discount.md \
+  skills/zero-host-accounting.md \
   skills/apply-overlap-ledger.md \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
@@ -166,6 +168,7 @@ for path in \
   .agents/skills/paper-dirty-borrowing-entanglement/SKILL.md \
   .agents/skills/paper-dead-gate-elimination/SKILL.md \
   .agents/skills/paper-score-condition-discount/SKILL.md \
+  .agents/skills/zero-host-accounting/SKILL.md \
   .agents/skills/apply-overlap-ledger/SKILL.md \
   dashboard/fixtures/status.json; do
   need_file "$path"
@@ -236,6 +239,8 @@ need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_t
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
+need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
+need_text scripts/storm-zero-host-accounting-gate.py "source accounting nack" "source-accounting-nack"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -306,12 +311,15 @@ need_text skills/paper-dirty-borrowing-entanglement.md "dirty borrow entanglemen
 need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Gate Elimination"
 need_text skills/paper-score-condition-discount.md "score condition discount" "Score Condition Discount"
 need_text skills/paper-score-condition-discount.md "average toffoli scorer" "average-Toffoli"
+need_text skills/zero-host-accounting.md "zero host accounting" "Zero Host Accounting"
+need_text skills/zero-host-accounting.md "source accounting nack" "source-accounting-nack"
 need_text skills/apply-overlap-ledger.md "apply overlap" "apply/codec/fold overlap"
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
 need_text skills/pip-discipline.md "pip discipline" "PIP Evidence Discipline"
 need_text skills/exact-support-miner.md "exact miner" "storm-exact-miner.py"
 need_text .agents/skills/exact-support-miner/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/zero-host-accounting/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/apply-overlap-ledger/SKILL.md "bridge" "Codex-discoverable bridge"
 
 tmpdir="$(mktemp -d)"
@@ -1034,6 +1042,87 @@ elif ! grep -q 'double_free=1' "$tmpdir/cout-host-row-double-free.out" ||
      ! grep -q 'first_result=DOUBLE_FREE' "$tmpdir/cout-host-row-double-free.out"; then
   printf 'public_harness_check=fail cout_host_row_double_free_output\n' >&2
   cat "$tmpdir/cout-host-row-double-free.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/zero-host-point-add.rs" <<'EOF'
+impl Builder {
+    fn alloc_qubit(&mut self) -> QubitId {
+        self.active_qubits += 1;
+        if let Some(q) = self.free_qubits.pop() {
+            QubitId(q.into())
+        } else {
+            QubitId(0)
+        }
+    }
+    fn free(&mut self, q: QubitId) {
+        self.r(q);
+        self.free_qubits.push(q.0.try_into().unwrap());
+        if self.active_qubits > 0 {
+            self.active_qubits -= 1;
+        }
+    }
+    fn reacquire(&mut self, q: QubitId) {
+        let pos = self.free_qubits.iter().position(|&free_q| u64::from(free_q) == q.0).unwrap();
+        self.free_qubits.swap_remove(pos);
+        self.active_qubits += 1;
+    }
+}
+EOF
+cat >"$tmpdir/zero-host-trailmix-mod.rs" <<'EOF'
+impl BExt for B {
+    fn loan_zero_qubit(&mut self, q: QubitId) {
+        self.free_qubits.push(q.0.try_into().unwrap());
+        if self.active_qubits > 0 {
+            self.active_qubits -= 1;
+        }
+    }
+}
+fn target_qubit_headroom(circ: &B) -> Option<usize> {
+    std::env::var("TLM_TARGET_Q")
+        .ok()
+        .and_then(|value| value.parse::<usize>().ok())
+        .map(|target| target.saturating_sub(circ.active_qubits as usize))
+}
+EOF
+cat >"$tmpdir/zero-host-gidney.rs" <<'EOF'
+pub fn controlled_hybrid_add_cout_refs(circ: &mut B, ctrl: &QubitId, a: &[&QubitId], b: &[&QubitId], cout: &QubitId, k: usize) {
+    let fit = take_cout_fit(k);
+    let effective = target_qubit_headroom(circ)
+        .map_or(fit.selected, |headroom| fit.selected.min(headroom));
+    controlled_hybrid_add_cout_refs_impl(circ, ctrl, a, b, cout, effective);
+}
+fn controlled_hybrid_add_cout_refs_impl(circ: &mut B, ctrl: &QubitId, a: &[&QubitId], b: &[&QubitId], cout: &QubitId, k: usize) {
+    let cy = circ.alloc_qubit();
+    controlled_clean_add_threaded(circ, ctrl, a, b, None, Some(&cy), k);
+}
+EOF
+cat >"$tmpdir/zero-host-families.tsv" <<'EOF'
+host_family	counted_active	known_zero	idle	owner_touches_during_borrow	disjoint_from_operands	delta_active
+free_pool	no	yes	yes	no	yes	1
+dead_carrier	yes	yes	no	yes	no	0
+live_data	yes	no	yes	no	yes	0
+EOF
+if ! python3 scripts/storm-zero-host-accounting-gate.py \
+  --point-add-rs "$tmpdir/zero-host-point-add.rs" \
+  --trailmix-mod-rs "$tmpdir/zero-host-trailmix-mod.rs" \
+  --gidney-rs "$tmpdir/zero-host-gidney.rs" \
+  --host-families "$tmpdir/zero-host-families.tsv" \
+  --summary-out "$tmpdir/zero-host-summary.tsv" >"$tmpdir/zero-host.out" 2>"$tmpdir/zero-host.err"; then
+  printf 'public_harness_check=fail zero_host_accounting_failed\n' >&2
+  cat "$tmpdir/zero-host.err" >&2
+  fail=1
+elif ! grep -q 'zero_host_accounting_gate=pass' "$tmpdir/zero-host.out" ||
+     ! grep -q 'source_ok=1' "$tmpdir/zero-host.out" ||
+     ! grep -q 'no_relief=1' "$tmpdir/zero-host.out" ||
+     ! grep -q 'hard_nack_alias=1' "$tmpdir/zero-host.out" ||
+     ! grep -q 'no_host=1' "$tmpdir/zero-host.out" ||
+     ! grep -q 'decision=source-accounting-nack' "$tmpdir/zero-host.out" ||
+     ! grep -q $'host_family\tfree_pool\tNO_THROTTLE_RELIEF\tfree_or_loaned_zero_is_not_counted_active' "$tmpdir/zero-host-summary.tsv" ||
+     ! grep -q $'host_family\tdead_carrier\tHARD_NACK_ALIAS\towner_touches_during_borrow' "$tmpdir/zero-host-summary.tsv"; then
+  printf 'public_harness_check=fail zero_host_accounting_output\n' >&2
+  cat "$tmpdir/zero-host.out" >&2
+  cat "$tmpdir/zero-host-summary.tsv" >&2
   fail=1
 fi
 
