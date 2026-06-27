@@ -4,3 +4,4 @@ rank	count	kind	file	line	context	first_idx	last_idx
 3	51451	CCX	src/point_add/trailmix_ludicrous/arith.rs	834	none	1535	10215494
 4	128	CCX	src/point_add/trailmix_ludicrous/new_family.rs	42	none	6000	6127
 5	64	CCX	src/point_add/trailmix_ludicrous/gidney.rs	1233	0x05002a07	7000	7063
+6	2	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1246	0x12000001	8000	8005
