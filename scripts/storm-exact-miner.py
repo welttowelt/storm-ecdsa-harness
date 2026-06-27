@@ -519,6 +519,32 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "swp=1,u[j]=0,v[j]=1 swaps to 1,0 during inverse restoration; omission leaves the old order",
         "restoration_obligation": "reverse cswap rows are required to restore the GCD registers",
     },
+    ("fused.rs", 1223, "e517488039d4acc3"): {
+        "primitive_family": "fused_cdouble_shift_live",
+        "support_domain": "source-hash-bound fused_double_cdouble s2-controlled shift",
+        "falsifier_template": "choose s2=1 with adjacent work-view bits unequal",
+        "witness": "s2=1,w[i]=1,w[i-1]=0 swaps to 0,1; omission leaves the unshifted work view",
+    },
+    ("fused.rs", 1284, "0f9cad42c142861b"): {
+        "primitive_family": "fused_cdouble_reverse_shift_live",
+        "support_domain": "source-hash-bound fused_double_cdouble_reverse inverse s2-controlled shift",
+        "falsifier_template": "choose s2=1 with adjacent work-view bits unequal",
+        "witness": "s2=1,w[i]=0,w[i-1]=1 swaps to 1,0 during inverse restoration; omission leaves the wrong work view",
+        "restoration_obligation": "reverse fused cdouble shift rows are required to restore the shifted work view",
+    },
+    ("gcd.rs", 1591, "7b33ab8a221f932f"): {
+        "primitive_family": "apply_cswap_live",
+        "support_domain": "source-hash-bound apply_step_forward coordinate cswap",
+        "falsifier_template": "choose a reached apply row with swp=1 and x_reg[j] != y_reg[j]",
+        "witness": "swp=1,x_reg[j]=1,y_reg[j]=0 swaps to 0,1; omission leaves the old coordinate order",
+    },
+    ("gcd.rs", 1640, "6463a039e5848198"): {
+        "primitive_family": "apply_cswap_live",
+        "support_domain": "source-hash-bound apply_step_reverse inverse coordinate cswap",
+        "falsifier_template": "choose a reached inverse apply row with swp=1 and x_reg[j] != y_reg[j]",
+        "witness": "swp=1,x_reg[j]=0,y_reg[j]=1 swaps to 1,0 during inverse restoration; omission leaves the old coordinate order",
+        "restoration_obligation": "inverse apply swap rows are required to restore x/y register order",
+    },
 }
 
 

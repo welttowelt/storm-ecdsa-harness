@@ -50,6 +50,7 @@ for path in \
   scripts/qcut-candidate-prefilter.sh \
   scripts/storm-exact-miner.py \
   scripts/storm-audit-impact.py \
+  scripts/storm-mailbox-action-scan.py \
   scripts/storm-wall-owner-summary.py \
   scripts/storm-source-certificate-scout.py \
   examples/audit-card.example.md \
@@ -203,6 +204,7 @@ need_text scripts/storm-exact-miner.py "ledger command" "ledger"
 need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 need_text scripts/storm-exact-miner.py "Gidney trace context decoding" "trace_context_family"
 need_text scripts/storm-audit-impact.py "machine-readable audit metrics" "unknown_weight_abs_avgT_delta"
+need_text scripts/storm-mailbox-action-scan.py "mailbox direct ask scanner" "mailbox_action_scan"
 need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_summary=pass"
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
 
@@ -293,6 +295,44 @@ if ! python3 scripts/storm-exact-miner.py support-check \
 elif ! grep -q 'certified=0 unknown=1 counterexample=2' "$tmpdir/support.out"; then
   printf 'public_harness_check=fail exact_miner_support_counts\n' >&2
   cat "$tmpdir/support.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/mailbox-action-tail.md" <<'EOF'
+## 2026-06-27T00:00:00Z from: Worker-A - bounded check
+
+ACK Worker-A NACK demo-lane skill=redsky file=demo.rs next=needs-operator no_submit_ack=yes
+Storm-Codex: confirm whether I should produce one fresh trace or hold.
+
+## 2026-06-27T00:01:00Z from: Worker-B - status
+
+Boss Storm: want me to stop the idle proof host?
+EOF
+if ! python3 scripts/storm-mailbox-action-scan.py \
+  --input "$tmpdir/mailbox-action-tail.md" >"$tmpdir/mailbox-action.out" 2>"$tmpdir/mailbox-action.err"; then
+  printf 'public_harness_check=fail mailbox_action_scan_failed\n' >&2
+  cat "$tmpdir/mailbox-action.err" >&2
+  fail=1
+elif ! grep -q 'mailbox_action_scan=review count=2' "$tmpdir/mailbox-action.out"; then
+  printf 'public_harness_check=fail mailbox_action_scan_counts\n' >&2
+  cat "$tmpdir/mailbox-action.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/mailbox-action-clean.md" <<'EOF'
+## 2026-06-27T00:02:00Z from: Worker-C - status
+
+ACK Worker-C NACK demo-lane skill=redsky file=demo.rs next=local-falsifier no_submit_ack=yes
+No operator decision requested.
+EOF
+if ! python3 scripts/storm-mailbox-action-scan.py \
+  --input "$tmpdir/mailbox-action-clean.md" >"$tmpdir/mailbox-action-clean.out" 2>"$tmpdir/mailbox-action-clean.err"; then
+  printf 'public_harness_check=fail mailbox_action_scan_clean_failed\n' >&2
+  cat "$tmpdir/mailbox-action-clean.err" >&2
+  fail=1
+elif ! grep -q 'mailbox_action_scan=pass count=0' "$tmpdir/mailbox-action-clean.out"; then
+  printf 'public_harness_check=fail mailbox_action_scan_clean_counts\n' >&2
+  cat "$tmpdir/mailbox-action-clean.out" >&2
   fail=1
 fi
 
@@ -648,6 +688,10 @@ rank	count	kind	file	line	context	source_hash
 5	70900	CCX	src/point_add/trailmix_ludicrous/gcd.rs	697	none	7ff9c8a1b028c409
 6	70390	CCX	src/point_add/trailmix_ludicrous/gcd.rs	904	none	ee3a5c0b13bf21e2
 7	70372	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1386	none	f76620b45753b899
+8	65792	CCX	src/point_add/trailmix_ludicrous/fused.rs	1223	none	e517488039d4acc3
+9	65792	CCX	src/point_add/trailmix_ludicrous/fused.rs	1284	none	0f9cad42c142861b
+10	65792	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1640	none	6463a039e5848198
+11	65536	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1591	none	7b33ab8a221f932f
 EOF
 if ! python3 scripts/storm-exact-miner.py trace-facts \
   --input "$tmpdir/source-hash-bound-scout.tsv" \
@@ -664,7 +708,7 @@ elif ! python3 scripts/storm-exact-miner.py support-check \
   printf 'public_harness_check=fail source_hash_bound_scout_support_failed\n' >&2
   cat "$tmpdir/source-hash-bound-scout-supported.err" >&2
   fail=1
-elif ! grep -q 'counterexample=7' "$tmpdir/source-hash-bound-scout-supported.out" ||
+elif ! grep -q 'counterexample=11' "$tmpdir/source-hash-bound-scout-supported.out" ||
      ! grep -q 'unknown=0' "$tmpdir/source-hash-bound-scout-supported.out"; then
   printf 'public_harness_check=fail source_hash_bound_scout_support_counts\n' >&2
   cat "$tmpdir/source-hash-bound-scout-supported.out" >&2

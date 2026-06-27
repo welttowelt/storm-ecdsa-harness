@@ -39,13 +39,16 @@ Each claim is pressure-tested before it becomes state.
 
 1. Refresh the live benchmark/current target.
 2. Read the shared mailbox and log ACK/read receipts.
-3. Review the active route packet and evidence label.
-4. Run cheap local validation, source inspection, or canary checks.
-5. Run skeptic/RCI pass.
-6. Dispatch compute only with a validated compute request.
-7. Harvest results and downgrade all raw hits to `Prefilter`.
-8. Run trusted validation on score-relevant survivors.
-9. Open submit gate only after official local validation and fresh score check.
+3. Scan the mailbox tail for directed operator asks before posting steering.
+   Every direct ask must be ACKed, NACKed, or explicitly deferred with the next
+   bounded check.
+4. Review the active route packet and evidence label.
+5. Run cheap local validation, source inspection, or canary checks.
+6. Run skeptic/RCI pass.
+7. Dispatch compute only with a validated compute request.
+8. Harvest results and downgrade all raw hits to `Prefilter`.
+9. Run trusted validation on score-relevant survivors.
+10. Open submit gate only after official local validation and fresh score check.
 
 ## Evidence Labels
 
