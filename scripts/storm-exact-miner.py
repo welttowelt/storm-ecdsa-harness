@@ -565,6 +565,18 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 194 toggles the next carry when y[i]=1 and ci=1; omission loses the carry through the fused fold chain",
         "restoration_obligation": "the carry is consumed by later inline sums and reverse fold cleanup",
     },
+    ("arith.rs", 274, "72d7ae23d4404ca9"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound CONST_CHUNK_DEAD_RANGES table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
+        "witness": "d44cad3 arith.rs:274 is static dead-range table data, while origin rows are kept CCX across register/square arithmetic; no executable source-hook exists here",
+    },
+    ("arith.rs", 281, "33ad60de0fa8e78f"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound CONST_CHUNK_DEAD_RANGES table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
+        "witness": "d44cad3 arith.rs:281 is static dead-range table data, while origin rows are kept CCX across register/square arithmetic; no executable source-hook exists here",
+    },
     ("comparator.rs", 68, "e2d291034f536196"): {
         "primitive_family": "comparator_top_carry_live",
         "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",
