@@ -58,6 +58,7 @@ for path in \
   scripts/storm-gidney-thread-join.py \
   scripts/storm-windowed-carry-toy.py \
   scripts/storm-const-chunk-prefix-ledger.py \
+  scripts/storm-q1152-binder-ledger.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -216,6 +217,8 @@ need_text scripts/storm-alloc-owner-summary.py "alloc owner summary" "alloc_owne
 need_text scripts/storm-peak-lifetime-ledger.py "peak lifetime ledger" "peak_lifetime_ledger=pass"
 need_text scripts/storm-gidney-thread-join.py "gidney thread join" "gidney_thread_join=pass"
 need_text scripts/storm-windowed-carry-toy.py "windowed carry toy" "windowed_carry_toy="
+need_text scripts/storm-q1152-binder-ledger.py "q1152 binder ledger" "q1152_binder_ledger=pass"
+need_text scripts/storm-q1152-binder-ledger.py "mcx floor" "none_kg_prefix_ancilla"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -696,6 +699,43 @@ elif ! grep -q 'gidney_thread_join=pass thread_rows=2 alloc_rows=3 alloc_ops=2 j
   printf 'public_harness_check=fail gidney_thread_join_output\n' >&2
   cat "$tmpdir/gidney-thread-join.out" >&2
   cat "$tmpdir/gidney-thread-join.tsv" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/q1152-binder-trace.raw" <<'EOF'
+TLM_GIDNEY_THREAD call=5 phase=tlm_apply_inverse_mod_sub_register width=8 cin=1 cout=1 vents=0 ops_start=100 ops_end=180
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_inverse_mod_sub_register' ops_idx=100 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+TLM_GIDNEY_THREAD call=9 phase=tlm_apply_forward_mod_add_register width=8 cin=1 cout=1 vents=0 ops_start=200 ops_end=280
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_register' ops_idx=200 free_pool=0 caller=src/point_add/trailmix_ludicrous/gidney.rs:1217
+TLM_MCX_INC call=170 phase=tlm_apply_forward_mod_add_fold n=12 skip_lsb_x=true anc=3 ops_start=300 ops_end=330
+ALLOC_NEAR active=1152 next_idx=1151 phase='tlm_apply_forward_mod_add_fold' ops_idx=300 free_pool=0 caller=src/point_add/trailmix_ludicrous/mcx.rs:318
+EOF
+cat >"$tmpdir/q1152-binder-gidney.rs" <<'EOF'
+const GIDNEY_THREAD_FWD_DEAD_RANGES: &[(usize, usize, usize)] = &[
+    (5, 0, 3),
+    (9, 2, 4),
+];
+EOF
+if ! python3 scripts/storm-q1152-binder-ledger.py \
+  --trace "$tmpdir/q1152-binder-trace.raw" \
+  --gidney-source "$tmpdir/q1152-binder-gidney.rs" \
+  --summary-out "$tmpdir/q1152-binder-summary.tsv" \
+  --peak 1152 >"$tmpdir/q1152-binder.out" 2>"$tmpdir/q1152-binder.err"; then
+  printf 'public_harness_check=fail q1152_binder_ledger_failed\n' >&2
+  cat "$tmpdir/q1152-binder.err" >&2
+  fail=1
+elif ! grep -q 'q1152_binder_ledger=pass' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'gidney_binding_calls=2' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'gidney_prefix_dead_binding_calls=1' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'mcx_peak_ops=1' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'mcx_binding_calls=1' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'mcx_n_values=12' "$tmpdir/q1152-binder.out" ||
+     ! grep -q 'decision=coordinated-cut-requires-mcx-replacement' "$tmpdir/q1152-binder.out" ||
+     ! grep -q $'gidney.rs:1217\t2\t2\t2\t2\t1152\t1152\ttlm_apply_inverse_mod_sub_register\ttlm_apply_inverse_mod_sub_register\t5,9\t5\t4\t\t\t\tgidney_thread_forward_prefix' "$tmpdir/q1152-binder-summary.tsv" ||
+     ! grep -q $'mcx.rs:318\t1\t1\t1\t1\t1152\t1152\ttlm_apply_forward_mod_add_fold\ttlm_apply_forward_mod_add_fold\t170\t\t0\t12\t3\ttrue\tnone_kg_prefix_ancilla' "$tmpdir/q1152-binder-summary.tsv"; then
+  printf 'public_harness_check=fail q1152_binder_ledger_output\n' >&2
+  cat "$tmpdir/q1152-binder.out" >&2
+  cat "$tmpdir/q1152-binder-summary.tsv" >&2
   fail=1
 fi
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
