@@ -581,6 +581,25 @@ elif ! grep -q 'Decision: plateau-cut-required' "$tmpdir/vandaele-plateau.out"; 
   cat "$tmpdir/vandaele-plateau.out" >&2
   fail=1
 fi
+cat >"$tmpdir/vandaele-q1147-plateau.trace" <<'EOF'
+ALLOC_NEAR active=1147 next_idx=1146 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=10 free_pool=1 caller=src/point_add/trailmix_ludicrous/arith.rs:875
+ALLOC_NEAR active=1147 next_idx=1146 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=20 free_pool=1 caller=src/point_add/trailmix_ludicrous/comparator.rs:191
+ALLOC_NEAR active=1146 next_idx=1146 phase='tlm_apply_inverse_mod_sub_fold' ops_idx=30 free_pool=1 caller=src/point_add/trailmix_ludicrous/arith.rs:1085
+EOF
+if ! scripts/vandaele-comparator-ledger.sh \
+  --trace "$tmpdir/vandaele-q1147-plateau.trace" \
+  --frontier 1571592960 \
+  --q 1147 \
+  --route fixture-q1147 \
+  --candidate comparator-only >"$tmpdir/vandaele-q1147-plateau.out" 2>"$tmpdir/vandaele-q1147-plateau.err"; then
+  printf 'public_harness_check=fail vandaele_q1147_plateau_failed\n' >&2
+  cat "$tmpdir/vandaele-q1147-plateau.err" >&2
+  fail=1
+elif ! grep -q 'Decision: plateau-cut-required' "$tmpdir/vandaele-q1147-plateau.out"; then
+  printf 'public_harness_check=fail vandaele_q1147_plateau_decision\n' >&2
+  cat "$tmpdir/vandaele-q1147-plateau.out" >&2
+  fail=1
+fi
 
 if ! python3 scripts/storm-exact-miner.py trace-facts \
   --input "$tmpdir/context-scout.tsv" \
