@@ -611,6 +611,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 719 pushes the HMR measurement condition before compare_geq_cin_middle rebuilds the predicate; raw rows show kept CCX carry-chain operations, and controls=1 toggles the next comparator carry",
         "phase_obligation": "omission corrupts the phase-recovery predicate used to discharge the measured carry",
     },
+    ("arith.rs", 799, "d94ad239f6ca414a"): {
+        "primitive_family": "chunked_boundary_erase_carry_live",
+        "support_domain": "source-hash-bound emit_chunked_capped reverse boundary erase",
+        "falsifier_template": "choose a reached chunk-boundary erase row with carry=1 and erase controls set",
+        "witness": "line 799 enters the reverse boundary-erase loop; raw rows are kept erase_carry_gated_opt CCX operations, and controls=1 toggles the carry/erase predicate",
+        "restoration_obligation": "skipping leaves chunk boundary carry cleanup and phase discharge incorrect",
+    },
     ("codec.rs", 304, "011131e1db1721fe"): {
         "primitive_family": "dialog_codec_normalizer_live",
         "support_domain": "source-hash-bound Triple dialog-codec normalizer CCX row",
