@@ -65,6 +65,7 @@ for path in \
   scripts/storm-q1152-avgt-theorem.py \
   scripts/storm-cout-host-row-gate.py \
   scripts/storm-zero-host-accounting-gate.py \
+  scripts/storm-dead-drop-fixedpoint-gate.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -130,6 +131,7 @@ for path in \
   skills/paper-dead-gate-elimination.md \
   skills/paper-score-condition-discount.md \
   skills/zero-host-accounting.md \
+  skills/dead-drop-fixedpoint.md \
   skills/apply-overlap-ledger.md \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
@@ -169,6 +171,7 @@ for path in \
   .agents/skills/paper-dead-gate-elimination/SKILL.md \
   .agents/skills/paper-score-condition-discount/SKILL.md \
   .agents/skills/zero-host-accounting/SKILL.md \
+  .agents/skills/dead-drop-fixedpoint/SKILL.md \
   .agents/skills/apply-overlap-ledger/SKILL.md \
   dashboard/fixtures/status.json; do
   need_file "$path"
@@ -241,6 +244,8 @@ need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_ro
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
 need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
 need_text scripts/storm-zero-host-accounting-gate.py "source accounting nack" "source-accounting-nack"
+need_text scripts/storm-dead-drop-fixedpoint-gate.py "dead drop fixedpoint" "dead_drop_fixedpoint_gate=pass"
+need_text scripts/storm-dead-drop-fixedpoint-gate.py "fixedpoint required" "fixedpoint-required"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -313,6 +318,8 @@ need_text skills/paper-score-condition-discount.md "score condition discount" "S
 need_text skills/paper-score-condition-discount.md "average toffoli scorer" "average-Toffoli"
 need_text skills/zero-host-accounting.md "zero host accounting" "Zero Host Accounting"
 need_text skills/zero-host-accounting.md "source accounting nack" "source-accounting-nack"
+need_text skills/dead-drop-fixedpoint.md "dead drop fixed point" "Dead-Drop Fixed Point"
+need_text skills/dead-drop-fixedpoint.md "fixedpoint ready" "FIXEDPOINT_READY"
 need_text skills/apply-overlap-ledger.md "apply overlap" "apply/codec/fold overlap"
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
@@ -320,6 +327,7 @@ need_text skills/pip-discipline.md "pip discipline" "PIP Evidence Discipline"
 need_text skills/exact-support-miner.md "exact miner" "storm-exact-miner.py"
 need_text .agents/skills/exact-support-miner/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/zero-host-accounting/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/dead-drop-fixedpoint/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/apply-overlap-ledger/SKILL.md "bridge" "Codex-discoverable bridge"
 
 tmpdir="$(mktemp -d)"
@@ -334,6 +342,50 @@ if ! python3 scripts/storm-exact-miner.py support-check \
 elif ! grep -q 'certified=0 unknown=1 counterexample=2' "$tmpdir/support.out"; then
   printf 'public_harness_check=fail exact_miner_support_counts\n' >&2
   cat "$tmpdir/support.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/dead-drop-bad.tsv" <<'EOF'
+route_id	stream_hash	pre_drop_ops_hash	candidate_indices_sha256	source_hash	support_status	support_certificate	dynamic_deadness	sampled_shots	rebuilt_after_edit	residual_probe_rebuilt	fixed_point	eval_classical	eval_phase	eval_ancilla
+salted4-dynamic	stream-a	pre-a	idx-a	source-a	UNKNOWN	cert-a	yes	36096	no	no	no	0	0	0
+stale-residual	stream-b	pre-b	idx-b	source-b	CERTIFIED	cert-b	no	0	yes	no	yes	0	0	0
+no-fixedpoint	stream-c	pre-c	idx-c	source-c	CERTIFIED	cert-c	no	0	yes	yes	no	0	0	0
+dirty-eval	stream-d	pre-d	idx-d	source-d	CERTIFIED	cert-d	no	0	yes	yes	yes	1	0	0
+EOF
+if ! python3 scripts/storm-dead-drop-fixedpoint-gate.py \
+  --packets "$tmpdir/dead-drop-bad.tsv" \
+  --summary-out "$tmpdir/dead-drop-bad-summary.tsv" >"$tmpdir/dead-drop-bad.out" 2>"$tmpdir/dead-drop-bad.err"; then
+  printf 'public_harness_check=fail dead_drop_bad_failed\n' >&2
+  cat "$tmpdir/dead-drop-bad.err" >&2
+  fail=1
+elif ! grep -q 'dead_drop_fixedpoint_gate=pass' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'ready=0' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'dynamic_only=1' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'stale_residual=1' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'no_fixedpoint=1' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'dirty_eval=1' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q 'decision=fixedpoint-required' "$tmpdir/dead-drop-bad.out" ||
+     ! grep -q $'salted4-dynamic\tDYNAMIC_ONLY\tsampled_deadness_without_source_invariant' "$tmpdir/dead-drop-bad-summary.tsv" ||
+     ! grep -q $'stale-residual\tSTALE_RESIDUAL\tresidual_probe_not_rebuilt_from_candidate_stream' "$tmpdir/dead-drop-bad-summary.tsv"; then
+  printf 'public_harness_check=fail dead_drop_bad_output\n' >&2
+  cat "$tmpdir/dead-drop-bad.out" >&2
+  cat "$tmpdir/dead-drop-bad-summary.tsv" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/dead-drop-ready.tsv" <<'EOF'
+route_id	stream_hash	pre_drop_ops_hash	candidate_indices_sha256	source_hash	support_status	support_certificate	dynamic_deadness	sampled_shots	rebuilt_after_edit	residual_probe_rebuilt	fixed_point	eval_classical	eval_phase	eval_ancilla
+ready-demo	stream-ready	pre-ready	idx-ready	source-ready	CERTIFIED	cert-ready	no	0	yes	yes	yes	0	0	0
+EOF
+if ! python3 scripts/storm-dead-drop-fixedpoint-gate.py \
+  --packets "$tmpdir/dead-drop-ready.tsv" >"$tmpdir/dead-drop-ready.out" 2>"$tmpdir/dead-drop-ready.err"; then
+  printf 'public_harness_check=fail dead_drop_ready_failed\n' >&2
+  cat "$tmpdir/dead-drop-ready.err" >&2
+  fail=1
+elif ! grep -q 'ready=1' "$tmpdir/dead-drop-ready.out" ||
+     ! grep -q 'decision=ready-for-validation' "$tmpdir/dead-drop-ready.out"; then
+  printf 'public_harness_check=fail dead_drop_ready_output\n' >&2
+  cat "$tmpdir/dead-drop-ready.out" >&2
   fail=1
 fi
 
