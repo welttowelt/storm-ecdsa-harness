@@ -60,6 +60,7 @@ for path in \
   scripts/storm-const-chunk-prefix-ledger.py \
   scripts/storm-q1152-binder-ledger.py \
   scripts/storm-mcx-incrementer-budget.py \
+  scripts/storm-square-static-gap-audit.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -222,6 +223,8 @@ need_text scripts/storm-q1152-binder-ledger.py "q1152 binder ledger" "q1152_bind
 need_text scripts/storm-q1152-binder-ledger.py "mcx floor" "none_kg_prefix_ancilla"
 need_text scripts/storm-mcx-incrementer-budget.py "mcx incrementer budget" "mcx_incrementer_budget=pass"
 need_text scripts/storm-mcx-incrementer-budget.py "candidate budget fail" "candidate-budget-fail"
+need_text scripts/storm-square-static-gap-audit.py "square static gap audit" "square_static_gap_audit=pass"
+need_text scripts/storm-square-static-gap-audit.py "zero bit trim decision" "no-executable-zero-bit-trim"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -781,6 +784,27 @@ elif ! grep -q 'candidate_extra_total=78.0' "$tmpdir/mcx-incrementer-budget-fail
   cat "$tmpdir/mcx-incrementer-budget-fail.out" >&2
   fail=1
 fi
+
+if ! python3 scripts/storm-square-static-gap-audit.py \
+  --min-width 1 \
+  --max-width 6 \
+  --summary-out "$tmpdir/square-static-gap.tsv" >"$tmpdir/square-static-gap.out" 2>"$tmpdir/square-static-gap.err"; then
+  printf 'public_harness_check=fail square_static_gap_audit_failed\n' >&2
+  cat "$tmpdir/square-static-gap.err" >&2
+  fail=1
+elif ! grep -q 'square_static_gap_audit=pass' "$tmpdir/square-static-gap.out" ||
+     ! grep -q 'fixed_zero_pattern=bit1_only' "$tmpdir/square-static-gap.out" ||
+     ! grep -q 'source_bit1_gap_has_executable_ccx=0' "$tmpdir/square-static-gap.out" ||
+     ! grep -q 'cross_terms_checked=35' "$tmpdir/square-static-gap.out" ||
+     ! grep -q 'cross_terms_live=35' "$tmpdir/square-static-gap.out" ||
+     ! grep -q 'decision=no-executable-zero-bit-trim' "$tmpdir/square-static-gap.out" ||
+     ! grep -q $'6\t1\t1\t0\t15\t15\t0:1:row2:prod2:x3' "$tmpdir/square-static-gap.tsv"; then
+  printf 'public_harness_check=fail square_static_gap_audit_output\n' >&2
+  cat "$tmpdir/square-static-gap.out" >&2
+  cat "$tmpdir/square-static-gap.tsv" >&2
+  fail=1
+fi
+
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
 rank	count	kind	file	line	context	source_hash
 1	100	CCX	src/point_add/trailmix_ludicrous/gidney.rs	1297	none	fixture-source
