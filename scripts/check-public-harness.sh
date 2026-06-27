@@ -49,6 +49,7 @@ for path in \
   scripts/apply-overlap-ledger.sh \
   scripts/storm-exact-miner.py \
   scripts/storm-audit-impact.py \
+  scripts/storm-wall-owner-summary.py \
   scripts/storm-source-certificate-scout.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
@@ -199,6 +200,7 @@ need_text scripts/storm-exact-miner.py "ledger command" "ledger"
 need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 need_text scripts/storm-exact-miner.py "Gidney trace context decoding" "trace_context_family"
 need_text scripts/storm-audit-impact.py "machine-readable audit metrics" "unknown_weight_abs_avgT_delta"
+need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_summary=pass"
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
@@ -513,6 +515,31 @@ src/point_add/trailmix_ludicrous/gidney.rs	1297	gidney_thread_sum	CCX	90	changed
 src/point_add/trailmix_ludicrous/comparator.rs	717	comparator_top_carry	CCX	40	fixture-source
 src/point_add/trailmix_ludicrous/arith.rs	834	unclassified	CCX	20	fixture-source
 EOF
+cat >"$tmpdir/wall-owner-contexts.tsv" <<'EOF'
+file	line	context_hex	family	call	bit	kind	count	source_hash
+src/point_add/trailmix_ludicrous/gidney.rs	1297	0x07000000	gidney_thread_sum	0	0	CCX	60	fixture-source
+src/point_add/trailmix_ludicrous/gidney.rs	1297	0x07000001	gidney_thread_sum	0	1	CCX	40	fixture-source
+src/point_add/trailmix_ludicrous/gidney.rs	1297	0x07000002	gidney_thread_sum	0	2	CCX	90	changed-source
+src/point_add/trailmix_ludicrous/comparator.rs	717	0x04000000	comparator_top_carry	0	0	CCX	40	fixture-source
+src/point_add/trailmix_ludicrous/arith.rs	834	0x00000000	unclassified	0	0	CCX	20	fixture-source
+EOF
+if ! python3 scripts/storm-wall-owner-summary.py \
+  --contexts "$tmpdir/wall-owner-contexts.tsv" \
+  --source-line-out "$tmpdir/generated-source-line-family-summary.tsv" \
+  --family-kind-out "$tmpdir/generated-family-kind-summary.tsv" >"$tmpdir/wall-owner-summary.out" 2>"$tmpdir/wall-owner-summary.err"; then
+  printf 'public_harness_check=fail wall_owner_summary_failed\n' >&2
+  cat "$tmpdir/wall-owner-summary.err" >&2
+  fail=1
+elif ! grep -q 'wall_owner_summary=pass input_rows=5 source_rows=4 family_rows=3' "$tmpdir/wall-owner-summary.out" ||
+     ! grep -q $'gidney.rs\t1297\tgidney_thread_sum\tCCX\t100\tfixture-source' "$tmpdir/generated-source-line-family-summary.tsv" ||
+     ! grep -q $'gidney.rs\t1297\tgidney_thread_sum\tCCX\t90\tchanged-source' "$tmpdir/generated-source-line-family-summary.tsv" ||
+     ! grep -q $'gidney_thread_sum\tCCX\t190' "$tmpdir/generated-family-kind-summary.tsv"; then
+  printf 'public_harness_check=fail wall_owner_summary_output\n' >&2
+  cat "$tmpdir/wall-owner-summary.out" >&2
+  cat "$tmpdir/generated-source-line-family-summary.tsv" >&2
+  cat "$tmpdir/generated-family-kind-summary.tsv" >&2
+  fail=1
+fi
 cat >"$tmpdir/closed-site-audit.tsv" <<'EOF'
 rank	count	kind	file	line	context	source_hash
 1	100	CCX	src/point_add/trailmix_ludicrous/gidney.rs	1297	none	fixture-source

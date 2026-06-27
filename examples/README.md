@@ -12,6 +12,7 @@ Use them to teach agents the workflow:
 - every compute request has a validator and kill gate,
 - every public note separates evidence from claims,
 - apply-overlap fixtures separate certified facts from restore-proof failures,
+- wall-owner summaries are regenerated before source-certificate scouting,
 - source-certificate scouts filter already-closed context rows before mining,
 - scanner output stays `Prefilter` until official validation passes.
 
