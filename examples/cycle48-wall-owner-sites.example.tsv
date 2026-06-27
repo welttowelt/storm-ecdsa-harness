@@ -4,3 +4,4 @@ rank	count	kind	file	line	context	source_hash
 3	70349	CCX	src/point_add/trailmix_ludicrous/gcd.rs	730	none	d44cad3-current
 4	70178	CCX	src/point_add/trailmix_ludicrous/gcd.rs	935	none	d44cad3-current
 5	69662	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1296	none	d44cad3-current
+6	65792	CCX	src/point_add/trailmix_ludicrous/gcd.rs	1510	none	d44cad3-current

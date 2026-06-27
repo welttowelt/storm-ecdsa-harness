@@ -278,6 +278,13 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "falsifier_template": "choose a reached row with swp=1 and u[j] != v[j]",
         "witness": "the source emits line 899 only after the exact-dead cswap guard is false; swp=1 with unequal limbs changes both registers",
     },
+    ("gcd.rs", 1296): {
+        "primitive_family": "gcd_reverse_cswap_live",
+        "support_domain": "reverse GCD cswap aggregate over step trace regions",
+        "falsifier_template": "choose a reached reverse row with swp=1 and u[j] != v[j]",
+        "witness": "swp=1 with unequal active limbs changes both GCD registers; omission breaks the inverse step",
+        "restoration_obligation": "reverse cswap rows are required to restore the GCD registers",
+    },
     ("gcd.rs", 935): {
         "primitive_family": "gcd_forward_cswap_live",
         "support_domain": "forward GCD/apply symbol aggregate over live cswap rows",
