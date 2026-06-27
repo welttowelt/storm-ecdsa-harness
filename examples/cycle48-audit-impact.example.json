@@ -8,25 +8,18 @@
   },
   "frontier": "1571592960/d44cad3",
   "improvement": {
-    "durable_nack_rows_delta": 21,
-    "ranked_unknown_rows_delta": -21,
-    "ranked_unknown_rows_reduction_pct": 91.3043,
-    "ranked_unknown_weight_abs_avgT_delta_delta": -709538,
-    "ranked_unknown_weight_abs_avgT_delta_reduction_pct": 99.9941
+    "durable_nack_rows_delta": 22,
+    "ranked_unknown_rows_delta": -22,
+    "ranked_unknown_rows_reduction_pct": 95.6522,
+    "ranked_unknown_weight_abs_avgT_delta_delta": -709578,
+    "ranked_unknown_weight_abs_avgT_delta_reduction_pct": 99.9997
   },
   "metric_definitions": {
     "durable_nack_rows": "count of JSONL rows emitted by storm-exact-miner ledger",
     "ranked_unknown_rows": "count of ranked proof packets where proof_status is UNKNOWN",
     "ranked_unknown_weight_abs_avgT_delta": "sum(abs(expected_avgT_delta)) over ranked UNKNOWN proof packets"
   },
-  "remaining_unknown_rows_after_pass_12": [
-    {
-      "expected_avgT_delta": -40,
-      "op_class": "ccx",
-      "route_id": "exact-skip-0eec2f4072e296ac",
-      "site_rank": "51",
-      "source_location": "src/point_add/trailmix_ludicrous/arith.rs:1375"
-    },
+  "remaining_unknown_rows_after_pass_13": [
     {
       "expected_avgT_delta": -2,
       "op_class": "ccx",
@@ -57,14 +50,14 @@
       "support_unknown_rows": 6
     },
     {
-      "durable_nack_rows": 52,
-      "label": "after_pass_12",
-      "ranked_counterexample_rows": 52,
-      "ranked_counterexample_weight_abs_avgT_delta": 834420,
-      "ranked_unknown_rows": 2,
-      "ranked_unknown_weight_abs_avgT_delta": 42,
-      "support_counterexample_rows": 53,
-      "support_unknown_rows": 4
+      "durable_nack_rows": 53,
+      "label": "after_pass_13",
+      "ranked_counterexample_rows": 53,
+      "ranked_counterexample_weight_abs_avgT_delta": 834460,
+      "ranked_unknown_rows": 1,
+      "ranked_unknown_weight_abs_avgT_delta": 2,
+      "support_counterexample_rows": 54,
+      "support_unknown_rows": 3
     }
   ]
 }

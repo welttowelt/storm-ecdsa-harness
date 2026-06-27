@@ -202,6 +202,13 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "witness": "the line-1369 CCX is the required mirror that restores cy0 before prefix reverse",
         "restoration_obligation": "skipping leaves the prefix carry unavailable for reverse cleanup",
     },
+    ("arith.rs", 1375): {
+        "primitive_family": "ffg_cy0_restore_live",
+        "support_domain": "+f optional cy0 reclaim/restore diagnostic",
+        "falsifier_template": "choose ctrl=1 and final a0=0 after reclaiming cy0",
+        "witness": "after reclaiming cy0, the diagnostic row maps to the CCX restoring cy0 = ctrl & !final_a0 before prefix reverse",
+        "restoration_obligation": "skipping leaves the prefix carry unavailable for reverse cleanup",
+    },
     ("arith.rs", 1854): {
         "primitive_family": "vented_carry_live",
         "support_domain": "support-bounded carry after dead(i) guard is false",

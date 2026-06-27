@@ -108,6 +108,7 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `gcd.rs:812`
 - `arith.rs:1865`
 - `arith.rs:1880`
+- `arith.rs:1375`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
@@ -185,12 +186,13 @@ Measured output:
 | After passes 6-10 | 8 | 49 | 6 | 48 | 48 | 2056 | 832406 |
 | After pass 11 | 6 | 51 | 4 | 50 | 50 | 1032 | 833430 |
 | After pass 12 | 4 | 53 | 2 | 52 | 52 | 42 | 834420 |
+| After pass 13 | 3 | 54 | 1 | 53 | 53 | 2 | 834460 |
 
 Result:
 
-- Ranked UNKNOWN rows fell from `23` to `2`, a `91.3%` reduction.
-- Ranked UNKNOWN weight fell from `709580` to `42`, a `99.99%` reduction.
-- Durable NACK ledger rows rose from `31` to `52`.
+- Ranked UNKNOWN rows fell from `23` to `1`, a `95.7%` reduction.
+- Ranked UNKNOWN weight fell from `709580` to `2`, a `99.9997%` reduction.
+- Durable NACK ledger rows rose from `31` to `53`.
 - Certified rows stayed at `0`, so the audit improved proof routing but did not
   create a submission candidate.
 
@@ -244,6 +246,29 @@ Gate:
 No source hook, count claim, residual/eval, pod dispatch, alert, WINNER, or
 submit follows from these rows. The next worker must prove or falsify
 `arith.rs:1375` before touching compute.
+
+## Pass 13 - FFG Cy0 Restore Alias Sync
+
+Problem:
+After pass 12, the next public fixture UNKNOWN was `arith.rs:1375`.
+
+Evidence:
+Row `1375` is the optional `cy0` reclaim/restore CCX in the `+f` path. After
+`cy0` is reclaimed from the zero-loan, the code flips `a[0]`, restores
+`cy0 = ctrl & !final_a0`, then flips `a[0]` back before prefix reverse.
+
+Effect:
+With `ctrl=1` and `final_a0=0`, the restore CCX must fire. Skipping it leaves
+the prefix carry unavailable for reverse cleanup.
+
+Fix:
+Added an explicit NACK-only source alias for `arith.rs:1375`, then advanced the
+fixture to leave `gcd.rs:800` as the next visible UNKNOWN.
+
+Gate:
+No source hook, count claim, residual/eval, pod dispatch, alert, WINNER, or
+submit follows from this row. The next worker must prove or falsify `gcd.rs:800`
+before touching compute.
 
 ## Verification Commands
 
