@@ -109,6 +109,7 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `arith.rs:1865`
 - `arith.rs:1880`
 - `arith.rs:1375`
+- `gcd.rs:800`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
@@ -187,12 +188,13 @@ Measured output:
 | After pass 11 | 6 | 51 | 4 | 50 | 50 | 1032 | 833430 |
 | After pass 12 | 4 | 53 | 2 | 52 | 52 | 42 | 834420 |
 | After pass 13 | 3 | 54 | 1 | 53 | 53 | 2 | 834460 |
+| After pass 14 | 2 | 55 | 0 | 54 | 54 | 0 | 834462 |
 
 Result:
 
-- Ranked UNKNOWN rows fell from `23` to `1`, a `95.7%` reduction.
-- Ranked UNKNOWN weight fell from `709580` to `2`, a `99.9997%` reduction.
-- Durable NACK ledger rows rose from `31` to `53`.
+- Ranked UNKNOWN rows fell from `23` to `0`, a `100%` reduction.
+- Ranked UNKNOWN weight fell from `709580` to `0`, a `100%` reduction.
+- Durable NACK ledger rows rose from `31` to `54`.
 - Certified rows stayed at `0`, so the audit improved proof routing but did not
   create a submission candidate.
 
@@ -269,6 +271,30 @@ Gate:
 No source hook, count claim, residual/eval, pod dispatch, alert, WINNER, or
 submit follows from this row. The next worker must prove or falsify `gcd.rs:800`
 before touching compute.
+
+## Pass 14 - GCD Reverse Overflow Alias Sync
+
+Problem:
+After pass 13, `gcd.rs:800` was the only ranked UNKNOWN packet left.
+
+Evidence:
+Row `800` is the inverse overflow rebuild in `controlled_mod_double_reverse`:
+`ovf = ctrl & a[0]`. The following subtract-`f` fold is gated on `ovf`, then the
+inverse shift returns the `a ++ ovf` view to zero overflow.
+
+Effect:
+With `ctrl=1` and `a[0]=1`, the rebuild CCX must fire. Skipping it loses the
+inverse subtract-`f` control and breaks inverse controlled modular doubling.
+
+Fix:
+Added an explicit NACK-only source alias for `gcd.rs:800`. The full cycle48
+ranked proof backlog now has zero UNKNOWN packets and zero CERTIFIED packets.
+
+Gate:
+The cycle48 wall-owner proof queue is exhausted as reusable NACK evidence. It
+does not authorize source hooks, count claims, residual/eval, pod dispatch,
+alerts, WINNER, or submit. The next route must be a new wall-wide
+source-hash-bound certificate or a separate structural discovery pass.
 
 ## Verification Commands
 
