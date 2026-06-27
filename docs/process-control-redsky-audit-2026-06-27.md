@@ -100,6 +100,10 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `arith.rs:1090`
 - `gidney.rs:1253`
 - `arith.rs:1860`
+- `gidney.rs:1357`
+- `gidney.rs:1416`
+- `arith.rs:524`
+- `arith.rs:537`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
@@ -130,6 +134,58 @@ The script prints `alert_decision=ready_candidate` only when explicitly supplied
 with both `--local-full-run-clean` and `--score-below-frontier`; default output
 keeps alert and submit closed.
 
+## Passes 6-10 - Cycle48 Source Alias Sweep
+
+Problem:
+After the first sync, full cycle48 still had source-site rows with `context=none`
+that duplicated trace-context families already covered by the miner.
+
+Evidence:
+The current rerun on `wall-owner-site-audit.tsv` reported `certified=0`,
+`unknown=14`, `counterexample=43` at support-check. The top five remaining
+ranked UNKNOWN rows were `gidney.rs:1253`, `arith.rs:1860`, `gidney.rs:1357`,
+`arith.rs:524`, and `arith.rs:537`.
+
+Effect:
+Leaving those aliases open keeps the fleet on known-live carry and phase rows
+instead of moving to the next proof family.
+
+Fix:
+Added explicit source aliases for the Gidney boundary carry, bounded-add carry
+span, Gidney HMR erase CCZ and capped erase CCZ, and Cuccaro forward/reverse
+carry rows. These are all NACK-only counterexamples; none supply a value-exact
+skip.
+
+Gate:
+Rerun the cycle48 fixture and full cycle48 miner pipeline. Keep pod dispatch,
+alerts, WINNER, and submit closed unless a later packet becomes `CERTIFIED` and
+then passes trusted validation.
+
+## Measurement - Process Impact
+
+Evidence source:
+
+- Original cycle48 artifact:
+  `state/autonomous-research/structural-alpha-20260627/artifacts/cycle48-wall-owner-certificate-backlog/ranked.jsonl`
+- Current rerun command: the full cycle48 classifier pipeline in the
+  verification section below, using the same `wall-owner-site-audit.tsv`.
+
+Measured output:
+
+| State | Support UNKNOWN | Support COUNTEREXAMPLE | Ranked UNKNOWN | Ranked COUNTEREXAMPLE | NACK ledger rows | Ranked UNKNOWN weight | Ranked COUNTEREXAMPLE weight |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Original cycle48 artifact | 25 | 32 | 23 | 31 | 31 | 709580 | 124882 |
+| Before passes 6-10 | 14 | 43 | 12 | 42 | 42 | 17818 | 816644 |
+| After passes 6-10 | 8 | 49 | 6 | 48 | 48 | 2056 | 832406 |
+
+Result:
+
+- Ranked UNKNOWN rows fell from `23` to `6`, a `73.9%` reduction.
+- Ranked UNKNOWN weight fell from `709580` to `2056`, a `99.7%` reduction.
+- Durable NACK ledger rows rose from `31` to `48`.
+- Certified rows stayed at `0`, so the audit improved proof routing but did not
+  create a submission candidate.
+
 ## Verification Commands
 
 ```bash
@@ -149,4 +205,20 @@ python3 scripts/storm-exact-miner.py support-check --facts "$tmp/facts.jsonl" --
 python3 scripts/storm-exact-miner.py mine --facts "$tmp/supported.jsonl" --include-unknown-sites --out "$tmp/candidates.jsonl"
 python3 scripts/storm-exact-miner.py prove --candidates "$tmp/candidates.jsonl" --out "$tmp/proofs.jsonl"
 python3 scripts/storm-exact-miner.py falsify --packets "$tmp/proofs.jsonl" --out "$tmp/falsified.jsonl"
+```
+
+Full cycle48 measurement rerun:
+
+```bash
+src=../state/autonomous-research/structural-alpha-20260627/artifacts/cycle48-wall-owner-certificate-backlog/wall-owner-site-audit.tsv
+tmp=/tmp/storm-cycle48-after-audit
+rm -rf "$tmp"
+mkdir -p "$tmp"
+python3 scripts/storm-exact-miner.py trace-facts --input "$src" --frontier 1571592960/d44cad3 --source-base d44cad3 --stream-hash cycle48-wall-owner-context-f30d8365 --out "$tmp/facts.jsonl"
+python3 scripts/storm-exact-miner.py support-check --facts "$tmp/facts.jsonl" --out "$tmp/supported.jsonl"
+python3 scripts/storm-exact-miner.py mine --facts "$tmp/supported.jsonl" --include-unknown-sites --max-unknown-sites 80 --out "$tmp/candidates.jsonl"
+python3 scripts/storm-exact-miner.py prove --candidates "$tmp/candidates.jsonl" --out "$tmp/proofs.jsonl"
+python3 scripts/storm-exact-miner.py falsify --packets "$tmp/proofs.jsonl" --out "$tmp/falsified.jsonl"
+python3 scripts/storm-exact-miner.py ledger --packets "$tmp/falsified.jsonl" --out "$tmp/nack-ledger.jsonl"
+python3 scripts/storm-exact-miner.py rank --proofs "$tmp/falsified.jsonl" --out "$tmp/ranked.jsonl"
 ```

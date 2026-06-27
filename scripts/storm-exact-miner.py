@@ -239,6 +239,19 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "falsifier_template": "set ctrl=1 and running carry c=1",
         "witness": "with cout present, ctrl=c=1 toggles the output carry at line 508",
     },
+    ("arith.rs", 524): {
+        "primitive_family": "cuccaro_forward_carry_live",
+        "support_domain": "Cuccaro forward MAJ carry after exact-dead guard is false",
+        "falsifier_template": "set x[i]=1 and y[i]=1 at a reached carry row",
+        "witness": "x[i]=y[i]=1 toggles the running carry; omission changes the following carry/sum path",
+    },
+    ("arith.rs", 537): {
+        "primitive_family": "cuccaro_reverse_carry_live",
+        "support_domain": "Cuccaro reverse carry uncompute after exact-dead guard is false",
+        "falsifier_template": "start from a live forward carry and skip the reverse carry row",
+        "witness": "the reverse CCX is required to restore the running carry lane",
+        "restoration_obligation": "skipping leaves the Cuccaro carry lane dirty",
+    },
     ("arith.rs", 1146): {
         "primitive_family": "const_chunk_drop_cout_carry_live",
         "support_domain": "final graduated constant chunk with dropped external cout",
@@ -327,6 +340,20 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "support_domain": "Gidney threaded boundary carry extraction",
         "falsifier_template": "choose ctrl=1 and top internal carry=1",
         "witness": "ctrl=1 and inner top carry=1 toggles cout; omission loses the boundary carry",
+    },
+    ("gidney.rs", 1357): {
+        "primitive_family": "gidney_erase_ccz_live",
+        "support_domain": "controlled_erase_carry_gated HMR phase correction",
+        "falsifier_template": "set ctrl=1 and both comparator top terms ta=tb=1 under the HMR condition",
+        "witness": "ctrl=ta=tb=1 stamps a required CCZ phase",
+        "phase_obligation": "omission is phase dirt unless a public phase-cancel certificate is supplied",
+    },
+    ("gidney.rs", 1416): {
+        "primitive_family": "gidney_erase_capped_ccz_live",
+        "support_domain": "controlled_erase_carry_gated_capped HMR phase correction",
+        "falsifier_template": "set ctrl=1 and both capped comparator top terms ta=tb=1 under the HMR condition",
+        "witness": "ctrl=ta=tb=1 stamps a required capped CCZ phase",
+        "phase_obligation": "omission is phase dirt unless a public phase-cancel certificate is supplied",
     },
     ("mcx.rs", 54): {
         "primitive_family": "mcx_prefix_live",
