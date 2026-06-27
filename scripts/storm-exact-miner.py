@@ -316,6 +316,12 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "falsifier_template": "choose a reached apply symbol with swp=1 and unequal coordinate limbs",
         "witness": "swp=1 with x_reg[j]=1,y_reg[j]=0 changes both coordinate registers; omission leaves the old order",
     },
+    ("gidney.rs", 1253): {
+        "primitive_family": "gidney_thread_boundary_carry_live",
+        "support_domain": "Gidney threaded boundary carry extraction",
+        "falsifier_template": "choose ctrl=1 and top internal carry=1",
+        "witness": "ctrl=1 and inner top carry=1 toggles cout; omission loses the boundary carry",
+    },
     ("mcx.rs", 54): {
         "primitive_family": "mcx_prefix_live",
         "support_domain": "two-control prefix target toggle",
