@@ -208,6 +208,12 @@ SITE_CLASSIFIERS: dict[tuple[str, int], dict[str, str]] = {
         "falsifier_template": "set a[i]=1 and b[i]=1 on a reached live bit",
         "witness": "line is emitted only when dead(i)=false; a=b=1 produces carry",
     },
+    ("arith.rs", 1860): {
+        "primitive_family": "vented_carry_live",
+        "support_domain": "vented carry creation after dead(i) guard is false",
+        "falsifier_template": "set a[i]=1 and b[i]=1 on a reached live bit",
+        "witness": "a[i]=1 and b[i]=1 toggles the vent ancilla; omission loses the carry into b[i+1]",
+    },
     ("arith.rs", 1859): {
         "primitive_family": "carry_live",
         "support_domain": "non-vented carry creation after dead(i) guard is false",

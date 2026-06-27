@@ -99,6 +99,7 @@ Updated `scripts/storm-exact-miner.py` with classifier aliases for:
 - `arith.rs:1322`
 - `arith.rs:1090`
 - `gidney.rs:1253`
+- `arith.rs:1860`
 
 Added `examples/cycle48-wall-owner-sites.example.tsv` as a regression fixture.
 
