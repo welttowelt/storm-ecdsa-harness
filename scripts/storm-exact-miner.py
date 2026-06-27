@@ -577,6 +577,12 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
         "witness": "d44cad3 arith.rs:281 is static dead-range table data, while origin rows are kept CCX across register/square arithmetic; no executable source-hook exists here",
     },
+    ("arith.rs", 258, "af5bcd7ca1721225"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound FFG_TOP29_REMAINDER_KEYS table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
+        "witness": "d44cad3 arith.rs:258 is static exact-top29 remainder key data, while origin rows are kept CCX across register/fold phases; no executable source-hook exists here",
+    },
     ("arith.rs", 895, "e70d0e40e1654d5f"): {
         "primitive_family": "const_chunk_carry_live",
         "support_domain": "source-hash-bound const-chunk carry creation row",
