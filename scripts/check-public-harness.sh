@@ -46,6 +46,7 @@ for path in \
   scripts/uncompute-window-ledger.sh \
   scripts/dirty-borrow-ledger.sh \
   scripts/dialog-codec-entropy-ledger.sh \
+  scripts/apply-overlap-ledger.sh \
   scripts/storm-exact-miner.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
@@ -60,6 +61,7 @@ for path in \
   examples/support-facts.example.jsonl \
   examples/nack-ledger.example.jsonl \
   examples/exact-skip-candidates.example.jsonl \
+  examples/apply-overlap-trace.example.txt \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
@@ -105,6 +107,7 @@ for path in \
   skills/paper-wire-recycling-lifetime-graph.md \
   skills/paper-dirty-borrowing-entanglement.md \
   skills/paper-dead-gate-elimination.md \
+  skills/apply-overlap-ledger.md \
   .agents/skills/nasqret-playbook/SKILL.md \
   .agents/skills/deepseek-pressure-test/SKILL.md \
   .agents/skills/pip-discipline/SKILL.md \
@@ -140,6 +143,7 @@ for path in \
   .agents/skills/paper-wire-recycling-lifetime-graph/SKILL.md \
   .agents/skills/paper-dirty-borrowing-entanglement/SKILL.md \
   .agents/skills/paper-dead-gate-elimination/SKILL.md \
+  .agents/skills/apply-overlap-ledger/SKILL.md \
   dashboard/fixtures/status.json; do
   need_file "$path"
 done
@@ -180,6 +184,7 @@ need_text scripts/resident-footprint-ledger.sh "resident footprint output" "Resi
 need_text scripts/uncompute-window-ledger.sh "reqomp ledger output" "Reqomp uncompute window gate"
 need_text scripts/dirty-borrow-ledger.sh "dirty borrow ledger output" "Dirty borrow entanglement gate"
 need_text scripts/dialog-codec-entropy-ledger.sh "dialog codec ledger output" "Dialog codec entropy gate"
+need_text scripts/apply-overlap-ledger.sh "apply overlap ledger output" "Apply overlap ledger"
 need_text scripts/storm-exact-miner.py "exact miner command" "trace-facts"
 need_text scripts/storm-exact-miner.py "support checker command" "support-check"
 need_text scripts/storm-exact-miner.py "falsify command" "falsify"
@@ -200,6 +205,7 @@ need_text examples/site-audit.example.tsv "site audit fixture" "src/point_add/tr
 need_text examples/support-facts.example.jsonl "support fixture" "dirty_host"
 need_text examples/nack-ledger.example.jsonl "nack ledger fixture" "nack_note"
 need_text examples/exact-skip-candidates.example.jsonl "proof packet" "proof_status"
+need_text examples/apply-overlap-trace.example.txt "apply overlap fixture" "TLM_OVERLAP_CHECK"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -243,11 +249,13 @@ need_text skills/paper-garn-kan-windowed-binary-ecdlp.md "binary field" "binary-
 need_text skills/paper-wire-recycling-lifetime-graph.md "wire recycling" "lifetime graph"
 need_text skills/paper-dirty-borrowing-entanglement.md "dirty borrow entanglement" "external entanglement"
 need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Gate Elimination"
+need_text skills/apply-overlap-ledger.md "apply overlap" "apply/codec/fold overlap"
 need_text skills/nasqret-playbook.md "route slate" "route slate"
 need_text skills/deepseek-pressure-test.md "pressure test" "pressure-test"
 need_text skills/pip-discipline.md "pip discipline" "PIP Evidence Discipline"
 need_text skills/exact-support-miner.md "exact miner" "storm-exact-miner.py"
 need_text .agents/skills/exact-support-miner/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/apply-overlap-ledger/SKILL.md "bridge" "Codex-discoverable bridge"
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
@@ -314,6 +322,38 @@ elif ! grep -q 'certified=1 unknown=0 counterexample=0' "$tmpdir/context-cert-su
   printf 'public_harness_check=fail exact_miner_context_cert_support_counts\n' >&2
   cat "$tmpdir/context-cert-support.out" >&2
   cat "$tmpdir/context-cert-support.jsonl" >&2
+  fail=1
+fi
+
+if ! scripts/apply-overlap-ledger.sh \
+  --trace examples/apply-overlap-trace.example.txt \
+  --frontier 1571592960 \
+  --q 1147 \
+  --target-q 1146 \
+  --route fixture \
+  --candidate pending_symbols >"$tmpdir/apply-overlap.out" 2>"$tmpdir/apply-overlap.err"; then
+  printf 'public_harness_check=fail apply_overlap_certified_failed\n' >&2
+  cat "$tmpdir/apply-overlap.err" >&2
+  fail=1
+elif ! grep -q 'Decision: support-certified-binder-fact' "$tmpdir/apply-overlap.out"; then
+  printf 'public_harness_check=fail apply_overlap_certified_decision\n' >&2
+  cat "$tmpdir/apply-overlap.out" >&2
+  fail=1
+fi
+
+if ! scripts/apply-overlap-ledger.sh \
+  --trace examples/apply-overlap-trace.example.txt \
+  --frontier 1571592960 \
+  --q 1147 \
+  --target-q 1146 \
+  --route fixture \
+  --candidate last_tape_window >"$tmpdir/apply-overlap-nack.out" 2>"$tmpdir/apply-overlap-nack.err"; then
+  printf 'public_harness_check=fail apply_overlap_nack_failed\n' >&2
+  cat "$tmpdir/apply-overlap-nack.err" >&2
+  fail=1
+elif ! grep -q 'Decision: overlap-nacked-read-during-fold' "$tmpdir/apply-overlap-nack.out"; then
+  printf 'public_harness_check=fail apply_overlap_nack_decision\n' >&2
+  cat "$tmpdir/apply-overlap-nack.out" >&2
   fail=1
 fi
 

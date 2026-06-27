@@ -1,0 +1,5 @@
+TLM_PROFILE peak_qubits=1147 peak_phase=tlm_apply_inverse_mod_sub_fold peak_ops_idx=25841 emitted_ops=10228095
+TLM_TAPE direction=inverse stage=forward i=254 active=1138 tape=590 pending=6 win_idx=84 codec=Triple phase=tlm_apply_inverse_mod_sub_fold
+TLM_TAPE direction=inverse stage=forward i=255 active=1142 tape=590 pending=6 win_idx=85 codec=Triple phase=tlm_apply_inverse_mod_sub_fold
+TLM_OVERLAP_CHECK candidate=pending_symbols i=255 target_phase=tlm_apply_inverse_mod_sub_fold reads_during_fold=0 restore_proof=1 phase_proof=1 support_certificate=public-pending-symbol-certificate
+TLM_OVERLAP_CHECK candidate=last_tape_window i=255 target_phase=tlm_apply_inverse_mod_sub_fold reads_during_fold=1 restore_proof=0 phase_proof=0
