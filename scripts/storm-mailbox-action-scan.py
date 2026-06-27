@@ -31,9 +31,8 @@ ASK_CUES = (
     "want me to",
     "should i",
     "should I",
-    "go-ahead",
-    "go ahead",
-    "decision",
+    "decision requested",
+    "operator decision",
     "needs storm",
     "storm-codex:",
 )
@@ -75,6 +74,11 @@ def target_hit(line: str, targets: list[str]) -> str:
     return ""
 
 
+def speaker_is_target(speaker: str, targets: list[str]) -> bool:
+    speaker = speaker.lower()
+    return any(target.lower() in speaker for target in targets)
+
+
 def ask_cue(line: str) -> str:
     if "?" in line:
         return "question-mark"
@@ -112,7 +116,7 @@ def scan(text: str, targets: list[str], context_lines: int) -> list[ReviewLine]:
 
         cue = ask_cue(line)
         target = hit or recent_target
-        if cue and target:
+        if cue and target and not speaker_is_target(current_speaker, targets):
             reviews.append(
                 ReviewLine(
                     lineno=index,
