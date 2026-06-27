@@ -577,6 +577,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
         "witness": "d44cad3 arith.rs:281 is static dead-range table data, while origin rows are kept CCX across register/square arithmetic; no executable source-hook exists here",
     },
+    ("arith.rs", 895, "e70d0e40e1654d5f"): {
+        "primitive_family": "const_chunk_carry_live",
+        "support_domain": "source-hash-bound const-chunk carry creation row",
+        "falsifier_template": "choose a reached const-chunk row with a[i]=1 and incoming carry cin_ref=1",
+        "witness": "a[i]=1 and cin_ref=1 toggles cout_ref; omission loses the const-chunk carry into later sum/cleanup",
+        "restoration_obligation": "the carry target is consumed by subsequent HMR/reset and reverse cleanup",
+    },
     ("comparator.rs", 68, "e2d291034f536196"): {
         "primitive_family": "comparator_top_carry_live",
         "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",
