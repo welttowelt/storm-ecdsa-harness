@@ -604,6 +604,13 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
         "witness": "line 1139 binds the drop-cout chunk loop whose reverse pass measures int_i and applies cz_if_bit(a[i], cin_ref, b); a[i]=cin_ref=1 under b=1 stamps a required CCZ phase",
         "phase_obligation": "omission leaves HMR deferred phase dirt even if the classical carry value path is unchanged",
     },
+    ("arith.rs", 719, "81fee66b262069d5"): {
+        "primitive_family": "erase_carry_phase_comparator_carry_live",
+        "support_domain": "source-hash-bound erase_carry_gated_zero_cin_opt comparator carry under HMR condition",
+        "falsifier_template": "choose a reached phase-recovery comparator row with hmr bit=1 and both carry controls set",
+        "witness": "line 719 pushes the HMR measurement condition before compare_geq_cin_middle rebuilds the predicate; raw rows show kept CCX carry-chain operations, and controls=1 toggles the next comparator carry",
+        "phase_obligation": "omission corrupts the phase-recovery predicate used to discharge the measured carry",
+    },
     ("codec.rs", 304, "011131e1db1721fe"): {
         "primitive_family": "dialog_codec_normalizer_live",
         "support_domain": "source-hash-bound Triple dialog-codec normalizer CCX row",
