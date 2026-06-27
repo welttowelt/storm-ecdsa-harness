@@ -625,20 +625,20 @@ SOURCE_HASH_SITE_CLASSIFIERS: dict[tuple[str, int, str], dict[str, str]] = {
     ("comparator.rs", 57, "d1a924ee4e28795f"): {
         "primitive_family": "table_origin_not_op_site",
         "support_domain": "source-hash-bound COMPARE_CIN_STRUCTURAL_DEAD_RANGES table-origin row",
-        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
-        "witness": "d44cad3 comparator.rs:57 is static compare-cin dead-range data `(1279, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable comparator CCX",
+        "witness": "d44cad3 comparator.rs:57 is static COMPARE_CIN_STRUCTURAL_DEAD_RANGES data `(1279, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
+    },
+    ("comparator.rs", 68, "e2d291034f536196"): {
+        "primitive_family": "table_origin_not_op_site",
+        "support_domain": "source-hash-bound COMPARE_CIN_STRUCTURAL_DEAD_RANGES table-origin row",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable comparator CCX",
+        "witness": "d44cad3 comparator.rs:68 is static COMPARE_CIN_STRUCTURAL_DEAD_RANGES data `(1422, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
     },
     ("comparator.rs", 89, "a0915e629bb82568"): {
         "primitive_family": "table_origin_not_op_site",
         "support_domain": "source-hash-bound COMPARE_CIN_STRUCTURAL_DEAD_RANGES table-origin row",
-        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases",
-        "witness": "d44cad3 comparator.rs:89 is static compare-cin dead-range data `(1760, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
-    },
-    ("comparator.rs", 68, "e2d291034f536196"): {
-        "primitive_family": "comparator_top_carry_live",
-        "support_domain": "source-hash-bound compare_geq_chunked_middle held top carry",
-        "falsifier_template": "choose folded controls a[i]=1 and b[i]=1 after the carry-in CX folds",
-        "witness": "after ci folds, a[i]=1,b[i]=1 toggles the next comparator carry; omission loses the comparison predicate",
+        "falsifier_template": "bind the scout row back to d44cad3 source and raw origin phases before treating it as a removable comparator CCX",
+        "witness": "d44cad3 comparator.rs:89 is static COMPARE_CIN_STRUCTURAL_DEAD_RANGES data `(1760, 0, 2)`, while origin rows are kept comparator CCX; no executable source-hook exists here",
     },
     ("square.rs", 154, "5db1c7a68cd9a333"): {
         "primitive_family": "square_cross_live",

@@ -814,8 +814,8 @@ rank	count	kind	file	line	context	source_hash
 22	4212	CCX	src/point_add/trailmix_ludicrous/fused.rs	486	none	8b76aa5ce391d117
 23	3754	CCZ	src/point_add/trailmix_ludicrous/gidney.rs	409	none	356b38b25111b2a7
 24	3364	CCX	src/point_add/trailmix_ludicrous/comparator.rs	57	none	d1a924ee4e28795f
-25	3364	CCX	src/point_add/trailmix_ludicrous/comparator.rs	89	none	a0915e629bb82568
-26	49510	CCX	src/point_add/trailmix_ludicrous/comparator.rs	68	none	e2d291034f536196
+25	49510	CCX	src/point_add/trailmix_ludicrous/comparator.rs	68	none	e2d291034f536196
+26	3364	CCX	src/point_add/trailmix_ludicrous/comparator.rs	89	none	a0915e629bb82568
 27	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	154	none	5db1c7a68cd9a333
 28	24512	CCX	src/point_add/trailmix_ludicrous/square.rs	183	none	dfd7339142550728
 EOF
