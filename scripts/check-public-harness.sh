@@ -64,6 +64,8 @@ for path in \
   scripts/storm-frontier-escape-gate.py \
   scripts/storm-square-static-gap-audit.py \
   scripts/storm-single-ccx-fanout-ledger.py \
+  scripts/storm-fanout-qstate-guard.py \
+  scripts/storm-fanout-survivor-phase-gate.py \
   scripts/storm-q1152-avgt-theorem.py \
   scripts/storm-cout-host-row-gate.py \
   scripts/storm-zero-host-accounting-gate.py \
@@ -85,6 +87,7 @@ for path in \
   examples/cycle48-audit-impact.example.json \
   examples/apply-overlap-trace.example.txt \
   examples/apply-overlap-restore-missing.example.txt \
+  examples/fanout-survivor-phase-gate.example.txt \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
@@ -114,6 +117,8 @@ for path in \
   skills/construction-package-gate.md \
   skills/frontier-escape-gate.md \
   skills/single-ccx-fanout-throughput.md \
+  skills/fanout-runpod-qstate-guard.md \
+  skills/fanout-survivor-phase-gate.md \
   skills/support-bounded-vented-dead-carry.md \
   skills/paper-gidney-constant-workspace-adder.md \
   skills/paper-mbu-modular-arithmetic.md \
@@ -158,6 +163,7 @@ for path in \
   .agents/skills/construction-package-gate/SKILL.md \
   .agents/skills/frontier-escape-gate/SKILL.md \
   .agents/skills/single-ccx-fanout-throughput/SKILL.md \
+  .agents/skills/fanout-survivor-phase-gate/SKILL.md \
   .agents/skills/paper-gidney-constant-workspace-adder/SKILL.md \
   .agents/skills/paper-mbu-modular-arithmetic/SKILL.md \
   .agents/skills/paper-hrs-dirty-constant-adder/SKILL.md \
@@ -252,12 +258,18 @@ need_text scripts/storm-square-static-gap-audit.py "square static gap audit" "sq
 need_text scripts/storm-square-static-gap-audit.py "zero bit trim decision" "no-executable-zero-bit-trim"
 need_text scripts/storm-single-ccx-fanout-ledger.py "single ccx fanout ledger" "single_ccx_fanout_ledger=pass"
 need_text scripts/storm-single-ccx-fanout-ledger.py "trusted eval nack" "trusted-eval-nack"
+need_text scripts/storm-fanout-qstate-guard.py "qstate guard" "qstate_guard=ok"
+need_text scripts/storm-fanout-survivor-phase-gate.py "survivor phase gate" "fanout_survivor_phase_gate="
+need_text scripts/storm-fanout-survivor-phase-gate.py "phase gap" "phase_gap"
 need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
 need_text patches/fanout-no-clone-d44.patch "fanout no clone patch" "rewrite_first_target_fanout\\(&ops"
 need_text skills/single-ccx-fanout-throughput.md "fanout throughput skill" "throughput helper only"
 need_text skills/single-ccx-fanout-throughput.md "fanout not winner" "not a winner"
+need_text skills/fanout-runpod-qstate-guard.md "qstate guard skill" "qstate_guard=ok"
+need_text skills/fanout-survivor-phase-gate.md "survivor phase skill" "phase-aware official eval"
 need_text .agents/skills/single-ccx-fanout-throughput/SKILL.md "bridge" "fanout-no-clone-d44.patch"
+need_text .agents/skills/fanout-survivor-phase-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
 need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
@@ -1120,6 +1132,43 @@ elif ! grep -q 'single_ccx_fanout_ledger=pass' "$tmpdir/single-ccx-fanout-ledger
      ! grep -q 'decision=trusted-eval-nack' "$tmpdir/single-ccx-fanout-ledger.out"; then
   printf 'public_harness_check=fail single_ccx_fanout_ledger_output\n' >&2
   cat "$tmpdir/single-ccx-fanout-ledger.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-fanout-survivor-phase-gate.py \
+  examples/fanout-survivor-phase-gate.example.txt \
+  >"$tmpdir/fanout-survivor-phase-gate-hold.out" \
+  2>"$tmpdir/fanout-survivor-phase-gate-hold.err"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_hold_failed\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-hold.err" >&2
+  fail=1
+elif ! grep -q 'fanout_survivor_phase_gate=hold' "$tmpdir/fanout-survivor-phase-gate-hold.out" ||
+     ! grep -q 'official_dirty=1' "$tmpdir/fanout-survivor-phase-gate-hold.out" ||
+     ! grep -q 'missing_official=1' "$tmpdir/fanout-survivor-phase-gate-hold.out" ||
+     ! grep -q 'phase_dirty=1' "$tmpdir/fanout-survivor-phase-gate-hold.out" ||
+     ! grep -q 'decision=hold_for_official_eval' "$tmpdir/fanout-survivor-phase-gate-hold.out"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_hold_output\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-hold.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/fanout-survivor-phase-gate-ready.log" <<'EOF'
+GPU prefilter CLEAN nonce=103
+official eval CLEAN nonce=103 classical=0 phase=0 ancilla=0
+EOF
+if ! python3 scripts/storm-fanout-survivor-phase-gate.py \
+  "$tmpdir/fanout-survivor-phase-gate-ready.log" \
+  --require-ready \
+  >"$tmpdir/fanout-survivor-phase-gate-ready.out" \
+  2>"$tmpdir/fanout-survivor-phase-gate-ready.err"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_ready_failed\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-ready.err" >&2
+  fail=1
+elif ! grep -q 'fanout_survivor_phase_gate=ready' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
+     ! grep -q 'official_clean=1' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
+     ! grep -q 'phase_gap=false' "$tmpdir/fanout-survivor-phase-gate-ready.out"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_ready_output\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-ready.out" >&2
   fail=1
 fi
 
