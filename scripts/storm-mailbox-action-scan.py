@@ -33,8 +33,11 @@ ASK_CUES = (
     "should I",
     "decision requested",
     "operator decision",
+    "operator call",
     "needs storm",
     "storm-codex:",
+    "storm-codex's call",
+    "go-ahead",
 )
 
 HEADER_FROM_RE = re.compile(r"^##\s+.+?\s+from:\s*([^-#\n]+?)(?:\s+-|$)", re.IGNORECASE)

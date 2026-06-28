@@ -161,6 +161,11 @@ agent instructions or used as a preflight before route work:
 - `skills/fleet-owner-claim-gate.md`: require owner, pod identity, route/range,
   active watcher/log evidence, next action, and `no_submit_ack=yes` before a
   paid instance survives audit.
+- `skills/local-heavy-compute-gate.md`: block Mac-local heavy ECDSA compute and
+  recurring watcher wrappers from laptop process snapshots.
+- `skills/candidate-validation-packet-gate.md`: check remote validation packets
+  for host, owner, ops, score edge, c/p/a, artifacts, and no-submit discipline
+  before FOR-AKASH language.
 - `skills/paper-gidney-constant-workspace-adder.md`: apply Gidney 2025
   constant-workspace adders only after a toy proof and one-callsite residual
   gate.
@@ -244,6 +249,8 @@ The bridge names are:
 - `official-fast-exit-eval`
 - `official-eval-isolation-gate`
 - `fleet-owner-claim-gate`
+- `local-heavy-compute-gate`
+- `candidate-validation-packet-gate`
 - `paper-gidney-constant-workspace-adder`
 - `paper-mbu-modular-arithmetic`
 - `paper-hrs-dirty-constant-adder`

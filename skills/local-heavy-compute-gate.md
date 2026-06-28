@@ -20,6 +20,8 @@ metadata, use:
 - Mac-local build_circuit, eval_circuit, fanout_nonce_eval, ccx_site_histogram,
   target/release programs, cargo release builds, validation wrappers, or local
   fleet loops fail the gate.
+- Mac-local recurring SSH/watch wrappers fail the gate even when they are only
+  watching remote work.
 - Unknown-host heavy commands hold until the worker records host, owner, route,
   and pid/log evidence.
 - Remote-owned studio, RunPod, or Vast work can pass this gate, but still needs
@@ -29,4 +31,4 @@ metadata, use:
 
 ## Output
 
-    local_heavy_compute_gate=<pass|hold|fail> heavy_lines=... local_heavy=... remote_heavy=... unknown_heavy=... decision=...
+    local_heavy_compute_gate=<pass|hold|fail> heavy_lines=... local_heavy=... remote_heavy=... unknown_heavy=... local_recurring=... decision=...

@@ -1,0 +1,5 @@
+ACK Validator CLAIM dirty-local-candidate skill=validation-submit-gate file=mac-local:validator/report.md next=reject no_submit_ack=no
+host=macbook-local owner=Validator source_base=d44cad3 frontier_score=1571592960
+official validation path: build_circuit then eval_circuit
+emitted_ops=10221058 qubits=1153 score=1579000000 c=1 p=0 a=0
+artifacts preserved: report.md

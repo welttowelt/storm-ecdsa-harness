@@ -36,6 +36,12 @@ REMOTE_RE = re.compile(
 )
 REMOTE_HEADER_RE = re.compile(r"^\s*(?:host|machine|scope)\s*[=:]\s*(?:studio|runpod|vast|pod|remote)\b", re.IGNORECASE | re.MULTILINE)
 ALLOW_RE = re.compile(r"\b(?:lightweight harness|check-public-harness|redaction-check|py_compile|git diff --check)\b", re.IGNORECASE)
+RECURRING_WRAPPER_RE = re.compile(
+    r"\b(?:while\s+(?:true|pgrep)|watch\s+-n|tail\s+-f|"
+    r"sleep\s+[0-9]+.*(?:ssh|runpod|vast|fleet)|"
+    r"(?:watch|scan|fleet|validation)[-_ ]loop)\b",
+    re.IGNORECASE,
+)
 
 
 def read_text(paths: Iterable[Path]) -> str:
@@ -47,6 +53,10 @@ def inspect(text: str, assume_local: bool = False) -> dict[str, object]:
     local_heavy = 0
     remote_heavy = 0
     unknown_heavy = 0
+    recurring_lines = 0
+    local_recurring = 0
+    remote_recurring = 0
+    unknown_recurring = 0
     allowed_lightweight = bool(ALLOW_RE.search(text))
     global_local = bool(LOCAL_HEADER_RE.search(text))
     global_remote = bool(REMOTE_HEADER_RE.search(text)) and not global_local
@@ -56,15 +66,25 @@ def inspect(text: str, assume_local: bool = False) -> dict[str, object]:
         stripped = line.strip()
         if not stripped:
             continue
+        line_local = bool(LOCAL_RE.search(stripped))
+        line_remote = bool(REMOTE_RE.search(stripped))
+        is_local = bool(line_local or global_local or assume_local)
+        is_remote = bool(line_remote or global_remote)
+        recurring = bool(RECURRING_WRAPPER_RE.search(stripped))
+        if recurring:
+            recurring_lines += 1
+            terms.add("recurring-wrapper")
+            if is_local:
+                local_recurring += 1
+            elif is_remote:
+                remote_recurring += 1
+            else:
+                unknown_recurring += 1
         matches = [match.group(0) for match in HEAVY_RE.finditer(stripped)]
         if not matches:
             continue
         heavy_lines.append(stripped)
         terms.update(match.lower() for match in matches)
-        line_local = bool(LOCAL_RE.search(stripped))
-        line_remote = bool(REMOTE_RE.search(stripped))
-        is_local = bool(line_local or global_local or assume_local)
-        is_remote = bool(line_remote or global_remote)
         if line_local or (is_local and not is_remote):
             local_heavy += 1
         elif is_remote:
@@ -72,10 +92,10 @@ def inspect(text: str, assume_local: bool = False) -> dict[str, object]:
         else:
             unknown_heavy += 1
 
-    if local_heavy:
+    if local_heavy or local_recurring:
         gate = "fail"
         decision = "stop-mac-local-heavy-compute"
-    elif unknown_heavy:
+    elif unknown_heavy or unknown_recurring:
         gate = "hold"
         decision = "require-host-and-owner-evidence"
     else:
@@ -89,6 +109,10 @@ def inspect(text: str, assume_local: bool = False) -> dict[str, object]:
         "local_heavy": local_heavy,
         "remote_heavy": remote_heavy,
         "unknown_heavy": unknown_heavy,
+        "recurring_lines": recurring_lines,
+        "local_recurring": local_recurring,
+        "remote_recurring": remote_recurring,
+        "unknown_recurring": unknown_recurring,
         "allowed_lightweight": allowed_lightweight,
         "terms": sorted(terms),
     }
@@ -100,6 +124,8 @@ def text_summary(row: dict[str, object]) -> str:
         f"local_heavy_compute_gate={row['gate']} "
         f"heavy_lines={row['heavy_lines']} local_heavy={row['local_heavy']} "
         f"remote_heavy={row['remote_heavy']} unknown_heavy={row['unknown_heavy']} "
+        f"recurring_lines={row['recurring_lines']} local_recurring={row['local_recurring']} "
+        f"remote_recurring={row['remote_recurring']} unknown_recurring={row['unknown_recurring']} "
         f"allowed_lightweight={str(row['allowed_lightweight']).lower()} "
         f"decision={row['decision']} terms={terms}"
     )

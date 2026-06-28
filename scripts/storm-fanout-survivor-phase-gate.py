@@ -175,7 +175,7 @@ def summarize(records: dict[str, NonceRecord]) -> dict[str, object]:
     ancilla_dirty = [row for row in dirty if (row.ancilla or 0) > 0]
 
     if clean:
-        decision = "ready_for_fresh_frontier_recheck"
+        decision = "validation_submit_gate_required"
         gate = "ready"
     elif missing:
         decision = "hold_for_official_eval"
@@ -200,6 +200,7 @@ def summarize(records: dict[str, NonceRecord]) -> dict[str, object]:
         "classical_dirty": len(classical_dirty),
         "ancilla_dirty": len(ancilla_dirty),
         "phase_gap": bool(phase_dirty),
+        "submit_authorized": False,
         "records": [
             {
                 "nonce": row.nonce,
@@ -230,7 +231,9 @@ def text_summary(summary: dict[str, object]) -> str:
     fields = " ".join(f"{key}={summary[key]}" for key in keys)
     return (
         f"fanout_survivor_phase_gate={summary['gate']} {fields} "
-        f"phase_gap={str(summary['phase_gap']).lower()} decision={summary['decision']}"
+        f"phase_gap={str(summary['phase_gap']).lower()} "
+        f"submit_authorized={str(summary['submit_authorized']).lower()} "
+        f"decision={summary['decision']}"
     )
 
 

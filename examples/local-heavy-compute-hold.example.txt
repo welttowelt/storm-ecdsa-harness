@@ -1,2 +1,3 @@
 ps 9001 ./target/release/eval_circuit
 ps 9002 cargo build --release --bin build_circuit
+ps 9003 zsh -lc 'while true; do sleep 60; done'

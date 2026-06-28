@@ -72,6 +72,7 @@ for path in \
   scripts/storm-fleet-owner-claim-gate.py \
   scripts/storm-pod-wrapper-dup-gate.py \
   scripts/storm-local-heavy-compute-gate.py \
+  scripts/storm-candidate-validation-packet-gate.py \
   examples/fleet-owner-claim-vague-token.example.txt \
   examples/official-eval-isolation-helper-storm.example.sh \
   scripts/storm-q1152-avgt-theorem.py \
@@ -109,6 +110,9 @@ for path in \
   examples/local-heavy-compute-pass.example.txt \
   examples/local-heavy-compute-fail.example.txt \
   examples/local-heavy-compute-hold.example.txt \
+  examples/candidate-validation-packet-pass.example.txt \
+  examples/candidate-validation-packet-hold.example.txt \
+  examples/candidate-validation-packet-fail.example.txt \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
@@ -147,6 +151,7 @@ for path in \
   skills/fleet-owner-claim-gate.md \
   skills/pod-wrapper-dup-gate.md \
   skills/local-heavy-compute-gate.md \
+  skills/candidate-validation-packet-gate.md \
   skills/support-bounded-vented-dead-carry.md \
   skills/paper-gidney-constant-workspace-adder.md \
   skills/paper-mbu-modular-arithmetic.md \
@@ -198,6 +203,7 @@ for path in \
   .agents/skills/fleet-owner-claim-gate/SKILL.md \
   .agents/skills/pod-wrapper-dup-gate/SKILL.md \
   .agents/skills/local-heavy-compute-gate/SKILL.md \
+  .agents/skills/candidate-validation-packet-gate/SKILL.md \
   .agents/skills/paper-gidney-constant-workspace-adder/SKILL.md \
   .agents/skills/paper-mbu-modular-arithmetic/SKILL.md \
   .agents/skills/paper-hrs-dirty-constant-adder/SKILL.md \
@@ -306,6 +312,8 @@ need_text scripts/storm-pod-wrapper-dup-gate.py "pod wrapper duplicate gate" "po
 need_text scripts/storm-pod-wrapper-dup-gate.py "duplicate eval failure" "duplicate_eval_nonce_wrapper"
 need_text scripts/storm-local-heavy-compute-gate.py "local heavy compute gate" "local_heavy_compute_gate="
 need_text scripts/storm-local-heavy-compute-gate.py "mac stop decision" "stop-mac-local-heavy-compute"
+need_text scripts/storm-candidate-validation-packet-gate.py "candidate validation packet gate" "candidate_validation_packet_gate="
+need_text scripts/storm-candidate-validation-packet-gate.py "akash handoff decision" "candidate-for-akash-handoff-no-submit"
 need_text scripts/storm-claim-ledger.py "claim ledger summary" "claim_ledger_summary"
 need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
@@ -323,6 +331,7 @@ need_text skills/fleet-owner-claim-gate.md "fleet owner claim skill" "paid insta
 need_text skills/fleet-owner-claim-gate.md "strict packet skill" "strict-single-packet"
 need_text skills/pod-wrapper-dup-gate.md "pod wrapper duplicate skill" "Duplicate GPU wrappers"
 need_text skills/local-heavy-compute-gate.md "local heavy compute skill" "Mac-local heavy compute"
+need_text skills/candidate-validation-packet-gate.md "candidate validation skill" "FOR-AKASH"
 need_text .agents/skills/single-ccx-fanout-throughput/SKILL.md "bridge" "fanout-no-clone-d44.patch"
 need_text .agents/skills/fanout-survivor-phase-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/fanout-burst-triage-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -331,6 +340,7 @@ need_text .agents/skills/official-eval-isolation-gate/SKILL.md "bridge" "Codex-d
 need_text .agents/skills/fleet-owner-claim-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/pod-wrapper-dup-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/local-heavy-compute-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
 need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
@@ -496,13 +506,17 @@ Storm-Codex: confirm whether I should produce one fresh trace or hold.
 ## 2026-06-27T00:01:00Z from: Worker-B - status
 
 Boss Storm: want me to stop the idle proof host?
+
+## 2026-06-27T00:02:00Z from: Claude-Kiln - status
+
+TL;DR: first bounded check is done. Awaiting Storm-Codex's call on whether I should produce a fresh wall-owner trace now or hold.
 EOF
 if ! python3 scripts/storm-mailbox-action-scan.py \
   --input "$tmpdir/mailbox-action-tail.md" >"$tmpdir/mailbox-action.out" 2>"$tmpdir/mailbox-action.err"; then
   printf 'public_harness_check=fail mailbox_action_scan_failed\n' >&2
   cat "$tmpdir/mailbox-action.err" >&2
   fail=1
-elif ! grep -q 'mailbox_action_scan=review count=2' "$tmpdir/mailbox-action.out"; then
+elif ! grep -q 'mailbox_action_scan=review count=3' "$tmpdir/mailbox-action.out"; then
   printf 'public_harness_check=fail mailbox_action_scan_counts\n' >&2
   cat "$tmpdir/mailbox-action.out" >&2
   fail=1
@@ -1227,7 +1241,9 @@ if ! python3 scripts/storm-fanout-survivor-phase-gate.py \
   fail=1
 elif ! grep -q 'fanout_survivor_phase_gate=ready' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
      ! grep -q 'official_clean=1' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
-     ! grep -q 'phase_gap=false' "$tmpdir/fanout-survivor-phase-gate-ready.out"; then
+     ! grep -q 'phase_gap=false' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
+     ! grep -q 'submit_authorized=false' "$tmpdir/fanout-survivor-phase-gate-ready.out" ||
+     ! grep -q 'decision=validation_submit_gate_required' "$tmpdir/fanout-survivor-phase-gate-ready.out"; then
   printf 'public_harness_check=fail fanout_survivor_phase_gate_ready_output\n' >&2
   cat "$tmpdir/fanout-survivor-phase-gate-ready.out" >&2
   fail=1
@@ -1521,6 +1537,7 @@ if python3 scripts/storm-local-heavy-compute-gate.py \
   fail=1
 elif ! grep -q 'local_heavy_compute_gate=fail' "$tmpdir/local-heavy-compute-fail.out" ||
      ! grep -q 'local_heavy=3' "$tmpdir/local-heavy-compute-fail.out" ||
+     ! grep -q 'local_recurring=1' "$tmpdir/local-heavy-compute-fail.out" ||
      ! grep -q 'stop-mac-local-heavy-compute' "$tmpdir/local-heavy-compute-fail.out"; then
   printf 'public_harness_check=fail local_heavy_compute_fail_output\n' >&2
   cat "$tmpdir/local-heavy-compute-fail.out" >&2
@@ -1538,10 +1555,62 @@ if python3 scripts/storm-local-heavy-compute-gate.py \
   fail=1
 elif ! grep -q 'local_heavy_compute_gate=hold' "$tmpdir/local-heavy-compute-hold.out" ||
      ! grep -q 'unknown_heavy=2' "$tmpdir/local-heavy-compute-hold.out" ||
+     ! grep -q 'unknown_recurring=1' "$tmpdir/local-heavy-compute-hold.out" ||
      ! grep -q 'require-host-and-owner-evidence' "$tmpdir/local-heavy-compute-hold.out"; then
   printf 'public_harness_check=fail local_heavy_compute_hold_output\n' >&2
   cat "$tmpdir/local-heavy-compute-hold.out" >&2
   cat "$tmpdir/local-heavy-compute-hold.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-candidate-validation-packet-gate.py \
+  examples/candidate-validation-packet-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/candidate-validation-packet-pass.out" \
+  2>"$tmpdir/candidate-validation-packet-pass.err"; then
+  printf 'public_harness_check=fail candidate_validation_packet_pass_failed\n' >&2
+  cat "$tmpdir/candidate-validation-packet-pass.err" >&2
+  fail=1
+elif ! grep -q 'candidate_validation_packet_gate=pass' "$tmpdir/candidate-validation-packet-pass.out" ||
+     ! grep -q 'decision=candidate-for-akash-handoff-no-submit' "$tmpdir/candidate-validation-packet-pass.out" ||
+     ! grep -q 'no_submit_ack=true' "$tmpdir/candidate-validation-packet-pass.out"; then
+  printf 'public_harness_check=fail candidate_validation_packet_pass_output\n' >&2
+  cat "$tmpdir/candidate-validation-packet-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-candidate-validation-packet-gate.py \
+  examples/candidate-validation-packet-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/candidate-validation-packet-hold.out" \
+  2>"$tmpdir/candidate-validation-packet-hold.err"; then
+  printf 'public_harness_check=fail candidate_validation_packet_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/candidate-validation-packet-hold.out" >&2
+  fail=1
+elif ! grep -q 'candidate_validation_packet_gate=hold' "$tmpdir/candidate-validation-packet-hold.out" ||
+     ! grep -q 'missing_remote_host' "$tmpdir/candidate-validation-packet-hold.out" ||
+     ! grep -q 'missing_artifact_evidence' "$tmpdir/candidate-validation-packet-hold.out"; then
+  printf 'public_harness_check=fail candidate_validation_packet_hold_output\n' >&2
+  cat "$tmpdir/candidate-validation-packet-hold.out" >&2
+  cat "$tmpdir/candidate-validation-packet-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-candidate-validation-packet-gate.py \
+  examples/candidate-validation-packet-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/candidate-validation-packet-fail.out" \
+  2>"$tmpdir/candidate-validation-packet-fail.err"; then
+  printf 'public_harness_check=fail candidate_validation_packet_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/candidate-validation-packet-fail.out" >&2
+  fail=1
+elif ! grep -q 'candidate_validation_packet_gate=fail' "$tmpdir/candidate-validation-packet-fail.out" ||
+     ! grep -q 'local_validation_packet' "$tmpdir/candidate-validation-packet-fail.out" ||
+     ! grep -q 'dirty_cpa_counts' "$tmpdir/candidate-validation-packet-fail.out" ||
+     ! grep -q 'missing_no_submit_ack' "$tmpdir/candidate-validation-packet-fail.out"; then
+  printf 'public_harness_check=fail candidate_validation_packet_fail_output\n' >&2
+  cat "$tmpdir/candidate-validation-packet-fail.out" >&2
+  cat "$tmpdir/candidate-validation-packet-fail.err" >&2
   fail=1
 fi
 
@@ -1583,6 +1652,41 @@ elif ! grep -q 'Local full run requires frontier' "$tmpdir/claim-ledger-missing-
   printf 'public_harness_check=fail claim_ledger_missing_frontier_output\n' >&2
   cat "$tmpdir/claim-ledger-missing-frontier.out" >&2
   cat "$tmpdir/claim-ledger-missing-frontier.err" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/claim-ledger-local-full-ready.jsonl" <<'EOF'
+{"agent":"Storm-Codex","ancilla":0,"avg_toffoli":"1364228.0","candidate_score":1571590656,"classical":0,"evidence_label":"Local full run","file":"score.json","frontier":"d44cad3/q1152/1571592960","frontier_score":1571592960,"kind":"CLAIM","lane":"candidate","next":"fresh-frontier","no_submit_ack":"yes","phase":0,"proof_status":"CERTIFIED","qubits":1152,"skill":"validation-submit-gate","timestamp":"2026-06-28T00:00:00Z"}
+EOF
+if ! python3 scripts/storm-claim-ledger.py validate \
+  --ledger "$tmpdir/claim-ledger-local-full-ready.jsonl" >"$tmpdir/claim-ledger-local-full-ready.out" 2>"$tmpdir/claim-ledger-local-full-ready.err"; then
+  printf 'public_harness_check=fail claim_ledger_local_full_ready_failed\n' >&2
+  cat "$tmpdir/claim-ledger-local-full-ready.err" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-claim-ledger.py summary \
+  --ledger "$tmpdir/claim-ledger-local-full-ready.jsonl" >"$tmpdir/claim-ledger-local-full-ready-summary.out" 2>"$tmpdir/claim-ledger-local-full-ready-summary.err"; then
+  printf 'public_harness_check=fail claim_ledger_local_full_ready_summary_failed\n' >&2
+  cat "$tmpdir/claim-ledger-local-full-ready-summary.err" >&2
+  fail=1
+elif ! grep -q 'local_full_submit_ready=1' "$tmpdir/claim-ledger-local-full-ready-summary.out"; then
+  printf 'public_harness_check=fail claim_ledger_local_full_ready_summary_output\n' >&2
+  cat "$tmpdir/claim-ledger-local-full-ready-summary.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/claim-ledger-local-full-dirty.jsonl" <<'EOF'
+{"agent":"Storm-Codex","ancilla":0,"avg_toffoli":"1364228.0","candidate_score":1571590656,"classical":0,"evidence_label":"Local full run","file":"score.json","frontier":"d44cad3/q1152/1571592960","frontier_score":1571592960,"kind":"CLAIM","lane":"candidate","next":"fresh-frontier","no_submit_ack":"yes","phase":1,"proof_status":"CERTIFIED","qubits":1152,"skill":"validation-submit-gate","timestamp":"2026-06-28T00:00:00Z"}
+EOF
+if python3 scripts/storm-claim-ledger.py validate \
+  --ledger "$tmpdir/claim-ledger-local-full-dirty.jsonl" >"$tmpdir/claim-ledger-local-full-dirty.out" 2>"$tmpdir/claim-ledger-local-full-dirty.err"; then
+  printf 'public_harness_check=fail claim_ledger_local_full_dirty_should_fail\n' >&2
+  cat "$tmpdir/claim-ledger-local-full-dirty.out" >&2
+  fail=1
+elif ! grep -q 'Local full run requires classical/phase/ancilla all zero' "$tmpdir/claim-ledger-local-full-dirty.err"; then
+  printf 'public_harness_check=fail claim_ledger_local_full_dirty_output\n' >&2
+  cat "$tmpdir/claim-ledger-local-full-dirty.out" >&2
+  cat "$tmpdir/claim-ledger-local-full-dirty.err" >&2
   fail=1
 fi
 

@@ -20,13 +20,14 @@ to add the local dirty-triage helper first.
 
 The gate reports one of:
 
-- ready: at least one survivor has trusted official counts 0/0/0.
+- ready: at least one survivor has official counts 0/0/0 and must enter the
+  validation-submit gate. It is not a submit authorization.
 - hold: a GPU survivor exists but no phase-aware official eval count exists.
 - nack: all official-evaluated survivors are dirty.
 - fail: no usable survivor/eval evidence was found.
 
-Only ready can move to a fresh frontier recheck. It is still not a submit
-authorization.
+Only ready can move to the validation-submit gate and fresh frontier recheck.
+It is still not a submit authorization.
 
 ## Discipline
 
@@ -43,7 +44,7 @@ authorization.
 
 ## Output Contract
 
-    fanout_survivor_phase_gate=<ready|hold|nack|fail> gpu_survivors=N official_evals=N official_clean=N official_dirty=N missing_official=N phase_dirty=N classical_dirty=N ancilla_dirty=N phase_gap=<true|false> decision=...
+    fanout_survivor_phase_gate=<ready|hold|nack|fail> gpu_survivors=N official_evals=N official_clean=N official_dirty=N missing_official=N phase_dirty=N classical_dirty=N ancilla_dirty=N phase_gap=<true|false> submit_authorized=false decision=...
 
 ## Fleet Use
 

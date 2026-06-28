@@ -2,3 +2,4 @@ host=macbook-local
 ps 4242 bash ./kiln-validate-nonce.sh 245765
 ps 4243 ./target/release/build_circuit
 ps 4244 ./target/release/fanout_nonce_eval --range [245760,445760)
+ps 4245 zsh -lc 'while true; do sleep 60; done'
