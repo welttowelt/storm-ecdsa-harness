@@ -92,6 +92,22 @@ For a real route:
 8. Public note is written only after official validation or as a clearly labeled
    non-winning research note.
 
+## Five-Loop Process Gate
+
+When the task asks for repeated Bluesky/Redsky loops with implemented findings,
+write a compact JSON packet and run:
+
+```bash
+python3 scripts/storm-bluesky-redsky-loop-gate.py \
+  examples/bluesky-redsky-loop-pass.example.json \
+  --require-implemented
+```
+
+This gives the controller a hard count of loops, implemented findings,
+verification strings, evidence labels, and any accidental compute/submit
+overclaim. It is a process-control gate only; candidate validation, compute
+unlock, and submit still use their dedicated gates.
+
 ## Minimum Gate Before Paid Compute
 
 No paid compute unless the packet answers:

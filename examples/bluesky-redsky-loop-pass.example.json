@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "route_id": "process-bluesky-redsky-five-loop",
+  "frontier": "d44cad3/q1152/1571592960",
+  "generated_at": "2026-06-28T05:20:00Z",
+  "loops": [
+    {
+      "loop": 1,
+      "finding": "Bluesky and Redsky audit packets were prose-first, so later workers could not reliably tell whether all required fields existed.",
+      "artifact": "scripts/storm-bluesky-redsky-loop-gate.py",
+      "implemented": true,
+      "implementation": "Added a JSON gate with required Bluesky and Redsky sections for every loop.",
+      "verification": "python3 scripts/storm-bluesky-redsky-loop-gate.py examples/bluesky-redsky-loop-pass.example.json --require-implemented",
+      "evidence_label": "Partial",
+      "claim_scope": "process-control",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": false,
+      "bluesky": {
+        "route_or_idea": "Make audit loops parseable before they influence worker routing.",
+        "best_case": "Workers can reuse the same packet without losing route, measurement, stop, and decision fields.",
+        "missing_measurement": "A pass/fail count of complete loops.",
+        "smallest_useful_experiment": "Validate one five-loop fixture with all required fields present.",
+        "bounded_alternative": "Keep markdown docs, but require a JSON packet beside them.",
+        "hidden_assumption": "Workers will keep JSON concise enough to review.",
+        "stop_condition": "Stop if the packet needs private logs or route secrets.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "A prose-only audit can steer fleet work.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; no validation or submit claim in this packet",
+        "evidence_label": "Partial",
+        "strongest_objection": "Prose can omit a kill gate while still sounding complete.",
+        "fastest_falsifier": "Run the JSON gate and require all fields.",
+        "failure_class": "process-drift",
+        "missing_gate": "machine-readable field completeness",
+        "decision": "measure",
+        "required_verification": "gate output reports five loops"
+      }
+    },
+    {
+      "loop": 2,
+      "finding": "Evidence labels could drift between the optimistic pass and the adversarial pass.",
+      "artifact": "scripts/storm-bluesky-redsky-loop-gate.py",
+      "implemented": true,
+      "implementation": "The gate checks allowed evidence labels and requires Redsky evidence to match the loop evidence.",
+      "verification": "mismatched labels fail with evidence_label mismatch",
+      "evidence_label": "Partial",
+      "claim_scope": "process-control",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": false,
+      "bluesky": {
+        "route_or_idea": "Keep evidence labels explicit in every loop.",
+        "best_case": "No one upgrades Partial or Prefilter into win language by accident.",
+        "missing_measurement": "Count labels across loops.",
+        "smallest_useful_experiment": "Reject a loop where Redsky and loop labels disagree.",
+        "bounded_alternative": "Summarize labels in the output line.",
+        "hidden_assumption": "A single label per loop is enough for process packets.",
+        "stop_condition": "Stop if a route needs separate labels for multiple artifacts.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "Mixed labels can still be safe if the prose explains them.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; label check is process-only",
+        "evidence_label": "Partial",
+        "strongest_objection": "Fleet readers skim labels first and may miss caveats.",
+        "fastest_falsifier": "Require exact label agreement inside the packet.",
+        "failure_class": "evidence-overclaim",
+        "missing_gate": "label consistency",
+        "decision": "measure",
+        "required_verification": "summary line includes evidence=Partial:5"
+      }
+    },
+    {
+      "loop": 3,
+      "finding": "An audit finding was not forced to name the artifact changed or the verification command.",
+      "artifact": "scripts/storm-bluesky-redsky-loop-gate.py",
+      "implemented": true,
+      "implementation": "Added implemented, artifact, implementation, and verification checks.",
+      "verification": "require-implemented mode fails any loop without implemented=true and a nonblank verification",
+      "evidence_label": "Partial",
+      "claim_scope": "process-control",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": false,
+      "bluesky": {
+        "route_or_idea": "Tie every audit insight to a concrete change.",
+        "best_case": "Five loops produce five durable changes or explicit parked findings.",
+        "missing_measurement": "Implemented and verified counts.",
+        "smallest_useful_experiment": "Require implemented=true for this run.",
+        "bounded_alternative": "Allow parked findings only when require-implemented is not set.",
+        "hidden_assumption": "The task is implementation-focused rather than exploratory.",
+        "stop_condition": "Stop if a finding cannot be scoped to a public-safe artifact.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "A finding without verification is still useful progress.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; no candidate evidence included",
+        "evidence_label": "Partial",
+        "strongest_objection": "Unverified process edits can break the harness.",
+        "fastest_falsifier": "Run py_compile and the public harness check.",
+        "failure_class": "unverified-change",
+        "missing_gate": "implementation verification",
+        "decision": "measure",
+        "required_verification": "implemented=5 and verified=5"
+      }
+    },
+    {
+      "loop": 4,
+      "finding": "A requested five-loop audit could silently become fewer loops after edits.",
+      "artifact": "scripts/storm-bluesky-redsky-loop-gate.py",
+      "implemented": true,
+      "implementation": "The gate defaults to exact five-loop validation and keeps --exact-loops configurable.",
+      "verification": "gate output includes loops=5; a one-loop overclaim fixture is checked with --exact-loops 1",
+      "evidence_label": "Partial",
+      "claim_scope": "process-control",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": false,
+      "bluesky": {
+        "route_or_idea": "Make the loop count explicit.",
+        "best_case": "The user can ask for five loops and get a verifiable five-loop artifact.",
+        "missing_measurement": "Exact loop count.",
+        "smallest_useful_experiment": "Fail packets with the wrong loop count.",
+        "bounded_alternative": "Use --exact-loops 0 for open-ended audits.",
+        "hidden_assumption": "Sequential loop numbering is the clearest low-cost check.",
+        "stop_condition": "Stop if loop count enforcement blocks a deliberate exploratory packet.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "Loop count can be trusted from the final summary alone.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; process packet only",
+        "evidence_label": "Partial",
+        "strongest_objection": "Summaries can compress away failed or skipped loops.",
+        "fastest_falsifier": "Require sequential loop numbers and the exact count.",
+        "failure_class": "loop-count-drift",
+        "missing_gate": "exact loop count",
+        "decision": "measure",
+        "required_verification": "loops=5 in gate output"
+      }
+    },
+    {
+      "loop": 5,
+      "finding": "Process packets could accidentally carry private paths, alert topics, or tokens into public repo artifacts.",
+      "artifact": "scripts/storm-bluesky-redsky-loop-gate.py",
+      "implemented": true,
+      "implementation": "Added forbidden-text checks for common token prefixes, private home paths, mailbox path, alert topic, and private-key blocks.",
+      "verification": "redaction-check plus loop-gate forbidden-text scan",
+      "evidence_label": "Partial",
+      "claim_scope": "process-control",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": false,
+      "bluesky": {
+        "route_or_idea": "Let workers publish public-safe process packets.",
+        "best_case": "The repo can preserve learnings without exposing private coordination surfaces.",
+        "missing_measurement": "Forbidden-text scan result.",
+        "smallest_useful_experiment": "Scan every string in the JSON packet.",
+        "bounded_alternative": "Keep sensitive state in private handoff files and cite only public-safe summaries.",
+        "hidden_assumption": "The forbidden patterns cover the common leak classes.",
+        "stop_condition": "Stop and redact if a packet needs private raw evidence.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "Audit packets are safe because they are process-level.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; public-boundary scan is independent of candidate state",
+        "evidence_label": "Partial",
+        "strongest_objection": "Process notes often quote exact private paths or alert topics.",
+        "fastest_falsifier": "Scan all strings before accepting the packet.",
+        "failure_class": "public-boundary-leak",
+        "missing_gate": "public-safe redaction scan",
+        "decision": "measure",
+        "required_verification": "no forbidden_text errors"
+      }
+    }
+  ]
+}

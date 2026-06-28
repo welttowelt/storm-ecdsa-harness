@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "route_id": "process-overclaim-demo",
+  "frontier": "d44cad3/q1152/1571592960",
+  "generated_at": "2026-06-28T05:20:00Z",
+  "loops": [
+    {
+      "loop": 1,
+      "finding": "Overclaim demo should fail because submit language is enabled without a full clean validation packet.",
+      "artifact": "examples/bluesky-redsky-loop-overclaim.example.json",
+      "implemented": true,
+      "implementation": "Fixture intentionally leaves submit prerequisites absent.",
+      "verification": "storm-bluesky-redsky-loop-gate.py must fail this fixture.",
+      "evidence_label": "Partial",
+      "claim_scope": "submit-gate",
+      "compute_dispatch_allowed": false,
+      "submit_language_allowed": true,
+      "bluesky": {
+        "route_or_idea": "Let a process packet use submit language after a promising audit.",
+        "best_case": "The team notices promising work quickly.",
+        "missing_measurement": "Official full validation.",
+        "smallest_useful_experiment": "Try the gate on this overclaim fixture.",
+        "bounded_alternative": "Keep the packet as Partial and route it to validation.",
+        "hidden_assumption": "Partial evidence can stand in for official clean validation.",
+        "stop_condition": "Stop if no Local full run 0/0/0 exists.",
+        "decision": "measure"
+      },
+      "redsky": {
+        "route_or_claim": "Partial process evidence can use submit language.",
+        "current_public_truth_checked": "frontier d44cad3/q1152/1571592960; no official clean validation in fixture",
+        "evidence_label": "Partial",
+        "strongest_objection": "Submit language requires a clean local full run and fresh frontier recheck.",
+        "fastest_falsifier": "Gate this fixture.",
+        "failure_class": "submit-overclaim",
+        "missing_gate": "Local full run 0/0/0 plus score below frontier",
+        "decision": "kill",
+        "required_verification": "fixture fails with submit language errors"
+      }
+    }
+  ]
+}

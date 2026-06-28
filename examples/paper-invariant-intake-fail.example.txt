@@ -1,0 +1,5 @@
+ACK researcher NACK paper-only-scout route_id=fixture-paper-invariant-fail owner=researcher next=no-compute host=studio no_submit_ack=yes
+paper_url=http://arxiv.org/abs/2510.23212v1 skill_name=paper-only-adder-scout
+source_base=d44cad3 frontier_score=1571592960 q=1152 evidence_label=Paper score expected_avgT_delta=0
+paper_only=yes scored_IR_effect=no_score_effect support_status=COUNTEREXAMPLE proof_status=COUNTEREXAMPLE
+launch pods for residual benchmark after paper scout

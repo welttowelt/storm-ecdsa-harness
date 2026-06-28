@@ -39,6 +39,7 @@ for path in \
   .agents/skills/bluesky-audit/SKILL.md \
   .agents/skills/redsky-audit/SKILL.md \
   docs/production-shape.md \
+  docs/bluesky-redsky-loop-gate-2026-06-28.md \
   scripts/active-volume-ledger.sh \
   scripts/pebble-memory-ledger.sh \
   scripts/vandaele-comparator-ledger.sh \
@@ -51,6 +52,7 @@ for path in \
   scripts/storm-exact-miner.py \
   scripts/storm-claim-ledger.py \
   scripts/storm-audit-impact.py \
+  scripts/storm-bluesky-redsky-loop-gate.py \
   scripts/storm-mailbox-action-scan.py \
   scripts/storm-wall-owner-summary.py \
   scripts/storm-source-certificate-scout.py \
@@ -87,6 +89,7 @@ for path in \
   scripts/storm-dead-drop-fixedpoint-gate.py \
   scripts/storm-route-compare-admission.py \
   scripts/storm-ffg-pair-proof-gate.py \
+  scripts/storm-paper-invariant-intake-gate.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
   examples/mailbox-entry.example.md \
@@ -101,6 +104,8 @@ for path in \
   examples/nack-ledger.example.jsonl \
   examples/exact-skip-candidates.example.jsonl \
   examples/cycle48-audit-impact.example.json \
+  examples/bluesky-redsky-loop-pass.example.json \
+  examples/bluesky-redsky-loop-overclaim.example.json \
   examples/apply-overlap-trace.example.txt \
   examples/apply-overlap-restore-missing.example.txt \
   examples/fanout-survivor-phase-gate.example.txt \
@@ -140,6 +145,9 @@ for path in \
   examples/ffg-pair-proof-pass.example.txt \
   examples/ffg-pair-proof-hold.example.txt \
   examples/ffg-pair-proof-fail.example.txt \
+  examples/paper-invariant-intake-pass.example.txt \
+  examples/paper-invariant-intake-hold.example.txt \
+  examples/paper-invariant-intake-fail.example.txt \
   examples/compute-restart-pass.example.txt \
   examples/compute-restart-hold.example.txt \
   examples/compute-restart-fail.example.txt \
@@ -152,6 +160,7 @@ for path in \
   docs/exact-support-miner.md \
   docs/bluesky-redsky-ffg-pair-complete-toy-2026-06-28.md \
   docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md \
+  docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
   operators/codex-storm.md \
   operators/deep-storm.md \
@@ -213,6 +222,7 @@ for path in \
   skills/paper-reqomp-space-constrained-uncompute.md \
   skills/paper-remaud-ancilla-free-adder.md \
   skills/paper-takahashi-no-ancilla-adder.md \
+  skills/paper-invariant-intake-gate.md \
   skills/paper-roetteler-ecdlp-resource-estimate.md \
   skills/paper-garn-kan-windowed-binary-ecdlp.md \
   skills/paper-wire-recycling-lifetime-graph.md \
@@ -271,6 +281,7 @@ for path in \
   .agents/skills/paper-reqomp-space-constrained-uncompute/SKILL.md \
   .agents/skills/paper-remaud-ancilla-free-adder/SKILL.md \
   .agents/skills/paper-takahashi-no-ancilla-adder/SKILL.md \
+  .agents/skills/paper-invariant-intake-gate/SKILL.md \
   .agents/skills/paper-roetteler-ecdlp-resource-estimate/SKILL.md \
   .agents/skills/paper-garn-kan-windowed-binary-ecdlp/SKILL.md \
   .agents/skills/paper-wire-recycling-lifetime-graph/SKILL.md \
@@ -312,6 +323,7 @@ need_text .agents/skills/redsky-audit/SKILL.md "bridge" "Codex-discoverable brid
 need_text docs/production-shape.md "storm production" "STORM harness in production"
 need_text docs/production-shape.md "prefilter label" "Prefilter"
 need_text docs/production-shape.md "private boundary" "private fleet config"
+need_text docs/bluesky-redsky-loop-gate-2026-06-28.md "five-loop gate doc" "implemented=5 verified=5"
 need_text scripts/active-volume-ledger.sh "square ledger output" "SQUARE active-volume gate"
 need_text scripts/pebble-memory-ledger.sh "pebble ledger output" "Reversible pebbling memory gate"
 need_text scripts/pebble-memory-ledger.sh "trace ledger" "TLM_TAPE"
@@ -330,6 +342,8 @@ need_text scripts/storm-exact-miner.py "ledger command" "ledger"
 need_text scripts/storm-exact-miner.py "public safety scan" "redaction_risk"
 need_text scripts/storm-exact-miner.py "Gidney trace context decoding" "trace_context_family"
 need_text scripts/storm-audit-impact.py "machine-readable audit metrics" "unknown_weight_abs_avgT_delta"
+need_text scripts/storm-bluesky-redsky-loop-gate.py "bluesky redsky loop gate" "bluesky_redsky_loop_gate="
+need_text scripts/storm-bluesky-redsky-loop-gate.py "compute dispatch guard" "compute_dispatch_allowed"
 need_text scripts/storm-mailbox-action-scan.py "mailbox direct ask scanner" "mailbox_action_scan"
 need_text scripts/storm-wall-owner-summary.py "wall owner summary" "wall_owner_summary=pass"
 need_text scripts/storm-source-certificate-scout.py "source certificate scout" "source_certificate_scout=pass"
@@ -391,6 +405,8 @@ need_text scripts/storm-compute-unlock-gate.py "closed compute failure" "compute
 need_text scripts/storm-claim-ledger.py "claim ledger summary" "claim_ledger_summary"
 need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
+need_text scripts/storm-paper-invariant-intake-gate.py "paper invariant intake gate" "paper_invariant_intake_gate="
+need_text scripts/storm-paper-invariant-intake-gate.py "source backed skill review" "source-backed-skill-review-no-compute"
 need_text patches/fanout-no-clone-d44.patch "fanout no clone patch" "rewrite_first_target_fanout\\(&ops"
 need_text patches/eval-fast-exit-dirty-triage.patch "fast exit patch" "ISLAND_FAST_EXIT"
 need_text patches/eval-fast-exit-dirty-triage.patch "tested shots" "tested_shots"
@@ -466,6 +482,7 @@ need_text examples/support-facts.example.jsonl "support fixture" "dirty_host"
 need_text examples/nack-ledger.example.jsonl "nack ledger fixture" "nack_note"
 need_text examples/exact-skip-candidates.example.jsonl "proof packet" "proof_status"
 need_text examples/cycle48-audit-impact.example.json "machine-readable improvement" "ranked_unknown_rows_reduction_pct"
+need_text examples/bluesky-redsky-loop-pass.example.json "five-loop process fixture" "process-bluesky-redsky-five-loop"
 need_text examples/ffg-pair-complete-no-recompute.example.txt "ffg no recompute fixture" "no-recompute-pair-complete-nack"
 need_text examples/ffg-pair-complete-recompute-hold.example.txt "ffg recompute fixture" "recompute-plan-needs-source-phase-score-proof"
 need_text examples/apply-overlap-trace.example.txt "apply overlap fixture" "TLM_OVERLAP_CHECK"
@@ -475,6 +492,9 @@ need_text examples/apply-overlap-restore-missing.example.txt "apply overlap tape
 need_text examples/ffg-pair-proof-pass.example.txt "ffg pair pass fixture" "pair_complete=yes"
 need_text examples/ffg-pair-proof-hold.example.txt "ffg pair hold fixture" "candidate"
 need_text examples/ffg-pair-proof-fail.example.txt "ffg pair fail fixture" "covered_calls=192"
+need_text examples/paper-invariant-intake-pass.example.txt "paper invariant pass fixture" "source_backed=yes"
+need_text examples/paper-invariant-intake-hold.example.txt "paper invariant hold fixture" "complete-source-hash"
+need_text examples/paper-invariant-intake-fail.example.txt "paper invariant fail fixture" "paper_only=yes"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -487,6 +507,8 @@ need_text docs/bluesky-redsky-ffg-pair-complete-toy-2026-06-28.md "ffg pair comp
 need_text docs/bluesky-redsky-ffg-pair-complete-toy-2026-06-28.md "ffg no compute" "No candidate, no official clean run"
 need_text docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md "ffg pair proof audit" "FFG Pair Proof Gate"
 need_text docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md "ffg proof no compute" "no compute unlock"
+need_text docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md "paper invariant audit" "Paper Invariant Intake"
+need_text docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md "paper invariant no compute" "does not open residual"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "current source" "f8e215b"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "no submit gate" "No clean winning candidate"
 need_text operators/kimi-storm.md "kimi boss" "operator boss"
@@ -536,6 +558,9 @@ need_text skills/paper-dirty-borrowing-entanglement.md "dirty borrow entanglemen
 need_text skills/paper-dead-gate-elimination.md "dead gate elimination" "Dead Gate Elimination"
 need_text skills/paper-score-condition-discount.md "score condition discount" "Score Condition Discount"
 need_text skills/paper-score-condition-discount.md "average toffoli scorer" "average-Toffoli"
+need_text skills/paper-invariant-intake-gate.md "paper invariant intake skill" "Paper Invariant Intake Gate"
+need_text skills/paper-invariant-intake-gate.md "paper invariant no compute" "no skill card, route, compute"
+need_text .agents/skills/paper-invariant-intake-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text skills/zero-host-accounting.md "zero host accounting" "Zero Host Accounting"
 need_text skills/zero-host-accounting.md "source accounting nack" "source-accounting-nack"
 need_text skills/dead-drop-fixedpoint.md "dead drop fixed point" "Dead-Drop Fixed Point"
@@ -2295,6 +2320,40 @@ elif ! grep -q 'Local full run requires classical/phase/ancilla all zero' "$tmpd
   fail=1
 fi
 
+if ! python3 scripts/storm-bluesky-redsky-loop-gate.py \
+  examples/bluesky-redsky-loop-pass.example.json \
+  --require-implemented >"$tmpdir/bluesky-redsky-loop-pass.out" 2>"$tmpdir/bluesky-redsky-loop-pass.err"; then
+  printf 'public_harness_check=fail bluesky_redsky_loop_pass_failed\n' >&2
+  cat "$tmpdir/bluesky-redsky-loop-pass.out" >&2
+  cat "$tmpdir/bluesky-redsky-loop-pass.err" >&2
+  fail=1
+elif ! grep -q 'bluesky_redsky_loop_gate=pass' "$tmpdir/bluesky-redsky-loop-pass.out" ||
+     ! grep -q 'loops=5' "$tmpdir/bluesky-redsky-loop-pass.out" ||
+     ! grep -q 'implemented=5' "$tmpdir/bluesky-redsky-loop-pass.out" ||
+     ! grep -q 'verified=5' "$tmpdir/bluesky-redsky-loop-pass.out" ||
+     ! grep -q 'compute_dispatch_allowed=0' "$tmpdir/bluesky-redsky-loop-pass.out" ||
+     ! grep -q 'submit_language_allowed=0' "$tmpdir/bluesky-redsky-loop-pass.out"; then
+  printf 'public_harness_check=fail bluesky_redsky_loop_pass_output\n' >&2
+  cat "$tmpdir/bluesky-redsky-loop-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-bluesky-redsky-loop-gate.py \
+  examples/bluesky-redsky-loop-overclaim.example.json \
+  --exact-loops 1 \
+  --require-implemented >"$tmpdir/bluesky-redsky-loop-overclaim.out" 2>"$tmpdir/bluesky-redsky-loop-overclaim.err"; then
+  printf 'public_harness_check=fail bluesky_redsky_loop_overclaim_should_fail\n' >&2
+  cat "$tmpdir/bluesky-redsky-loop-overclaim.out" >&2
+  fail=1
+elif ! grep -q 'bluesky_redsky_loop_gate=fail' "$tmpdir/bluesky-redsky-loop-overclaim.out" ||
+     ! grep -q 'submit language requires Local full run evidence' "$tmpdir/bluesky-redsky-loop-overclaim.err" ||
+     ! grep -q 'submit language missing true fresh_frontier_recheck' "$tmpdir/bluesky-redsky-loop-overclaim.err"; then
+  printf 'public_harness_check=fail bluesky_redsky_loop_overclaim_output\n' >&2
+  cat "$tmpdir/bluesky-redsky-loop-overclaim.out" >&2
+  cat "$tmpdir/bluesky-redsky-loop-overclaim.err" >&2
+  fail=1
+fi
+
 cat >"$tmpdir/q1152-avgt-sim.rs" <<'EOF'
 match op.kind {
     OperationType::CCZ | OperationType::CCX => {
@@ -2377,6 +2436,62 @@ elif ! grep -q 'q1152_avgt_theorem=pass' "$tmpdir/q1152-avgt-theorem.out" ||
      ! grep -q 'decision=source-theorem-packet' "$tmpdir/q1152-avgt-theorem.out"; then
   printf 'public_harness_check=fail q1152_avgt_theorem_output\n' >&2
   cat "$tmpdir/q1152-avgt-theorem.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-paper-invariant-intake-gate.py \
+  examples/paper-invariant-intake-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/paper-invariant-intake-pass.out" \
+  2>"$tmpdir/paper-invariant-intake-pass.err"; then
+  printf 'public_harness_check=fail paper_invariant_intake_pass_failed\n' >&2
+  cat "$tmpdir/paper-invariant-intake-pass.err" >&2
+  fail=1
+elif ! grep -q 'paper_invariant_intake_gate=pass' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'source_hash_bound=true' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'candidate_hash_bound=true' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'source_backed=true' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'score_visible_effect=true' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'certified=true' "$tmpdir/paper-invariant-intake-pass.out" ||
+     ! grep -q 'decision=source-backed-skill-review-no-compute' "$tmpdir/paper-invariant-intake-pass.out"; then
+  printf 'public_harness_check=fail paper_invariant_intake_pass_output\n' >&2
+  cat "$tmpdir/paper-invariant-intake-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-paper-invariant-intake-gate.py \
+  examples/paper-invariant-intake-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/paper-invariant-intake-hold.out" \
+  2>"$tmpdir/paper-invariant-intake-hold.err"; then
+  printf 'public_harness_check=fail paper_invariant_intake_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/paper-invariant-intake-hold.out" >&2
+  fail=1
+elif ! grep -q 'paper_invariant_intake_gate=hold' "$tmpdir/paper-invariant-intake-hold.out" ||
+     ! grep -q 'missing_source_hash' "$tmpdir/paper-invariant-intake-hold.out" ||
+     ! grep -q 'missing_candidate_hash' "$tmpdir/paper-invariant-intake-hold.out"; then
+  printf 'public_harness_check=fail paper_invariant_intake_hold_output\n' >&2
+  cat "$tmpdir/paper-invariant-intake-hold.out" >&2
+  cat "$tmpdir/paper-invariant-intake-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-paper-invariant-intake-gate.py \
+  examples/paper-invariant-intake-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/paper-invariant-intake-fail.out" \
+  2>"$tmpdir/paper-invariant-intake-fail.err"; then
+  printf 'public_harness_check=fail paper_invariant_intake_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/paper-invariant-intake-fail.out" >&2
+  fail=1
+elif ! grep -q 'paper_invariant_intake_gate=fail' "$tmpdir/paper-invariant-intake-fail.out" ||
+     ! grep -q 'paper_only_scout' "$tmpdir/paper-invariant-intake-fail.out" ||
+     ! grep -q 'no_score_visible_ir_effect' "$tmpdir/paper-invariant-intake-fail.out" ||
+     ! grep -q 'support_or_proof_counterexample' "$tmpdir/paper-invariant-intake-fail.out" ||
+     ! grep -q 'premature_compute_or_residual_request' "$tmpdir/paper-invariant-intake-fail.out"; then
+  printf 'public_harness_check=fail paper_invariant_intake_fail_output\n' >&2
+  cat "$tmpdir/paper-invariant-intake-fail.out" >&2
+  cat "$tmpdir/paper-invariant-intake-fail.err" >&2
   fail=1
 fi
 

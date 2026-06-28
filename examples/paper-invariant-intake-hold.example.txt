@@ -1,0 +1,6 @@
+ACK researcher CLAIM paper-model-pass route_id=fixture-paper-invariant-hold owner=researcher next=complete-source-hash host=studio no_submit_ack=yes
+paper_url=http://arxiv.org/abs/2401.17921v3 skill_name=paper-fixture-source-invariant
+source_base=d44cad3 source_backed=yes
+frontier_score=1571592960 q=1152 evidence_label=Prefilter expected_avgT_delta=-1
+source_location=src/point_add/trailmix_ludicrous/gcd.rs:1446 local_invariant=measured_condition_masks_scored_ccx
+scored_IR_effect=classically_discount_CCX_CCZ condition_source=measured_bit support_status=CERTIFIED proof_status=CERTIFIED

@@ -52,3 +52,16 @@ Bluesky audit:
 
 Bluesky does not approve compute or publication by itself. A route still needs a
 validator, owner, budget, kill gate, and evidence label before it can advance.
+
+For multi-pass process hardening, pair Bluesky with Redsky and emit a
+machine-readable packet through:
+
+```bash
+python3 scripts/storm-bluesky-redsky-loop-gate.py \
+  examples/bluesky-redsky-loop-pass.example.json \
+  --require-implemented
+```
+
+That gate checks loop count, required fields, evidence labels, implementation
+status, verification text, and public-boundary leakage. It still does not
+authorize compute or submit.

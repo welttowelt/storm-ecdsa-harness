@@ -55,3 +55,16 @@ Redsky audit:
 
 Do not allow win language, paid compute, or public claims until the route
 survives the required verification and any missing gate is closed.
+
+For repeated Bluesky/Redsky loops, require a machine-readable packet before the
+result steers workers:
+
+```bash
+python3 scripts/storm-bluesky-redsky-loop-gate.py \
+  examples/bluesky-redsky-loop-pass.example.json \
+  --require-implemented
+```
+
+The loop gate fails on missing Redsky fields, stale public-truth placeholders,
+evidence-label mismatch, submit overclaim, ungated compute dispatch, and common
+private-state leaks.

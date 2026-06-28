@@ -115,6 +115,9 @@ agent instructions or used as a preflight before route work:
   before deciding whether to invest.
 - `skills/redsky-audit.md`: try to kill a route with stale-truth, evidence,
   validator, economics, and gate checks.
+- `scripts/storm-bluesky-redsky-loop-gate.py`: validate a five-loop
+  Bluesky/Redsky process packet with implemented findings and no compute/submit
+  overclaim.
 - `skills/pip-discipline.md`: use the English/PIP-derived evidence discipline
   after repeated failure, passive handoff, or unverified completion claims. This
   repo imports only the local prompt-card discipline, not plugin hooks,
@@ -220,6 +223,9 @@ agent instructions or used as a preflight before route work:
   suffixes as lower-Q pressure relief with a strict Toffoli gate.
 - `skills/paper-takahashi-no-ancilla-adder.md`: use classic no-ancilla addition
   as a suffix-only fallback baseline.
+- skills/paper-invariant-intake-gate.md: block paper-only scout hits and admit
+  only source-backed, candidate-hash-bound, certified local invariants to
+  skill-card review, without compute authority.
 - `skills/paper-roetteler-ecdlp-resource-estimate.md`: ground prime-field ECDLP
   architecture ideas in gate-level point-add validation.
 - `skills/paper-garn-kan-windowed-binary-ecdlp.md`: borrow exact exceptional-case

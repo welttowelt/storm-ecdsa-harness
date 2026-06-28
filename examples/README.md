@@ -20,6 +20,8 @@ Use them to teach agents the workflow:
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or
   compute language,
+- paper-invariant fixtures block scout-only hits before skill-card or compute
+  language,
 - candidate validation packets fail stale source bases before handoff language,
 - scanner output stays `Prefilter` until official validation passes.
 
