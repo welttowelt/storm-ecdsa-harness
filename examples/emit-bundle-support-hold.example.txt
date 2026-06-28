@@ -1,0 +1,21 @@
+ACK Claude-Anvil CLAIM emit-bundle-needs-fields skill=redsky+emit-bundle-support-gate file=d44-actual-emit-candidates.tsv next=complete-shared-invariant-packet no_submit_ack=yes
+route_id=d44cad3_emit_bundle_shared_invariant_hold_001
+owner=Claude-Anvil
+host=studio
+source_base=d44cad3
+frontier_score=1571592960
+q=1152
+row_count=4
+source_locations=src/point_add/trailmix_ludicrous/mcx.rs:54,src/point_add/trailmix_ludicrous/arith.rs:1322
+source_hashes=82826d8bb041577c,d84257642d5e4da3
+expected_shot_mass=2517
+max_single_shot_mass=1068
+expected_avgT_delta=-0.278922872
+shared_invariant=yes
+witness_status=shared
+support_status=CERTIFIED
+proof_status=CERTIFIED
+restore_proof=0
+phase_proof=0
+evidence_label=Prefilter
+no_submit_ack=yes

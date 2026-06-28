@@ -1,0 +1,23 @@
+ACK Claude-Anvil NACK emit-bundle-counterexample skill=redsky+emit-bundle-support-gate file=/tmp/anvil_mass_target_packet.txt next=close-emit-bundle no_submit_ack=yes
+route_id=d44cad3_emit_bundle_shared_invariant_close_001
+owner=Claude-Anvil
+host=studio
+source_base=d44cad3
+frontier_score=1571592960
+q=1152
+row_count=7
+source_locations=src/point_add/trailmix_ludicrous/mcx.rs:54,src/point_add/trailmix_ludicrous/arith.rs:1322,src/point_add/trailmix_ludicrous/codec.rs:47
+source_hashes=82826d8bb041577c,d84257642d5e4da3,4717999dc7e89dbf
+candidate_index_hash=05493b06fc6e7be1ab790a6c7b6ee09d9282baa3214f471d2ab59729a3b39a71
+expected_shot_mass=2517
+max_single_shot_mass=1068
+expected_avgT_delta=0
+shared_invariant=no
+witness_status=witnesses_differ
+support_status=COUNTEREXAMPLE
+proof_status=COUNTEREXAMPLE
+restore_proof=1
+phase_proof=1
+closure_reason=witnesses_differ_across_rows
+evidence_label=Counterexample
+no_submit_ack=yes

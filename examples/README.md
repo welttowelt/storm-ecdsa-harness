@@ -22,6 +22,8 @@ Use them to teach agents the workflow:
   default-on remainder rows and missing-proof holds,
 - qoffset host-accounting fixtures separate certified source-integrated packets,
   counterexample closures, incomplete packets, and proof-unknown NACKs,
+- emit-bundle fixtures separate certified shared-invariant bundles from
+  counterexample closures, incomplete packets, and unsafe single-row claims,
 - FFG pair-complete fixtures distinguish no-recompute NACKs from recompute
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or

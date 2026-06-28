@@ -82,6 +82,7 @@ for path in \
   scripts/storm-source-row-routing-gate.py \
   scripts/storm-gidney-ccz-residual-gate.py \
   scripts/storm-qoffset-host-accounting-gate.py \
+  scripts/storm-emit-bundle-support-gate.py \
   scripts/storm-transcript-overlap-gate.py \
   scripts/storm-compute-restart-gate.py \
   scripts/storm-compute-unlock-gate.py \
@@ -157,6 +158,10 @@ for path in \
   examples/qoffset-host-accounting-closure.example.txt \
   examples/qoffset-host-accounting-hold.example.txt \
   examples/qoffset-host-accounting-fail.example.txt \
+  examples/emit-bundle-support-pass.example.txt \
+  examples/emit-bundle-support-closure.example.txt \
+  examples/emit-bundle-support-hold.example.txt \
+  examples/emit-bundle-support-fail.example.txt \
   examples/ffg-pair-complete-no-recompute.example.txt \
   examples/ffg-pair-complete-recompute-hold.example.txt \
   examples/transcript-overlap-pass.example.txt \
@@ -230,6 +235,7 @@ for path in \
   skills/source-row-routing-gate.md \
   skills/gidney-ccz-residual-gate.md \
   skills/qoffset-host-accounting-gate.md \
+  skills/emit-bundle-support-gate.md \
   skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
   skills/compute-restart-gate.md \
@@ -294,6 +300,7 @@ for path in \
   .agents/skills/source-row-routing-gate/SKILL.md \
   .agents/skills/gidney-ccz-residual-gate/SKILL.md \
   .agents/skills/qoffset-host-accounting-gate/SKILL.md \
+  .agents/skills/emit-bundle-support-gate/SKILL.md \
   .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
   .agents/skills/compute-restart-gate/SKILL.md \
@@ -435,6 +442,8 @@ need_text scripts/storm-gidney-ccz-residual-gate.py "gidney ccz residual gate" "
 need_text scripts/storm-gidney-ccz-residual-gate.py "default remainder failure" "default_on_remainder_not_new_edge"
 need_text scripts/storm-qoffset-host-accounting-gate.py "qoffset host accounting gate" "qoffset_host_accounting_gate="
 need_text scripts/storm-qoffset-host-accounting-gate.py "qoffset unknown close failure" "proof_unknown_close_as_nack"
+need_text scripts/storm-emit-bundle-support-gate.py "emit bundle support gate" "emit_bundle_support_gate="
+need_text scripts/storm-emit-bundle-support-gate.py "bundle mass bar" "bundle_mass_below_rounding_bar"
 need_text scripts/storm-transcript-overlap-gate.py "transcript overlap gate" "transcript_overlap_gate="
 need_text scripts/storm-transcript-overlap-gate.py "source theorem review decision" "source-theorem-review-no-compute"
 need_text scripts/storm-transcript-overlap-gate.py "score edge failure" "score_no_edge"
@@ -484,6 +493,8 @@ need_text skills/gidney-ccz-residual-gate.md "gidney ccz residual skill" "Gidney
 need_text skills/gidney-ccz-residual-gate.md "gidney ccz no auto compute" "no automatic compute"
 need_text skills/qoffset-host-accounting-gate.md "qoffset host accounting skill" "Qoffset Host Accounting Gate"
 need_text skills/qoffset-host-accounting-gate.md "qoffset no compute" "no-compute"
+need_text skills/emit-bundle-support-gate.md "emit bundle support skill" "Emit Bundle Support Gate"
+need_text skills/emit-bundle-support-gate.md "emit bundle no compute" "no-compute"
 need_text skills/transcript-overlap-gate.md "transcript overlap skill" "transcript peak-overlap"
 need_text skills/transcript-overlap-gate.md "active only failure" "active-only"
 need_text skills/compute-restart-gate.md "compute restart skill" "scanner restart"
@@ -508,6 +519,7 @@ need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge candidate h
 need_text .agents/skills/source-row-routing-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/gidney-ccz-residual-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/qoffset-host-accounting-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/emit-bundle-support-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/transcript-overlap-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-unlock-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-restart-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -568,6 +580,10 @@ need_text examples/qoffset-host-accounting-pass.example.txt "qoffset pass fixtur
 need_text examples/qoffset-host-accounting-closure.example.txt "qoffset closure fixture" "qoffset-host-accounting-counterexample"
 need_text examples/qoffset-host-accounting-hold.example.txt "qoffset hold fixture" "restore_proof=0"
 need_text examples/qoffset-host-accounting-fail.example.txt "qoffset fail fixture" "proof_status=UNPROVEN"
+need_text examples/emit-bundle-support-pass.example.txt "emit bundle pass fixture" "emit-bundle-certified"
+need_text examples/emit-bundle-support-closure.example.txt "emit bundle closure fixture" "emit-bundle-counterexample"
+need_text examples/emit-bundle-support-hold.example.txt "emit bundle hold fixture" "complete-shared-invariant-packet"
+need_text examples/emit-bundle-support-fail.example.txt "emit bundle fail fixture" "launch runpod gpu scanner"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -806,6 +822,67 @@ elif ! grep -q 'qoffset_host_accounting_gate=fail' "$tmpdir/qoffset-host-account
      ! grep -q 'premature_compute_or_residual_request' "$tmpdir/qoffset-host-accounting-fail.out"; then
   printf 'public_harness_check=fail qoffset_host_accounting_fail_output\n' >&2
   cat "$tmpdir/qoffset-host-accounting-fail.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-emit-bundle-support-gate.py \
+  examples/emit-bundle-support-pass.example.txt \
+  --require-pass >"$tmpdir/emit-bundle-support-pass.out" 2>"$tmpdir/emit-bundle-support-pass.err"; then
+  printf 'public_harness_check=fail emit_bundle_support_pass_failed\n' >&2
+  cat "$tmpdir/emit-bundle-support-pass.err" >&2
+  cat "$tmpdir/emit-bundle-support-pass.out" >&2
+  fail=1
+elif ! grep -q 'emit_bundle_support_gate=pass' "$tmpdir/emit-bundle-support-pass.out" ||
+     ! grep -q 'decision=emit-bundle-certified-no-compute-review' "$tmpdir/emit-bundle-support-pass.out" ||
+     ! grep -q 'required_drop=2439' "$tmpdir/emit-bundle-support-pass.out"; then
+  printf 'public_harness_check=fail emit_bundle_support_pass_output\n' >&2
+  cat "$tmpdir/emit-bundle-support-pass.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-emit-bundle-support-gate.py \
+  examples/emit-bundle-support-closure.example.txt \
+  --require-pass >"$tmpdir/emit-bundle-support-closure.out" 2>"$tmpdir/emit-bundle-support-closure.err"; then
+  printf 'public_harness_check=fail emit_bundle_support_closure_failed\n' >&2
+  cat "$tmpdir/emit-bundle-support-closure.err" >&2
+  cat "$tmpdir/emit-bundle-support-closure.out" >&2
+  fail=1
+elif ! grep -q 'emit_bundle_support_gate=pass' "$tmpdir/emit-bundle-support-closure.out" ||
+     ! grep -q 'decision=emit-bundle-counterexample-closed-no-compute' "$tmpdir/emit-bundle-support-closure.out" ||
+     ! grep -q 'closure=True' "$tmpdir/emit-bundle-support-closure.out"; then
+  printf 'public_harness_check=fail emit_bundle_support_closure_output\n' >&2
+  cat "$tmpdir/emit-bundle-support-closure.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-emit-bundle-support-gate.py \
+  examples/emit-bundle-support-hold.example.txt >"$tmpdir/emit-bundle-support-hold.out" 2>"$tmpdir/emit-bundle-support-hold.err"; then
+  printf 'public_harness_check=fail emit_bundle_support_hold_unexpected_error\n' >&2
+  cat "$tmpdir/emit-bundle-support-hold.err" >&2
+  fail=1
+elif ! grep -q 'emit_bundle_support_gate=hold' "$tmpdir/emit-bundle-support-hold.out" ||
+     ! grep -q 'missing_candidate_hash' "$tmpdir/emit-bundle-support-hold.out" ||
+     ! grep -q 'restore_proof_missing' "$tmpdir/emit-bundle-support-hold.out"; then
+  printf 'public_harness_check=fail emit_bundle_support_hold_output\n' >&2
+  cat "$tmpdir/emit-bundle-support-hold.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-emit-bundle-support-gate.py \
+  examples/emit-bundle-support-hold.example.txt \
+  --require-pass >"$tmpdir/emit-bundle-support-hold-strict.out" 2>"$tmpdir/emit-bundle-support-hold-strict.err"; then
+  printf 'public_harness_check=fail emit_bundle_support_hold_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/emit-bundle-support-hold-strict.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-emit-bundle-support-gate.py \
+  examples/emit-bundle-support-fail.example.txt >"$tmpdir/emit-bundle-support-fail.out" 2>"$tmpdir/emit-bundle-support-fail.err"; then
+  printf 'public_harness_check=fail emit_bundle_support_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/emit-bundle-support-fail.out" >&2
+  fail=1
+elif ! grep -q 'emit_bundle_support_gate=fail' "$tmpdir/emit-bundle-support-fail.out" ||
+     ! grep -q 'proof_unknown_close_as_nack' "$tmpdir/emit-bundle-support-fail.out" ||
+     ! grep -q 'bundle_mass_below_rounding_bar' "$tmpdir/emit-bundle-support-fail.out" ||
+     ! grep -q 'premature_compute_or_residual_request' "$tmpdir/emit-bundle-support-fail.out"; then
+  printf 'public_harness_check=fail emit_bundle_support_fail_output\n' >&2
+  cat "$tmpdir/emit-bundle-support-fail.out" >&2
   fail=1
 fi
 

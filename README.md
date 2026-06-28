@@ -201,6 +201,9 @@ agent instructions or used as a preflight before route work:
 - `skills/qoffset-host-accounting-gate.md`: require source-integrated qoffset
   packets or closures to carry source/candidate hashes, proof status, restore
   and phase flags, counted q1152 delta, and no-submit discipline.
+- `skills/emit-bundle-support-gate.md`: require combined real-emit bundles to
+  prove one shared invariant, clear the same-q shot-mass bar, and close cleanly
+  when witnesses differ or rows are live.
 - `skills/transcript-overlap-gate.md`: gate transcript peak-overlap drop
   packets before implementation, blocking active-only origins, stale indexes,
   dirty probes, missing peak calls, and premature residual/compute requests.
@@ -296,6 +299,7 @@ The bridge names are:
 - `compute-unlock-gate`
 - `candidate-validation-packet-gate`
 - `qoffset-host-accounting-gate`
+- `emit-bundle-support-gate`
 - `transcript-overlap-gate`
 - `paper-gidney-constant-workspace-adder`
 - `paper-mbu-modular-arithmetic`
