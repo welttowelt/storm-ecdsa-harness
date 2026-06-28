@@ -1,0 +1,14 @@
+# name	host	port	role	state	note
+boss	local	-	boss	local	Owns priority stack, frontier/current-target lock, policy visibility, dispatch, and no-submit gate.
+auditor	local	-	auditor	local	Bluesky/Redsky/RCI/PUA/PIP audit lane; implements process fixes and demands evidence.
+pua-pip	local	-	pua-pip	local	Repeated-failure discipline, assumption inversion, and sharper bounded checks.
+researcher	local	-	researcher	local	Theory and paper-to-source construction lane; source-bound packets only.
+source-proof	local	-	source-proof	local	Source novelty, support invariants, counterexamples, and closed-ledger screens.
+validator	local	-	validator	local	Trusted local validation lane for gate-pass candidates only.
+pods-manager	local	-	provider-manager	local	Provider inventory, canaries, spend visibility, worker registry, cleanup plans.
+wallbreaker-lead	local	-	wallbreaker	local	Lead integrator: converts specialist output into one route_attempt, worker_attempt, or hard_nack.
+wallbreaker-shadow	local	-	wallbreaker	local	Adversarial integrator: falsifies the lead attempt or proposes one materially different alternate.
+claude-waffle-lab	local	-	claude-deep-engineer	local	Long-context engineer 1/2, integration and executable packet production.
+claude-laser-spatula	local	-	claude-deep-engineer	local	Long-context engineer 2/2, adversarial alternate and falsifier.
+claude-research-sommelier	local	-	claude-deep-researcher	local	Long-context researcher, stepwise digestion with audit between batches.
+# remote-worker-1	<host-alias>	<port>	worker	registered	Public-safe placeholder only. Keep real endpoints in private state.

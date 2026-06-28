@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+value() {
+  local name="$1" fallback="$2"
+  printf '%s' "${!name:-$fallback}"
+}
+
+printf 'policy_file=%s\n' "$STORM_POLICY"
+printf 'submit_gate=%s no_submit=%s no_submit_ack=%s\n' \
+  "$(value FLEET_SUBMIT_GATE closed)" \
+  "$(value FLEET_NO_SUBMIT 1)" \
+  "$(value FLEET_NO_SUBMIT_ACK yes)"
+printf 'route_gate=%s compute_gate=%s spend_gate=%s worker_island_gate=%s\n' \
+  "$(value FLEET_ROUTE_GATE open)" \
+  "$(value FLEET_COMPUTE_GATE closed)" \
+  "$(value FLEET_SPEND_GATE closed)" \
+  "$(value FLEET_WORKER_ISLAND_GATE closed)"
+printf 'max_usd_per_hour=%s max_usd_total=%s owner=%s\n' \
+  "$(value FLEET_MAX_USD_PER_HOUR 0)" \
+  "$(value FLEET_MAX_USD_TOTAL 0)" \
+  "$(value FLEET_POLICY_OWNER boss)"
+printf 'policy_note=%s\n' "$(value FLEET_POLICY_NOTE template)"

@@ -1,0 +1,175 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+loop_ledger="$STORM_RUNTIME_DIR/role-loop-ledger.tsv"
+idle_min_seconds="${STORM_ROLE_LOOP_IDLE_MIN_SECONDS:-300}"
+dry_run=0
+force=0
+idle_only=0
+only_role=""
+
+usage() {
+  cat <<'TEXT'
+usage:
+  ./bin/role-loop list
+  ./bin/role-loop due [--idle] [role]
+  ./bin/role-loop enqueue [--idle] [--force] [--dry-run] [role]
+
+Queues recurring LOOP dispatches for Claude and specialist panes. This is the
+template replacement for relying on one-time manual prompts.
+TEXT
+}
+
+roles() {
+  cat <<'TEXT'
+claude-waffle-lab	Claude engineer integration loop	Produce route_attempt, worker_attempt, or hard_nack; run Bluesky->Redsky->PUA->PIP; no first-NACK give-up; no_submit_ack=yes.
+claude-laser-spatula	Claude adversarial engineer loop	Falsify the lead or produce a materially different alternate with validator and stop condition; no_submit_ack=yes.
+claude-research-sommelier	Claude research digestion loop	Digest one bounded batch, audit before next batch, output source-bound handoff or hard_nack; no_submit_ack=yes.
+auditor	Redsky/Bluesky audit loop	Find stale truth, idle important roles, weak evidence, policy drift, or missing validators; write ACK/NACK or small fix; no_submit_ack=yes.
+pua-pip	PUA/PIP repeated-failure loop	Name repeated assumptions, force three materially different hypotheses, and pick one bounded check; no_submit_ack=yes.
+researcher	Research construction-intake loop	Produce one source-bound construction packet or hard_nack with source mapping, economics, obligations, and falsifier; no_submit_ack=yes.
+source-proof	Source-proof novelty loop	Screen latest packets for novelty, closed-ledger overlap, scored relevance, and proof/counterexample status; no_submit_ack=yes.
+validator	Validator readiness loop	Check for gate-pass candidate; otherwise write exact missing inputs. No speculative runs; no_submit_ack=yes.
+pods-manager	Provider governance loop	Refresh policy, worker registry, canary state, spend runway, and cleanup obligations. Read-only unless gate permits; no_submit_ack=yes.
+wallbreaker-lead	Wallbreaker lead integration loop	Consume specialist outputs and produce one route_attempt, worker_attempt, or hard_nack; no_submit_ack=yes.
+wallbreaker-shadow	Wallbreaker shadow falsifier loop	Falsify lead fast or produce materially different alternate; no duplicate prose; no_submit_ack=yes.
+TEXT
+}
+
+pane_for_worker() {
+  case "$1" in
+    auditor) printf 'auditor-codex' ;;
+    pua-pip) printf 'pua-pip-codex' ;;
+    researcher) printf 'research-codex' ;;
+    source-proof) printf 'source-proof-codex' ;;
+    validator) printf 'validator-codex' ;;
+    pods-manager) printf 'pods-manager-codex' ;;
+    wallbreaker-lead) printf 'wallbreaker-lead-codex' ;;
+    wallbreaker-shadow) printf 'wallbreaker-shadow-codex' ;;
+    claude-waffle-lab) printf 'waffle-lab-claude' ;;
+    claude-laser-spatula) printf 'laser-spatula-claude' ;;
+    claude-research-sommelier) printf 'research-sommelier-claude' ;;
+    *) return 1 ;;
+  esac
+}
+
+pane_state() {
+  local worker="$1" pane pane_id screen
+  if [[ -z "${ZELLIJ:-}" ]]; then
+    printf 'unknown'
+    return
+  fi
+  pane="$(pane_for_worker "$worker")" || {
+    printf 'unmapped'
+    return
+  }
+  pane_id="$(zellij action list-panes | awk -v name="$pane" 'NR > 1 && $3 == name { print $1; exit }')"
+  if [[ -z "$pane_id" ]]; then
+    printf 'missing'
+    return
+  fi
+  screen="$(zellij action dump-screen --pane-id "$pane_id" 2>/dev/null || true)"
+  if printf '%s\n' "$screen" | rg -q 'Working|background terminal running|esc to interrupt|still thinking|Brewing|Cascading|Germinating|Computing|Choreographing|Jitterbugging|Deliberating|Thinking|Herding|Pondering'; then
+    printf 'busy'
+  else
+    printf 'idle'
+  fi
+}
+
+pending_for_worker() {
+  local worker="$1"
+  awk -F '\t' -v worker="$worker" 'NR > 1 && $2 == "pending" && $3 == worker { n++ } END { print n + 0 }' "$STORM_DISPATCH_LEDGER"
+}
+
+last_loop_age() {
+  local worker="$1" latest now
+  if [[ ! -r "$loop_ledger" ]]; then
+    printf 'missing'
+    return
+  fi
+  latest="$(awk -F '\t' -v worker="$worker" '$0 !~ /^#/ && $2 == worker { value=$1 } END { print value }' "$loop_ledger")"
+  if [[ -z "$latest" ]]; then
+    printf 'missing'
+    return
+  fi
+  if date -j -f '%Y-%m-%d %H:%M:%S %Z' "$latest" '+%s' >/dev/null 2>&1; then
+    latest_epoch="$(date -j -f '%Y-%m-%d %H:%M:%S %Z' "$latest" '+%s')"
+  else
+    latest_epoch="$(date -d "$latest" '+%s' 2>/dev/null || true)"
+  fi
+  if [[ -z "${latest_epoch:-}" ]]; then
+    printf 'unknown'
+    return
+  fi
+  now="$(date '+%s')"
+  printf '%s' "$((now - latest_epoch))"
+}
+
+list_roles() {
+  printf '%-28s %-9s %-8s %s\n' worker pane pending title
+  while IFS=$'\t' read -r worker title note; do
+    [[ -z "$only_role" || "$worker" == "$only_role" ]] || continue
+    printf '%-28s %-9s %-8s %s\n' "$worker" "$(pane_state "$worker")" "$(pending_for_worker "$worker")" "$title"
+  done < <(roles)
+}
+
+due_roles() {
+  while IFS=$'\t' read -r worker title note; do
+    [[ -z "$only_role" || "$worker" == "$only_role" ]] || continue
+    pane="$(pane_state "$worker")"
+    pending="$(pending_for_worker "$worker")"
+    age="$(last_loop_age "$worker")"
+    if [[ "$force" -eq 1 || ( "$pending" -eq 0 && ( "$idle_only" -eq 0 || "$pane" == "idle" ) && ( "$age" == "missing" || "$age" == "unknown" || "$age" -ge "$idle_min_seconds" ) ) ]]; then
+      printf '%s\t%s\t%s\tpane=%s pending=%s last_loop_age=%s\n' "$worker" "$title" "$note" "$pane" "$pending" "$age"
+    fi
+  done < <(roles)
+}
+
+enqueue_roles() {
+  mkdir -p "$STORM_RUNTIME_DIR"
+  if [[ ! -f "$loop_ledger" ]]; then
+    printf '# time\tworker\treason\tstatus\n' >"$loop_ledger"
+  fi
+  local queued=0
+  while IFS=$'\t' read -r worker title note reason; do
+    summary="ROLE LOOP $title: $note"
+    if [[ "$dry_run" -eq 1 ]]; then
+      printf 'would queue role-loop worker=%s reason=%s\n  %s\n' "$worker" "$reason" "$summary"
+    else
+      "$ROOT/bin/dispatch" add "$worker" role-loop "$title" "$summary"
+      printf '%s\t%s\t%s\tqueued\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$worker" "$reason" >>"$loop_ledger"
+      queued="$((queued + 1))"
+    fi
+  done < <(due_roles)
+  printf 'role-loop enqueue complete: queued=%s\n' "$queued"
+}
+
+cmd="${1:-list}"
+shift || true
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) dry_run=1 ;;
+    --force) force=1 ;;
+    --idle) idle_only=1 ;;
+    -h|--help) usage; exit 0 ;;
+    *)
+      if [[ -z "$only_role" ]]; then
+        only_role="$arg"
+      else
+        usage >&2
+        exit 64
+      fi
+      ;;
+  esac
+done
+
+case "$cmd" in
+  list) list_roles ;;
+  due) due_roles ;;
+  enqueue|cycle) enqueue_roles ;;
+  help|-h|--help) usage ;;
+  *) usage >&2; exit 64 ;;
+esac

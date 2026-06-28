@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+cd "$STORM_FLEET_ROOT"
+
+if [[ -n "${ZELLIJ:-}" ]]; then
+  exec "$ROOT/bin/apply-zellij-layout"
+fi
+
+exec zellij --session "$STORM_SESSION" --new-session-with-layout "$STORM_LAYOUT"

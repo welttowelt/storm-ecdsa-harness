@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+mode="${1:---brief}"
+
+brief() {
+  printf '== policy ==\n'
+  "$ROOT/bin/policy-brief"
+  printf '\n== dispatch ==\n'
+  "$ROOT/bin/dispatch" summary
+  printf '\n== workers ==\n'
+  "$ROOT/bin/list-workers" | sed -n '1,20p'
+  printf '\nno_submit_ack=%s\n' "${FLEET_NO_SUBMIT_ACK:-yes}"
+}
+
+full() {
+  brief
+  printf '\n== dispatch ledger ==\n'
+  "$ROOT/bin/dispatch" list
+  printf '\n== worker registry ==\n'
+  "$ROOT/bin/list-workers"
+  printf '\n== skill registry ==\n'
+  if [[ -r "$STORM_SKILL_REGISTRY" ]]; then
+    column -t -s $'\t' "$STORM_SKILL_REGISTRY" 2>/dev/null || cat "$STORM_SKILL_REGISTRY"
+  else
+    printf 'missing %s\n' "$STORM_SKILL_REGISTRY"
+  fi
+}
+
+case "$mode" in
+  --brief|brief) brief ;;
+  --full|full) full ;;
+  -h|--help|help)
+    printf 'usage: ./bin/check-gates [--brief|--full]\n'
+    ;;
+  *)
+    printf 'unknown mode: %s\n' "$mode" >&2
+    exit 64
+    ;;
+esac

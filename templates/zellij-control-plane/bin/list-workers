@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+if [[ ! -r "$STORM_WORKERS" ]]; then
+  printf 'missing worker registry: %s\n' "$STORM_WORKERS" >&2
+  exit 66
+fi
+
+column -t -s $'\t' "$STORM_WORKERS" 2>/dev/null || cat "$STORM_WORKERS"

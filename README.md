@@ -9,9 +9,10 @@ control plane for coordinating public `ecdsa.fail` research workflows. It is the
 layer around the solver: deciding what receives attention, forcing evidence
 labels, routing workers, gating compute, recording ACKs, and keeping public
 notes safe to share. The edge is multi-model collaboration: different workers
-can contribute through mailbox or API handoffs, but every claim still has to
-pass the same evidence, critique, and validation gates. It is not the original
-benchmark harness and it does not contain private hunt state.
+can contribute through mailbox, API handoffs, or a named Zellij multiplexer
+board, but every claim still has to pass the same evidence, critique, and
+validation gates. It is not the original benchmark harness and it does not
+contain private hunt state.
 
 Purpose and limits: `ecdsa.fail` is a public resource-estimation benchmark for
 the quantum cost of one `secp256k1` point-add circuit. This repo contains
@@ -33,6 +34,27 @@ state.
 
 See [docs/production-shape.md](docs/production-shape.md) for the exact
 production-to-public mapping.
+
+## Zellij Control Plane Template
+
+The current production pattern moved from loose manual terminal sessions plus a
+mailbox into one explicit Zellij board. The board gives the boss lane, policy
+surface, dispatch queue, wallbreakers, audit lanes, benchmark lane, provider
+governance lane, and long-context workers a stable place to live and resume.
+
+Read [docs/zellij-control-plane.md](docs/zellij-control-plane.md) for the
+detailed model. Copy [templates/zellij-control-plane/](templates/zellij-control-plane/)
+into a private controller repo when you want a starter board with:
+
+- `layouts/fleet.kdl` for the tab layout,
+- `bin/start-zellij` and role launchers,
+- policy and worker TSV examples,
+- role goal prompts for boss, auditor, wallbreakers, Codex workers, and Claude
+  long-context workers.
+
+The template is intentionally public-safe. It contains no private worker hosts,
+provider account data, logs, raw nonces, live candidate state, or submit
+authority.
 
 ## Operator Edge
 
@@ -100,6 +122,8 @@ endorsement where there was only inspiration.
   their own validation gates before use.
 - Public-credit policy for community-derived ideas.
 - Repo-local Codex skill bridges for ECDSA workflow agents.
+- A sanitized Zellij multiplexer control-plane template for replacing manual
+  session sprawl with named tabs, visible gates, dispatch state, and role goals.
 
 ## Skill Cards
 

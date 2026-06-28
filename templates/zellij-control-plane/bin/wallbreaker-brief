@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+printf 'wallbreaker contract\n'
+printf '  output: route_attempt | worker_attempt | hard_nack\n'
+printf '  required: source/base, evidence label, validator, stop condition, owner\n'
+printf '  discipline: Bluesky -> Redsky -> RCI -> PUA/PIP after repeated failure\n'
+printf '  no_submit_ack=%s\n\n' "${FLEET_NO_SUBMIT_ACK:-yes}"
+
+"$ROOT/bin/dispatch" summary

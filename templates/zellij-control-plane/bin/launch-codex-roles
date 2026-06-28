@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+if [[ -z "${ZELLIJ:-}" ]]; then
+  printf 'Not inside zellij. Start the board with:\n' >&2
+  printf '  cd %s && ./bin/start-zellij\n' "$STORM_FLEET_ROOT" >&2
+  exit 64
+fi
+
+CODEX_BIN="$(command -v codex)"
+
+tab_id_by_name() {
+  local name="$1"
+  zellij action list-tabs | awk -v name="$name" 'NR > 1 && $3 == name { print $1; exit }'
+}
+
+pane_exists() {
+  local name="$1"
+  zellij action list-panes | awk -v name="$name" 'NR > 1 && $3 == name { found = 1 } END { exit found ? 0 : 1 }'
+}
+
+new_codex_pane() {
+  local tab="$1" pane="$2" prompt="$3" tab_id
+  if pane_exists "$pane"; then
+    printf 'codex pane exists: %s\n' "$pane"
+    return
+  fi
+  tab_id="$(tab_id_by_name "$tab")"
+  if [[ -z "$tab_id" ]]; then
+    printf 'missing zellij tab: %s\n' "$tab" >&2
+    exit 66
+  fi
+  printf 'creating codex pane: tab=%s pane=%s\n' "$tab" "$pane"
+  zellij action new-pane \
+    --tab-id "$tab_id" \
+    --name "$pane" \
+    --cwd "$STORM_FLEET_ROOT" \
+    -- "$CODEX_BIN" \
+      --cd "$STORM_FLEET_ROOT" \
+      --sandbox danger-full-access \
+      --ask-for-approval never \
+      "$prompt"
+}
+
+common_guardrails='Do not submit, write winner sentinels, leak secrets, pass provider credentials on command lines, print account/payment details, kill jobs, lease paid compute, open spend, or launch worker-island unless the current repo policy gates explicitly allow it. Keep no_submit_ack=yes in every output.'
+
+new_codex_pane boss boss-codex \
+  "You are the boss orchestration lane for this STORM control plane. Work from $STORM_FLEET_ROOT. Read README.md if present, docs/control-plane.md, docs/current-findings.md, state/fleet-policy.env, workers.tsv, and ./bin/check-gates output. Coordinate dispatch, policy visibility, frontier/current-target lock, wallbreaker follow-up, validation handoffs, and urgent decisions. Do not hide behind busywork; prioritize blocked important lanes and evidence that moves the route forward. Use Bluesky, Redsky, RCI, PUA, and PIP loops. $common_guardrails"
+
+new_codex_pane auditor auditor-codex \
+  "You are the auditor lane. Work from $STORM_FLEET_ROOT. Read docs/audit-process.md, docs/current-findings.md, state/fleet-policy.env, workers.tsv, and ./bin/check-gates output. Run continuous Bluesky, Redsky, RCI, PUA, and PIP audits; implement small process fixes when safe; demand numbers and evidence before accepting improvement claims. $common_guardrails"
+
+new_codex_pane pua-pip pua-pip-codex \
+  "You are the PUA/PIP discipline lane. Work from $STORM_FLEET_ROOT. Read docs/lane-playbooks.md, docs/current-findings.md, templates/research-packet.md, and ./bin/check-gates output. Find repeated failed assumptions, force materially different hypotheses, and turn vague effort into bounded checks with evidence. $common_guardrails"
+
+new_codex_pane research research-codex \
+  "You are the researcher lane. Work from $STORM_FLEET_ROOT. Read docs/lane-playbooks.md, docs/current-findings.md, state/skill-registry.tsv, and templates/research-packet.md. Convert papers, public repos, and prior notes into source-bound packets with hashes, economics, proof obligations, and falsifiers. $common_guardrails"
+
+new_codex_pane research source-proof-codex \
+  "You are the source-proof lane. Work from $STORM_FLEET_ROOT. Read docs/current-findings.md, state/skill-registry.tsv, and ./bin/check-gates output. Mine or validate source-bound support invariants and counterexamples; reject stale rows, non-scored rows, and proof-free compute asks. $common_guardrails"
+
+new_codex_pane wallbreaker wallbreaker-lead-codex \
+  "You are wallbreaker-lead. Work from $STORM_FLEET_ROOT. Start with ./bin/wallbreaker-brief, docs/wallbreaker-worker.md, docs/current-findings.md, state/fleet-policy.env, and ./bin/check-gates output. Connect specialist evidence into exactly one route_attempt, worker_attempt, or hard_nack. Challenge shallow specialist output until it becomes executable or closed. $common_guardrails"
+
+new_codex_pane wallbreaker wallbreaker-shadow-codex \
+  "You are wallbreaker-shadow. Work from $STORM_FLEET_ROOT. Start with ./bin/wallbreaker-brief, docs/wallbreaker-worker.md, docs/current-findings.md, state/fleet-policy.env, and ./bin/check-gates output. Falsify the lead attempt fast or produce one materially different alternate with a validator and stop condition. $common_guardrails"
+
+new_codex_pane local-benchmark validator-codex \
+  "You are the validator lane. Work from $STORM_FLEET_ROOT. Read docs/audit-process.md, docs/current-findings.md, state/fleet-policy.env, and ./bin/check-gates output. Run trusted local verification only for gate-pass candidates and separate prefilter, partial, paper, and official validation evidence. $common_guardrails"
+
+new_codex_pane workers worker-codex \
+  "You are the worker procedure lane. Work from $STORM_FLEET_ROOT. Read workers.tsv, state/fleet-policy.env, docs/lane-playbooks.md, and ./bin/check-gates output. Prepare source sync, canary, harvest, and bounded worker commands only after matching gates are open. $common_guardrails"
+
+new_codex_pane pods-manager pods-manager-codex \
+  "You are the provider manager lane. Work from $STORM_FLEET_ROOT. Read docs/control-plane.md, state/fleet-policy.env, workers.tsv, and ./bin/check-gates output. Own provider inventory, canary requirements, spend visibility, worker registry hygiene, local load checks, and cleanup plans. Read-only first; no provider commands unless the current policy gate allows them. $common_guardrails"
+
+zellij action list-panes

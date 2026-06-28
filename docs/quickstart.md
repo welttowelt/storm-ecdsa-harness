@@ -36,6 +36,8 @@ Start with:
 - `templates/compute-request.md`
 - `templates/public-note.md`
 - `templates/kimi-handoff.md`
+- `templates/zellij-control-plane/` if you want the current multiplexer board
+  shape instead of loose manual sessions.
 
 Use these as formats, not as a mandate. The core rule is that every compute
 request should have an owner, validator, kill gate, and evidence label.
@@ -53,7 +55,39 @@ You can also copy the audit roles as standalone skills:
 - `skills/bluesky-audit.md`
 - `skills/redsky-audit.md`
 
-## 4. Keep Private State Outside This Repo
+## 4. Start The Zellij Board
+
+For a private live controller, copy the Zellij starter pack out of this public
+repo and initialize it in a private working directory:
+
+```bash
+cp -R templates/zellij-control-plane ../private-storm-controller
+cd ../private-storm-controller
+cp state/fleet-policy.env.example state/fleet-policy.env
+cp workers.tsv.example workers.tsv
+./bin/start-zellij
+```
+
+Inside the board, launch agents only after the policy file says the matching
+gate is open:
+
+```bash
+./bin/launch-codex-roles
+./bin/launch-claude-roles
+./bin/check-gates --brief
+```
+
+The template uses one named session, `STORM BOSS` by default. Resume it with:
+
+```bash
+zellij attach "STORM BOSS"
+```
+
+Do not put provider credentials, account data, raw logs, worker endpoints, or
+live candidate material into the public repo. The template files are examples;
+the private controller owns runtime state.
+
+## 5. Keep Private State Outside This Repo
 
 Do not store these in the public repo:
 
@@ -76,7 +110,7 @@ private-runs-and-logs/
 private-fleet-config/
 ```
 
-## 5. Update The Fixture Dashboard
+## 6. Update The Fixture Dashboard
 
 The dashboard reads only:
 
@@ -93,7 +127,7 @@ Local preview:
 python3 -m http.server 8787 --directory dashboard
 ```
 
-## 6. Add Credits Before Sharing
+## 7. Add Credits Before Sharing
 
 If you use an idea from a person, repo, article, or group discussion, add it to:
 
@@ -107,7 +141,7 @@ Use:
 - `based on` only for direct foundations,
 - `group_context_unverified_publicly` when no public source exists.
 
-## 7. First Operating Loop
+## 8. First Operating Loop
 
 For each route:
 

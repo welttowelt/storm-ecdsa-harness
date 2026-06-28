@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+if [[ -z "${ZELLIJ:-}" ]]; then
+  printf 'Not inside zellij. Start the board with:\n' >&2
+  printf '  cd %s && ./bin/start-zellij\n' "$STORM_FLEET_ROOT" >&2
+  exit 64
+fi
+
+missing=0
+for tab in boss auditor pua-pip research local-benchmark wallbreaker pods-manager waffle-lab research-vault workers; do
+  if ! zellij action list-tabs | awk -v tab="$tab" 'NR > 1 && $3 == tab { found=1 } END { exit found ? 0 : 1 }'; then
+    missing=1
+  fi
+done
+
+if [[ "$missing" -eq 0 ]]; then
+  printf 'zellij control-plane layout already appears present.\n'
+  zellij action list-tabs
+  exit 0
+fi
+
+printf 'applying layout from %s\n' "$STORM_LAYOUT"
+zellij --layout "$STORM_LAYOUT"
+zellij action go-to-tab-name boss || true
+zellij action list-tabs

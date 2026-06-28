@@ -1,0 +1,161 @@
+layout {
+    default_tab_template {
+        pane size=1 borderless=true {
+            plugin location="tab-bar"
+        }
+        children
+        pane size=2 borderless=true {
+            plugin location="status-bar"
+        }
+    }
+
+    tab name="boss" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="control" size="42%" command="zsh" {
+                args "-lc" "./bin/check-gates --brief; exec zsh -l"
+            }
+            pane split_direction="Horizontal" {
+                pane name="policy-dispatch" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/policy-brief; printf '\\n'; ./bin/dispatch summary; sleep 20; done"
+                }
+                pane split_direction="Vertical" {
+                    pane name="frontier" command="zsh" {
+                        args "-lc" "sed -n '1,180p' docs/current-findings.md; exec zsh -l"
+                    }
+                    pane name="sentinels" command="zsh" {
+                        args "-lc" "while true; do clear; printf 'submit gate stays closed unless policy opens it\\n'; printf 'no_submit_ack=yes\\n'; sleep 30; done"
+                    }
+                }
+            }
+        }
+    }
+
+    tab name="auditor" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="audit-playbook" command="zsh" {
+                args "-lc" "sed -n '1,220p' docs/audit-process.md; exec zsh -l"
+            }
+            pane split_direction="Horizontal" {
+                pane name="audit-queue" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/dispatch summary; sleep 30; done"
+                }
+                pane name="audit-goals" command="zsh" {
+                    args "-lc" "sed -n '1,220p' docs/role-goals.md; exec zsh -l"
+                }
+            }
+        }
+    }
+
+    tab name="pua-pip" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="pip-playbook" command="zsh" {
+                args "-lc" "sed -n '1,220p' docs/lane-playbooks.md; exec zsh -l"
+            }
+            pane name="pip-queue" command="zsh" {
+                args "-lc" "while true; do clear; ./bin/dispatch summary; sleep 30; done"
+            }
+        }
+    }
+
+    tab name="research" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="research-playbook" command="zsh" {
+                args "-lc" "sed -n '1,220p' templates/research-packet.md; exec zsh -l"
+            }
+            pane split_direction="Horizontal" {
+                pane name="research-skills" command="zsh" {
+                    args "-lc" "while true; do clear; column -t -s $'\\t' state/skill-registry.tsv 2>/dev/null || cat state/skill-registry.tsv; sleep 45; done"
+                }
+                pane name="research-template" command="zsh" {
+                    args "-lc" "sed -n '1,220p' templates/research-packet.md; exec zsh -l"
+                }
+            }
+        }
+    }
+
+    tab name="local-benchmark" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="validator" command="zsh" {
+                args "-lc" "printf 'Validator lane: only gate-pass candidates. Keep Prefilter, paper, partial, and official validation separate.\\n\\n'; ./bin/check-gates --brief; exec zsh -l"
+            }
+            pane name="benchmark-placeholder" command="zsh" {
+                args "-lc" "printf 'Mount or symlink a private benchmark checkout here. Do not commit it.\\n'; exec zsh -l"
+            }
+        }
+    }
+
+    tab name="wallbreaker" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="wallbreaker-brief" command="zsh" {
+                args "-lc" "while true; do clear; ./bin/wallbreaker-brief; sleep 60; done"
+            }
+            pane split_direction="Horizontal" {
+                pane name="wallbreaker-queue" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/dispatch summary; sleep 30; done"
+                }
+                pane name="wallbreaker-playbook" command="zsh" {
+                    args "-lc" "sed -n '1,220p' docs/wallbreaker-worker.md; exec zsh -l"
+                }
+            }
+        }
+    }
+
+    tab name="pods-manager" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="provider-playbook" command="zsh" {
+                args "-lc" "sed -n '1,220p' docs/control-plane.md; exec zsh -l"
+            }
+            pane split_direction="Horizontal" {
+                pane name="provider-policy" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/policy-brief; printf '\\n'; ./bin/list-workers; sleep 30; done"
+                }
+                pane name="provider-queue" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/dispatch summary; sleep 45; done"
+                }
+            }
+        }
+    }
+
+    tab name="waffle-lab" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="waffle-brief" command="zsh" {
+                args "-lc" "while true; do clear; ./bin/wallbreaker-brief; printf '\\n'; sed -n '1,180p' docs/claude-worker-loops.md; sleep 60; done"
+            }
+            pane split_direction="Horizontal" {
+                pane name="waffle-queue" command="zsh" {
+                    args "-lc" "while true; do clear; ./bin/dispatch summary; sleep 30; done"
+                }
+                pane name="waffle-playbook" command="zsh" {
+                    args "-lc" "sed -n '1,240p' docs/claude-worker-loops.md; exec zsh -l"
+                }
+            }
+        }
+    }
+
+    tab name="research-vault" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="research-vault-brief" command="zsh" {
+                args "-lc" "while true; do clear; ./bin/dispatch summary; printf '\\n'; sed -n '1,220p' docs/claude-worker-loops.md; sleep 60; done"
+            }
+            pane name="research-vault-playbook" command="zsh" {
+                args "-lc" "sed -n '1,260p' docs/claude-worker-loops.md; exec zsh -l"
+            }
+        }
+    }
+
+    tab name="workers" cwd="." {
+        pane split_direction="Vertical" {
+            pane name="worker-1" command="zsh" {
+                args "-lc" "./bin/check-gates --brief; exec zsh -l"
+            }
+            pane split_direction="Horizontal" {
+                pane name="worker-2" command="zsh" {
+                    args "-lc" "./bin/check-gates --brief; exec zsh -l"
+                }
+                pane name="worker-3" command="zsh" {
+                    args "-lc" "./bin/check-gates --brief; exec zsh -l"
+                }
+            }
+        }
+    }
+}

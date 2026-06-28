@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+source "$ROOT/bin/env.sh"
+
+mkdir -p "$(dirname "$STORM_DISPATCH_LEDGER")"
+if [[ ! -e "$STORM_DISPATCH_LEDGER" ]]; then
+  printf 'id\tstatus\ttarget\towner\ttitle\tnote\n' >"$STORM_DISPATCH_LEDGER"
+fi
+
+cmd="${1:-summary}"
+
+case "$cmd" in
+  summary)
+    awk -F '\t' 'NR > 1 { count[$2]++; target[$3]++ }
+      END {
+        print "status_counts";
+        for (s in count) print s "=" count[s];
+        print "";
+        print "target_counts";
+        for (t in target) print t "=" target[t];
+      }' "$STORM_DISPATCH_LEDGER"
+    ;;
+  list)
+    column -t -s $'\t' "$STORM_DISPATCH_LEDGER" 2>/dev/null || cat "$STORM_DISPATCH_LEDGER"
+    ;;
+  add)
+    target="${2:?target required}"
+    owner="${3:?owner required}"
+    title="${4:?title required}"
+    note="${5:-}"
+    next_id="$(awk -F '\t' 'NR > 1 && $1 ~ /^[0-9]+$/ && $1 > max { max=$1 } END { print max + 1 }' "$STORM_DISPATCH_LEDGER")"
+    printf '%s\tpending\t%s\t%s\t%s\t%s\n' "$next_id" "$target" "$owner" "$title" "$note" >>"$STORM_DISPATCH_LEDGER"
+    printf 'dispatch_added id=%s target=%s owner=%s\n' "$next_id" "$target" "$owner"
+    ;;
+  close)
+    id="${2:?id required}"
+    note="${3:-closed}"
+    tmp="${STORM_DISPATCH_LEDGER}.tmp"
+    awk -F '\t' -v OFS='\t' -v id="$id" -v note="$note" \
+      'NR == 1 { print; next } $1 == id { $2="closed"; $6=note } { print }' \
+      "$STORM_DISPATCH_LEDGER" >"$tmp"
+    mv "$tmp" "$STORM_DISPATCH_LEDGER"
+    printf 'dispatch_closed id=%s\n' "$id"
+    ;;
+  *)
+    printf 'usage: ./bin/dispatch summary|list|add <target> <owner> <title> [note]|close <id> [note]\n' >&2
+    exit 64
+    ;;
+esac

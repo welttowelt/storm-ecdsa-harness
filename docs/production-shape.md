@@ -14,6 +14,7 @@ protocol, templates, checks, and fixture dashboard without exposing live state.
 | Benchmarks | Runs official local validation, score checks, and submission-note preparation in the private workspace. | Documents the validator contract; does not ship live benchmark outputs. |
 | Models | Coordinates Codex-, Claude-, DeepSeek-, Kimi-, and OpenRouter-style workers through explicit roles. | Operator cards and handoff formats. |
 | Mailbox | Reads the shared mailbox tail, posts ACKs, records strategic-goal packets, and routes worker objections back into state. | Mailbox template and examples only. |
+| Zellij board | Runs the live boss lane, policy/dispatch surface, auditor, PUA/PIP lane, research lane, local benchmark lane, wallbreakers, provider manager, long-context workers, and generic worker panes in one named multiplexer session. | `docs/zellij-control-plane.md` plus the sanitized starter pack under `templates/zellij-control-plane/`. |
 | External chat | Human or connector input is converted into source-labeled evidence before it affects routing. | Announcement draft and credit policy. |
 | Fleet | Dispatches CPU/GPU work only when a route has a validator, budget, owner, non-overlap rule, and kill gate. | Compute-request template and fixture fleet states. |
 | Stormgate | Uses fast prefiltering and first-error validation to reduce wasted full evaluations. GPU output stays `Prefilter` until trusted validation. | Public Stormgate contract, labels, and redaction boundary. |
@@ -23,15 +24,16 @@ protocol, templates, checks, and fixture dashboard without exposing live state.
 ## Controller Loop
 
 1. Refresh public frontier state.
-2. Read mailbox tail and ACK directed handoffs.
-3. Pick one active route or explicitly park it.
-4. Require a route packet with evidence label, validator, owner, budget, and
+2. Refresh the Zellij board status surface and policy pane.
+3. Read mailbox tail and ACK directed handoffs.
+4. Pick one active route or explicitly park it.
+5. Require a route packet with evidence label, validator, owner, budget, and
    falsifier.
-5. Run cheap source checks, canaries, and prefilters before paid compute.
-6. Dispatch fleet work only after the gate artifacts exist.
-7. Treat every scanner row as `Prefilter` until trusted validation returns
+6. Run cheap source checks, canaries, and prefilters before paid compute.
+7. Dispatch fleet work only after the gate artifacts exist.
+8. Treat every scanner row as `Prefilter` until trusted validation returns
    `0/0/0`.
-8. Open the submit gate only after a fresh frontier check, score win, legal
+9. Open the submit gate only after a fresh frontier check, score win, legal
    diff, public note, and explicit submit flag.
 
 ## Public Boundary

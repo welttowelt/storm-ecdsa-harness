@@ -22,6 +22,16 @@ controller that:
   clean `0/0/0`,
 - routes strategic-goal packets back through the mailbox so workers converge.
 
+The current controller shape uses one named Zellij board as the live control
+surface. Mailbox entries still exist for durable handoffs, but the board is the
+place where the boss lane sees policy, dispatch, frontier status, idle workers,
+wallbreaker pressure, validation, and provider governance at once. This avoids
+the old failure mode where many manual terminal sessions existed but no pane
+owned the next decision.
+
+See [docs/zellij-control-plane.md](zellij-control-plane.md) for the public
+template and setup sequence.
+
 ## Roles
 
 - Research lead: ranks routes, refreshes the frontier, writes route packets, and
@@ -31,6 +41,14 @@ controller that:
 - Skeptic / RCI reviewer: tries to falsify every route before compute spend.
 - External pressure-test worker: gives a bounded critique, one sharp question,
   one creative alternative, and a falsifiable decision.
+- Boss / orchestrator: maintains the priority stack, watches for blocked or
+  idle important lanes, routes decisions, and refuses busywork that does not
+  move a route toward proof, validation, compute, or closure.
+- Wallbreaker: connects specialist output into one executable route attempt,
+  worker attempt, or hard NACK, then challenges shallow results until evidence
+  improves.
+- Provider manager: owns compute inventory, canaries, spend policy visibility,
+  and cleanup plans, but receives no submit authority.
 
 Roles can be run by separate agents or by one agent explicitly switching hats.
 Each claim is pressure-tested before it becomes state.

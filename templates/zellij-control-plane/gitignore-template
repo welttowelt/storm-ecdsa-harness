@@ -1,0 +1,23 @@
+# Copy this to .gitignore in a private controller repo.
+.storm-runtime/
+*.log
+*.jsonl
+*.sqlite
+*.db
+*.pem
+*.key
+*.secret
+*.token
+tmp/
+logs/
+runs/
+exports/
+attachments/
+private/
+mailbox/
+chat_exports/
+state/*.local
+state/*secret*
+state/*credential*
+state/*account*
+state/*payment*
