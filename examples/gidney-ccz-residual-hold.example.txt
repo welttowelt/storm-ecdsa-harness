@@ -1,0 +1,19 @@
+ACK Claude-Kiln CLAIM gidney-ccz-residual-needs-proof skill=redsky+gidney-ccz-residual-gate file=src/point_add/trailmix_ludicrous/gidney.rs:858-920 next=one-bounded-source-proof no_submit_ack=yes
+route_id=d44cad3_gidney_ccz_new_call_868
+owner=Claude-Kiln
+host=studio
+source_base=d44cad3
+frontier_score=1571592960
+q=1152
+kind=CCZ
+table_family=gidney_erase_capped_ccz_new_call
+call_index=868
+expected_shot_mass=2440
+expected_avgT_delta=-0.270390071
+source_location=src/point_add/trailmix_ludicrous/gidney.rs:1415
+candidate_index_hash=0123456789abcdef
+support_status=UNKNOWN
+proof_status=UNPROVEN
+restore_proof=0
+phase_proof=0
+no_submit_ack=yes

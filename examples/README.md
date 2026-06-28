@@ -18,6 +18,8 @@ Use them to teach agents the workflow:
   subdirectory,
 - source-row routing fixtures separate packet-ready rows from counterexample
   closures and unsafe compute asks,
+- Gidney CCZ residual fixtures separate non-default residual packets from
+  default-on remainder rows and missing-proof holds,
 - FFG pair-complete fixtures distinguish no-recompute NACKs from recompute
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or

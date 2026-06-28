@@ -196,6 +196,8 @@ agent instructions or used as a preflight before route work:
 - `skills/source-row-routing-gate.md`: require each q1152 scout row to become
   either one packet-ready bounded-proof row or one counterexample closure that
   advances to the next source row, with no compute authority.
+- `skills/gidney-ccz-residual-gate.md`: screen Gidney erase-CCZ residual
+  packets so default-on remainder rows and below-bar mass do not unlock compute.
 - `skills/transcript-overlap-gate.md`: gate transcript peak-overlap drop
   packets before implementation, blocking active-only origins, stale indexes,
   dirty probes, missing peak calls, and premature residual/compute requests.

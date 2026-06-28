@@ -80,6 +80,7 @@ for path in \
   scripts/storm-apply-cswap-support-gate.py \
   scripts/storm-source-packet-novelty-gate.py \
   scripts/storm-source-row-routing-gate.py \
+  scripts/storm-gidney-ccz-residual-gate.py \
   scripts/storm-transcript-overlap-gate.py \
   scripts/storm-compute-restart-gate.py \
   scripts/storm-compute-unlock-gate.py \
@@ -148,6 +149,9 @@ for path in \
   examples/source-row-routing-closure.example.txt \
   examples/source-row-routing-hold.example.txt \
   examples/source-row-routing-fail.example.txt \
+  examples/gidney-ccz-residual-pass.example.txt \
+  examples/gidney-ccz-residual-hold.example.txt \
+  examples/gidney-ccz-residual-fail.example.txt \
   examples/ffg-pair-complete-no-recompute.example.txt \
   examples/ffg-pair-complete-recompute-hold.example.txt \
   examples/transcript-overlap-pass.example.txt \
@@ -219,6 +223,7 @@ for path in \
   skills/apply-cswap-support-gate.md \
   skills/source-packet-novelty-gate.md \
   skills/source-row-routing-gate.md \
+  skills/gidney-ccz-residual-gate.md \
   skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
   skills/compute-restart-gate.md \
@@ -281,6 +286,7 @@ for path in \
   .agents/skills/apply-cswap-support-gate/SKILL.md \
   .agents/skills/source-packet-novelty-gate/SKILL.md \
   .agents/skills/source-row-routing-gate/SKILL.md \
+  .agents/skills/gidney-ccz-residual-gate/SKILL.md \
   .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
   .agents/skills/compute-restart-gate/SKILL.md \
@@ -418,6 +424,8 @@ need_text scripts/storm-source-packet-novelty-gate.py "candidate hash field" "ca
 need_text scripts/storm-source-packet-novelty-gate.py "point add source location" "src/point_add"
 need_text scripts/storm-source-row-routing-gate.py "source row routing gate" "source_row_routing_gate="
 need_text scripts/storm-source-row-routing-gate.py "source row closure decision" "source-row-closed-advance-next-no-compute"
+need_text scripts/storm-gidney-ccz-residual-gate.py "gidney ccz residual gate" "gidney_ccz_residual_gate="
+need_text scripts/storm-gidney-ccz-residual-gate.py "default remainder failure" "default_on_remainder_not_new_edge"
 need_text scripts/storm-transcript-overlap-gate.py "transcript overlap gate" "transcript_overlap_gate="
 need_text scripts/storm-transcript-overlap-gate.py "source theorem review decision" "source-theorem-review-no-compute"
 need_text scripts/storm-transcript-overlap-gate.py "score edge failure" "score_no_edge"
@@ -463,6 +471,8 @@ need_text skills/source-packet-novelty-gate.md "source packet candidate hash" "c
 need_text skills/source-packet-novelty-gate.md "source family exhausted" "exhausted source-family"
 need_text skills/source-row-routing-gate.md "source row routing skill" "Source Row Routing Gate"
 need_text skills/source-row-routing-gate.md "source row no compute" "no-compute"
+need_text skills/gidney-ccz-residual-gate.md "gidney ccz residual skill" "Gidney CCZ Residual Gate"
+need_text skills/gidney-ccz-residual-gate.md "gidney ccz no auto compute" "no automatic compute"
 need_text skills/transcript-overlap-gate.md "transcript overlap skill" "transcript peak-overlap"
 need_text skills/transcript-overlap-gate.md "active only failure" "active-only"
 need_text skills/compute-restart-gate.md "compute restart skill" "scanner restart"
@@ -485,6 +495,7 @@ need_text .agents/skills/apply-cswap-support-gate/SKILL.md "bridge" "Codex-disco
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge candidate hash" "candidate index/diff hash"
 need_text .agents/skills/source-row-routing-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/gidney-ccz-residual-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/transcript-overlap-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-unlock-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-restart-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -538,6 +549,9 @@ need_text examples/source-row-routing-packet.example.txt "source row packet fixt
 need_text examples/source-row-routing-closure.example.txt "source row closure fixture" "source-closure"
 need_text examples/source-row-routing-hold.example.txt "source row hold fixture" "closure-incomplete"
 need_text examples/source-row-routing-fail.example.txt "source row fail fixture" "launch runpod gpu scanner"
+need_text examples/gidney-ccz-residual-pass.example.txt "gidney ccz pass fixture" "gidney-ccz-residual-certified"
+need_text examples/gidney-ccz-residual-hold.example.txt "gidney ccz hold fixture" "support_status=UNKNOWN"
+need_text examples/gidney-ccz-residual-fail.example.txt "gidney ccz fail fixture" "gidney_erase_capped_ccz_remainder"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -626,6 +640,98 @@ need_text .agents/skills/apply-overlap-ledger/SKILL.md "bridge" "Codex-discovera
 
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
+
+cat >"$tmpdir/gidney-ccz-fixture.rs" <<'EOF'
+const GIDNEY_ERASE_CCZ_RESIDUAL_CALLS: &[usize] = &[101, 102];
+const GIDNEY_ERASE_CAPPED_CCZ_RESIDUAL_CALLS: &[usize] = &[201, 202];
+const GIDNEY_ERASE_CCZ_REMAINDER_CALLS: &[usize] = &[301, 302];
+const GIDNEY_ERASE_CAPPED_CCZ_REMAINDER_CALLS: &[usize] = &[401, 402, 867];
+EOF
+cat >"$tmpdir/gidney-ccz-mod.rs" <<'EOF'
+fn defaults() {
+    set_default_env("TLM_GIDNEY_SKIP_EXACT_ERASE_ALL_CCZ", "1");
+    set_default_env("TLM_GIDNEY_SKIP_SMALL_RESIDUAL_DEAD", "1");
+}
+EOF
+if ! python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" >"$tmpdir/gidney-ccz-source-screen.out" 2>"$tmpdir/gidney-ccz-source-screen.err"; then
+  printf 'public_harness_check=fail gidney_ccz_source_screen_failed\n' >&2
+  cat "$tmpdir/gidney-ccz-source-screen.err" >&2
+  fail=1
+elif ! grep -q 'gidney_ccz_residual_gate=pass' "$tmpdir/gidney-ccz-source-screen.out" ||
+     ! grep -q 'decision=source-screen-only-no-compute' "$tmpdir/gidney-ccz-source-screen.out" ||
+     ! grep -q 'required_drop=2439' "$tmpdir/gidney-ccz-source-screen.out"; then
+  printf 'public_harness_check=fail gidney_ccz_source_screen_output\n' >&2
+  cat "$tmpdir/gidney-ccz-source-screen.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" \
+  --packet examples/gidney-ccz-residual-pass.example.txt \
+  --require-pass >"$tmpdir/gidney-ccz-pass.out" 2>"$tmpdir/gidney-ccz-pass.err"; then
+  printf 'public_harness_check=fail gidney_ccz_pass_failed\n' >&2
+  cat "$tmpdir/gidney-ccz-pass.err" >&2
+  cat "$tmpdir/gidney-ccz-pass.out" >&2
+  fail=1
+elif ! grep -q 'gidney_ccz_residual_gate=pass' "$tmpdir/gidney-ccz-pass.out" ||
+     ! grep -q 'decision=eligible-for-storm-compute-unlock-review-no-auto-compute' "$tmpdir/gidney-ccz-pass.out" ||
+     ! grep -q 'implied_avgT_delta=-0.270390' "$tmpdir/gidney-ccz-pass.out"; then
+  printf 'public_harness_check=fail gidney_ccz_pass_output\n' >&2
+  cat "$tmpdir/gidney-ccz-pass.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" \
+  --packet examples/gidney-ccz-residual-hold.example.txt >"$tmpdir/gidney-ccz-hold.out" 2>"$tmpdir/gidney-ccz-hold.err"; then
+  printf 'public_harness_check=fail gidney_ccz_hold_unexpected_error\n' >&2
+  cat "$tmpdir/gidney-ccz-hold.err" >&2
+  fail=1
+elif ! grep -q 'gidney_ccz_residual_gate=hold' "$tmpdir/gidney-ccz-hold.out" ||
+     ! grep -q 'support_not_certified' "$tmpdir/gidney-ccz-hold.out" ||
+     ! grep -q 'phase_proof_missing' "$tmpdir/gidney-ccz-hold.out"; then
+  printf 'public_harness_check=fail gidney_ccz_hold_output\n' >&2
+  cat "$tmpdir/gidney-ccz-hold.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" \
+  --packet examples/gidney-ccz-residual-hold.example.txt \
+  --require-pass >"$tmpdir/gidney-ccz-hold-strict.out" 2>"$tmpdir/gidney-ccz-hold-strict.err"; then
+  printf 'public_harness_check=fail gidney_ccz_hold_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/gidney-ccz-hold-strict.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" \
+  --packet examples/gidney-ccz-residual-fail.example.txt >"$tmpdir/gidney-ccz-fail.out" 2>"$tmpdir/gidney-ccz-fail.err"; then
+  printf 'public_harness_check=fail gidney_ccz_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/gidney-ccz-fail.out" >&2
+  fail=1
+elif ! grep -q 'premature_compute_request' "$tmpdir/gidney-ccz-fail.out" ||
+     ! grep -q 'default_on_remainder_not_new_edge' "$tmpdir/gidney-ccz-fail.out"; then
+  printf 'public_harness_check=fail gidney_ccz_fail_output\n' >&2
+  cat "$tmpdir/gidney-ccz-fail.out" >&2
+  fail=1
+fi
+sed 's/expected_avgT_delta=-0.270390071/expected_avgT_delta=-1/' \
+  examples/gidney-ccz-residual-pass.example.txt >"$tmpdir/gidney-ccz-overclaim.example.txt"
+if python3 scripts/storm-gidney-ccz-residual-gate.py \
+  --gidney-rs "$tmpdir/gidney-ccz-fixture.rs" \
+  --point-add-mod-rs "$tmpdir/gidney-ccz-mod.rs" \
+  --packet "$tmpdir/gidney-ccz-overclaim.example.txt" >"$tmpdir/gidney-ccz-overclaim.out" 2>"$tmpdir/gidney-ccz-overclaim.err"; then
+  printf 'public_harness_check=fail gidney_ccz_overclaim_unexpected_pass\n' >&2
+  cat "$tmpdir/gidney-ccz-overclaim.out" >&2
+  fail=1
+elif ! grep -q 'delta_overclaims_shot_mass' "$tmpdir/gidney-ccz-overclaim.out"; then
+  printf 'public_harness_check=fail gidney_ccz_overclaim_output\n' >&2
+  cat "$tmpdir/gidney-ccz-overclaim.out" >&2
+  fail=1
+fi
 
 if ! python3 scripts/storm-exact-miner.py support-check \
   --facts examples/support-facts.example.jsonl \
