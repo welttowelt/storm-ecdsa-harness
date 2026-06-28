@@ -1,0 +1,23 @@
+ACK researcher NACK ffg-lifetime-cy0-call185 route_id=ffg-cy0-call185 owner=researcher next=phase-theorem-or-stop host=studio no_submit_ack=yes
+source_base=d44cad3 source_hash=8f407bf998b991b293b7db7e75d3f12f5005e75f363f02ebba11c44eae322504 candidate_hash=185badc0ffee1234 evidence_label=Partial
+frontier_score=1571592960
+TLM_FFG lifetime proof
+
+## Toy Falsifiers
+
+- Split qcin: `FFG_SPLIT_EQUIV: PASS cases=36864 base_ops=719 split_ops=552 base_peak=75 split_peak=75`
+- Cy0 park: `CY0_PARK_EQUIV: PASS cases=36864 base_ops=719 park_ops=725 base_toffoli=75 park_toffoli=77 base_peak=113 park_peak=112`
+
+summary decision=carry-floor-local-support-no-constant-wire
+
+## One-Call Probe
+
+- Probe kind: `cy0_park`
+- Call: `185`
+- Candidate env: `TLM_FFG_CY0_PARK_CALLS=185`
+
+BASE_SUMMARY shots=256 ops=10228095 qubits=1147 bits=613101 classical=1 phase_batches=1 ancilla_batches=0 avg_tof=1396798.035 avg_cliff=5632151.273
+CAND_SUMMARY shots=256 ops=10228101 qubits=1147 bits=613101 classical=1 phase_batches=0 ancilla_batches=0 avg_tof=1396718.473 avg_cliff=5631466.793
+COMPARE_SUMMARY shots=256 output_diff=0 phase_diff_batches=1
+
+n_ops=10228101 CCX=1475527 CCZ=6657 PEAK_QUBITS=1147 bits=613101

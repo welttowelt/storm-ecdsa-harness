@@ -99,6 +99,7 @@ for path in \
   scripts/storm-dead-drop-fixedpoint-gate.py \
   scripts/storm-route-compare-admission.py \
   scripts/storm-ffg-pair-proof-gate.py \
+  scripts/storm-ffg-lifetime-rotation-gate.py \
   scripts/storm-paper-invariant-intake-gate.py \
   examples/audit-card.example.md \
   examples/operator-card.example.md \
@@ -186,6 +187,9 @@ for path in \
   examples/pebbling-theorem-fail.example.txt \
   examples/ffg-pair-complete-no-recompute.example.txt \
   examples/ffg-pair-complete-recompute-hold.example.txt \
+  examples/ffg-lifetime-rotation-pass.example.txt \
+  examples/ffg-lifetime-rotation-hold.example.txt \
+  examples/ffg-lifetime-rotation-fail.example.txt \
   examples/transcript-overlap-pass.example.txt \
   examples/transcript-overlap-hold.example.txt \
   examples/transcript-overlap-fail.example.txt \
@@ -251,6 +255,7 @@ for path in \
   skills/pod-inventory-ack-gate.md \
   skills/route-compare-admission-gate.md \
   skills/ffg-pair-proof-gate.md \
+  skills/ffg-lifetime-rotation-gate.md \
   skills/candidate-validation-packet-gate.md \
   skills/apply-cswap-support-gate.md \
   skills/source-packet-novelty-gate.md \
@@ -321,6 +326,7 @@ for path in \
   .agents/skills/pod-inventory-ack-gate/SKILL.md \
   .agents/skills/route-compare-admission-gate/SKILL.md \
   .agents/skills/ffg-pair-proof-gate/SKILL.md \
+  .agents/skills/ffg-lifetime-rotation-gate/SKILL.md \
   .agents/skills/candidate-validation-packet-gate/SKILL.md \
   .agents/skills/apply-cswap-support-gate/SKILL.md \
   .agents/skills/source-packet-novelty-gate/SKILL.md \
@@ -425,6 +431,8 @@ need_text scripts/storm-windowed-carry-toy.py "windowed carry toy" "windowed_car
 need_text scripts/storm-ffg-pair-complete-toy.py "ffg pair complete toy" "ffg_pair_complete_toy="
 need_text scripts/storm-ffg-pair-complete-toy.py "no recompute nack" "no-recompute-pair-complete-nack"
 need_text scripts/storm-ffg-pair-complete-toy.py "recompute hold" "recompute-plan-needs-source-phase-score-proof"
+need_text scripts/storm-ffg-lifetime-rotation-gate.py "ffg lifetime rotation gate" "ffg_lifetime_rotation_gate="
+need_text scripts/storm-ffg-lifetime-rotation-gate.py "one-call rotation decision" "do-not-promote-ffg-lifetime-rotation"
 need_text scripts/storm-q1152-binder-ledger.py "q1152 binder ledger" "q1152_binder_ledger=pass"
 need_text scripts/storm-q1152-binder-ledger.py "mcx floor" "none_kg_prefix_ancilla"
 need_text scripts/storm-mcx-incrementer-budget.py "mcx incrementer budget" "mcx_incrementer_budget=pass"
@@ -522,6 +530,8 @@ need_text skills/route-compare-admission-gate.md "route compare admission skill"
 need_text skills/route-compare-admission-gate.md "strict admission flag" "require-admission"
 need_text skills/ffg-pair-proof-gate.md "ffg pair proof skill" "FFG Pair Proof Gate"
 need_text skills/ffg-pair-proof-gate.md "pair complete calls" "178,180,181"
+need_text skills/ffg-lifetime-rotation-gate.md "ffg lifetime rotation skill" "FFG Lifetime Rotation Gate"
+need_text skills/ffg-lifetime-rotation-gate.md "lifetime rotation no submit" "no-submit discipline"
 need_text skills/candidate-validation-packet-gate.md "candidate validation skill" "FOR-AKASH"
 need_text skills/apply-cswap-support-gate.md "apply cswap support skill" "per-step and per-bit"
 need_text skills/apply-cswap-support-gate.md "machine readable packet" "frontier_score"
@@ -554,6 +564,7 @@ need_text .agents/skills/local-heavy-compute-gate/SKILL.md "bridge" "Codex-disco
 need_text .agents/skills/pod-inventory-ack-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/route-compare-admission-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/ffg-pair-proof-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/ffg-lifetime-rotation-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/apply-cswap-support-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -577,6 +588,8 @@ need_text scripts/storm-route-compare-admission.py "route compare min shots" "mi
 need_text scripts/storm-route-compare-admission.py "route compare rounded score" "avg_tof_rounded"
 need_text scripts/storm-ffg-pair-proof-gate.py "ffg pair proof gate" "ffg_pair_proof_gate="
 need_text scripts/storm-ffg-pair-proof-gate.py "ffg pair calls" "required_calls"
+need_text scripts/storm-ffg-lifetime-rotation-gate.py "ffg lifetime rotation gate output" "ffg_lifetime_rotation_gate="
+need_text scripts/storm-ffg-lifetime-rotation-gate.py "ffg lifetime rotation count baseline" "baseline_ccx"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -602,6 +615,9 @@ need_text examples/apply-overlap-restore-missing.example.txt "apply overlap tape
 need_text examples/ffg-pair-proof-pass.example.txt "ffg pair pass fixture" "pair_complete=yes"
 need_text examples/ffg-pair-proof-hold.example.txt "ffg pair hold fixture" "candidate"
 need_text examples/ffg-pair-proof-fail.example.txt "ffg pair fail fixture" "covered_calls=192"
+need_text examples/ffg-lifetime-rotation-pass.example.txt "ffg lifetime rotation pass fixture" "ffg-cy0-clean-call190"
+need_text examples/ffg-lifetime-rotation-hold.example.txt "ffg lifetime rotation hold fixture" "needs-route-compare"
+need_text examples/ffg-lifetime-rotation-fail.example.txt "ffg lifetime rotation fail fixture" "carry-floor-local-support-no-constant-wire"
 need_text examples/paper-invariant-intake-pass.example.txt "paper invariant pass fixture" "source_backed=yes"
 need_text examples/paper-invariant-intake-hold.example.txt "paper invariant hold fixture" "complete-source-hash"
 need_text examples/paper-invariant-intake-fail.example.txt "paper invariant fail fixture" "paper_only=yes"
@@ -3024,6 +3040,68 @@ elif ! grep -q 'ffg_pair_proof_gate=fail' "$tmpdir/ffg-pair-proof-fail.out" ||
   printf 'public_harness_check=fail ffg_pair_proof_fail_output\n' >&2
   cat "$tmpdir/ffg-pair-proof-fail.out" >&2
   cat "$tmpdir/ffg-pair-proof-fail.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-ffg-lifetime-rotation-gate.py \
+  examples/ffg-lifetime-rotation-pass.example.txt \
+  --baseline-ops 10228095 \
+  --baseline-ccx 1475525 \
+  --baseline-ccz 6657 \
+  --require-pass \
+  >"$tmpdir/ffg-lifetime-rotation-pass.out" \
+  2>"$tmpdir/ffg-lifetime-rotation-pass.err"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_pass_failed\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-pass.err" >&2
+  fail=1
+elif ! grep -q 'ffg_lifetime_rotation_gate=pass' "$tmpdir/ffg-lifetime-rotation-pass.out" ||
+     ! grep -q 'decision=ffg-lifetime-rotation-review-no-compute' "$tmpdir/ffg-lifetime-rotation-pass.out" ||
+     ! grep -q 'score_edge=1152.0' "$tmpdir/ffg-lifetime-rotation-pass.out" ||
+     ! grep -q 'baseline_ccx=1475525' "$tmpdir/ffg-lifetime-rotation-pass.out"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_pass_output\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-ffg-lifetime-rotation-gate.py \
+  examples/ffg-lifetime-rotation-hold.example.txt \
+  --baseline-ops 10228095 \
+  --baseline-ccx 1475525 \
+  --baseline-ccz 6657 \
+  --require-pass \
+  >"$tmpdir/ffg-lifetime-rotation-hold.out" \
+  2>"$tmpdir/ffg-lifetime-rotation-hold.err"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-hold.out" >&2
+  fail=1
+elif ! grep -q 'ffg_lifetime_rotation_gate=hold' "$tmpdir/ffg-lifetime-rotation-hold.out" ||
+     ! grep -q 'missing_base_summary' "$tmpdir/ffg-lifetime-rotation-hold.out" ||
+     ! grep -q 'missing_score_edge' "$tmpdir/ffg-lifetime-rotation-hold.out"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_hold_output\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-hold.out" >&2
+  cat "$tmpdir/ffg-lifetime-rotation-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-ffg-lifetime-rotation-gate.py \
+  examples/ffg-lifetime-rotation-fail.example.txt \
+  --baseline-ops 10228095 \
+  --baseline-ccx 1475525 \
+  --baseline-ccz 6657 \
+  --require-pass \
+  >"$tmpdir/ffg-lifetime-rotation-fail.out" \
+  2>"$tmpdir/ffg-lifetime-rotation-fail.err"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-fail.out" >&2
+  fail=1
+elif ! grep -q 'ffg_lifetime_rotation_gate=fail' "$tmpdir/ffg-lifetime-rotation-fail.out" ||
+     ! grep -q 'carry_floor_no_static_carry_cut' "$tmpdir/ffg-lifetime-rotation-fail.out" ||
+     ! grep -q 'candidate_classical_dirty' "$tmpdir/ffg-lifetime-rotation-fail.out" ||
+     ! grep -q 'compare_phase_diff' "$tmpdir/ffg-lifetime-rotation-fail.out" ||
+     ! grep -q 'score_no_edge' "$tmpdir/ffg-lifetime-rotation-fail.out"; then
+  printf 'public_harness_check=fail ffg_lifetime_rotation_fail_output\n' >&2
+  cat "$tmpdir/ffg-lifetime-rotation-fail.out" >&2
+  cat "$tmpdir/ffg-lifetime-rotation-fail.err" >&2
   fail=1
 fi
 

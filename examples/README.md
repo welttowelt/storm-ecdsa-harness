@@ -40,6 +40,8 @@ Use them to teach agents the workflow:
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or
   compute language,
+- FFG lifetime rotation fixtures separate clean route-admission packets from
+  incomplete one-call reports and dirty/count-worse call rotations,
 - paper-invariant fixtures block scout-only hits before skill-card or compute
   language,
 - pod-inventory ACK fixtures accept complete no-compute inventory, hold

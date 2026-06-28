@@ -1,0 +1,11 @@
+ACK researcher CLAIM ffg-lifetime-cy0-incomplete route_id=ffg-cy0-incomplete owner=researcher next=run-route-compare host=studio no_submit_ack=yes
+source_base=d44cad3 source_hash=8f407bf998b991b293b7db7e75d3f12f5005e75f363f02ebba11c44eae322504 candidate_hash=1234abcd5678ef90 evidence_label=Partial
+frontier_score=1571592960
+TLM_FFG lifetime proof
+
+- Split qcin: `FFG_SPLIT_EQUIV: PASS cases=36864`
+- Cy0 park: `CY0_PARK_EQUIV: PASS cases=36864`
+summary decision=needs-route-compare
+- Probe kind: `cy0_park`
+- Call: `190`
+- Candidate env: `TLM_FFG_CY0_PARK_CALLS=190`
