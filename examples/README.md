@@ -15,9 +15,10 @@ Use them to teach agents the workflow:
 - wall-owner summaries are regenerated before source-certificate scouting,
 - source-certificate scouts filter already-closed context rows before mining,
 - source-packet novelty checks accept public `src/point_add` sites beyond one
-  subdirectory,
+  subdirectory and reject non-scored `CX/CZ/X/SWAP` rows as q1152 avg-Toffoli
+  routes,
 - source-row routing fixtures separate packet-ready rows from counterexample
-  closures and unsafe compute asks,
+  closures, unsafe compute asks, and non-scored row promotions,
 - Gidney CCZ residual fixtures separate non-default residual packets from
   default-on remainder rows and missing-proof holds,
 - qoffset host-accounting fixtures separate certified source-integrated packets,

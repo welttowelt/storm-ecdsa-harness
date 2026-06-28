@@ -34,7 +34,10 @@ SOURCE_LOCATION_RE = re.compile(
 )
 FRONTIER_SCORE_RE = re.compile(r"\bfrontier(?:_score| score)?\s*[=:]\s*([0-9][0-9_]*(?:\.[0-9]+)?)\b", re.IGNORECASE)
 QUBITS_RE = re.compile(r"\b(?:q|qubits?)\s*[=:]\s*([0-9][0-9_]*)\b", re.IGNORECASE)
-KIND_RE = re.compile(r"\b(?:kind|op_class)\s*[=:]\s*(CCX|CCZ|CSWAP|TOFFOLI|T)\b", re.IGNORECASE)
+KIND_RE = re.compile(
+    r"\b(?:kind|op_class)\s*[=:]\s*(CCX|CCZ|CX|CZ|X|SWAP|CSWAP|TOFFOLI|T)\b",
+    re.IGNORECASE,
+)
 FAMILY_RE = re.compile(r"\b(?:family|primitive_family|trace_context_family)\s*[=:]\s*([A-Za-z0-9_.:+-]+)\b", re.IGNORECASE)
 EVIDENCE_LABEL_RE = re.compile(r"\bevidence_label\s*[=:]\s*(Prefilter|Partial|Local full run|Promoted)\b", re.IGNORECASE)
 DELTA_RE = re.compile(r"\b(?:expected_avgT_delta|expected_delta|expected_ops_delta|delta)\s*[=:]\s*(-?[0-9]+(?:\.[0-9]+)?)\b", re.IGNORECASE)
@@ -114,6 +117,7 @@ def inspect(text: str, expected_source: str, expected_qubits: int) -> dict[str, 
     has_proof_backlog = bool(PROOF_BACKLOG_RE.search(text))
     has_closure_reason = bool(CLOSURE_RE.search(text))
     negative_delta = delta is not None and delta < 0
+    is_scored_kind = kind in {"CCX", "CCZ"}
 
     failures: list[str] = []
     holds: list[str] = []
@@ -137,6 +141,8 @@ def inspect(text: str, expected_source: str, expected_qubits: int) -> dict[str, 
         failures.append("counterexample_closure_claims_negative_delta")
     if packet and delta is not None and not negative_delta:
         failures.append("packet_has_nonnegative_expected_delta")
+    if packet and kind and not is_scored_kind:
+        failures.append("non_scored_op_kind")
 
     for label, value in [
         ("missing_route_id", route_id),

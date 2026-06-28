@@ -2759,6 +2759,23 @@ elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-
 fi
 
 if python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-nonscored-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-nonscored-fail.out" \
+  2>"$tmpdir/source-packet-novelty-nonscored-fail.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_nonscored_unexpected_pass\n' >&2
+  cat "$tmpdir/source-packet-novelty-nonscored-fail.out" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-nonscored-fail.out" ||
+     ! grep -q 'kind=CZ' "$tmpdir/source-packet-novelty-nonscored-fail.out" ||
+     ! grep -q 'non_scored_op_kind' "$tmpdir/source-packet-novelty-nonscored-fail.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_nonscored_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-nonscored-fail.out" >&2
+  cat "$tmpdir/source-packet-novelty-nonscored-fail.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-packet-novelty-gate.py \
   examples/source-packet-novelty-family-exhausted.example.txt \
   --require-pass \
   >"$tmpdir/source-packet-novelty-family-exhausted.out" \
@@ -2860,6 +2877,23 @@ elif ! grep -q 'source_row_routing_gate=fail' "$tmpdir/source-row-routing-fail.o
   printf 'public_harness_check=fail source_row_routing_fail_output\n' >&2
   cat "$tmpdir/source-row-routing-fail.out" >&2
   cat "$tmpdir/source-row-routing-fail.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-row-routing-gate.py \
+  examples/source-row-routing-nonscored-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/source-row-routing-nonscored-fail.out" \
+  2>"$tmpdir/source-row-routing-nonscored-fail.err"; then
+  printf 'public_harness_check=fail source_row_routing_nonscored_unexpected_pass\n' >&2
+  cat "$tmpdir/source-row-routing-nonscored-fail.out" >&2
+  fail=1
+elif ! grep -q 'source_row_routing_gate=fail' "$tmpdir/source-row-routing-nonscored-fail.out" ||
+     ! grep -q 'kind=CZ' "$tmpdir/source-row-routing-nonscored-fail.out" ||
+     ! grep -q 'non_scored_op_kind' "$tmpdir/source-row-routing-nonscored-fail.out"; then
+  printf 'public_harness_check=fail source_row_routing_nonscored_output\n' >&2
+  cat "$tmpdir/source-row-routing-nonscored-fail.out" >&2
+  cat "$tmpdir/source-row-routing-nonscored-fail.err" >&2
   fail=1
 fi
 
