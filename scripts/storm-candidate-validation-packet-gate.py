@@ -40,6 +40,11 @@ EVAL_BLOCK_RE = re.compile(
     r"\bancilla-garbage\s+batches\s*:\s*([0-9]+)\b",
     re.IGNORECASE | re.DOTALL,
 )
+PREMATURE_RE = re.compile(
+    r"\b(?:FOR[- ]AKASH|WINNER|mobile alert|ready[- ]to[- ]submit|Akash-ready)\b|"
+    r"\bsubmit\s+(?:now|candidate|ready|decision|this)\b",
+    re.IGNORECASE,
+)
 
 
 def read_text(paths: Iterable[Path]) -> str:
@@ -70,9 +75,11 @@ def parse_counts(text: str) -> tuple[int, int, int] | None:
     return None
 
 
-def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int) -> dict[str, object]:
+def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int, expected_source: str) -> dict[str, object]:
     frontier_in_packet = parse_number(FRONTIER_RE, text)
     effective_frontier = frontier_in_packet if frontier_in_packet is not None else frontier_score
+    source_match = SOURCE_RE.search(text)
+    source_base = source_match.group(1) if source_match else ""
     ops = parse_int(OPS_RE, text)
     qubits = parse_int(Q_RE, text)
     score = parse_number(SCORE_RE, text)
@@ -89,7 +96,8 @@ def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int
     has_owner = bool(OWNER_RE.search(text))
     has_artifact = bool(ARTIFACT_RE.search(text))
     has_no_submit = bool(NO_SUBMIT_RE.search(text))
-    has_source = bool(SOURCE_RE.search(text))
+    has_source = bool(source_base)
+    has_premature_language = bool(PREMATURE_RE.search(text))
 
     failures: list[str] = []
     holds: list[str] = []
@@ -97,6 +105,8 @@ def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int
 
     if has_local_host:
         failures.append("local_validation_packet")
+    if has_premature_language:
+        failures.append("premature_alert_or_submit_language")
     if not has_remote_host:
         holds.append("missing_remote_host")
     if not has_owner:
@@ -108,7 +118,9 @@ def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int
     if frontier_in_packet is None:
         holds.append("missing_frontier_score")
     if not has_source:
-        warnings.append("missing_source_base")
+        holds.append("missing_source_base")
+    if expected_source and source_base and source_base != expected_source:
+        failures.append("stale_source_base")
     if expected_ops > 0 and ops is None:
         holds.append("missing_ops")
     elif expected_ops > 0 and ops != expected_ops:
@@ -142,6 +154,8 @@ def inspect(text: str, frontier_score: float, max_qubits: int, expected_ops: int
         "gate": gate,
         "decision": decision,
         "frontier_score": effective_frontier,
+        "source_base": source_base,
+        "expected_source": expected_source,
         "ops": ops,
         "expected_ops": expected_ops,
         "qubits": qubits,
@@ -171,6 +185,7 @@ def text_summary(row: dict[str, object]) -> str:
         f"official_path={str(row['official_path']).lower()} remote_host={str(row['remote_host']).lower()} "
         f"local_host={str(row['local_host']).lower()} owner={str(row['owner']).lower()} "
         f"artifact={str(row['artifact']).lower()} no_submit_ack={str(row['no_submit_ack']).lower()} "
+        f"source_base={row['source_base'] or 'missing'} expected_source={row['expected_source'] or 'none'} "
         f"ops={row['ops']} expected_ops={row['expected_ops']} qubits={row['qubits']} "
         f"max_qubits={row['max_qubits']} score={row['score']} frontier_score={row['frontier_score']} "
         f"counts={counts} decision={row['decision']} failures={failures} holds={holds} warnings={warnings}"
@@ -183,6 +198,7 @@ def main() -> int:
     parser.add_argument("--frontier-score", type=float, default=1571592960.0)
     parser.add_argument("--max-qubits", type=int, default=1152)
     parser.add_argument("--expected-ops", type=int, default=10221059)
+    parser.add_argument("--expected-source", default="d44cad3")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--require-pass", action="store_true")
     args = parser.parse_args()
@@ -192,7 +208,7 @@ def main() -> int:
         print(f"candidate_validation_packet_gate=fail missing_inputs={','.join(missing)}", file=sys.stderr)
         return 2
 
-    row = inspect(read_text(args.inputs), args.frontier_score, args.max_qubits, args.expected_ops)
+    row = inspect(read_text(args.inputs), args.frontier_score, args.max_qubits, args.expected_ops, args.expected_source)
     if args.json:
         print(json.dumps(row, sort_keys=True))
     else:

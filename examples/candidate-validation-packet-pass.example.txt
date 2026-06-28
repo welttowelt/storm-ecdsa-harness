@@ -1,4 +1,4 @@
-ACK Validator CLAIM candidate-for-akash-demo skill=validation-submit-gate file=studio:validator/report.md next=hand-to-Storm-for-fresh-frontier-and-submit-decision no_submit_ack=yes
+ACK Validator CLAIM candidate-clean-demo skill=validation-submit-gate file=studio:validator/report.md next=hand-to-Storm-for-fresh-frontier-review-no-submit no_submit_ack=yes
 host=studio owner=Validator source_base=d44cad3 frontier_score=1571592960
 official validation path: build_circuit then eval_circuit
 emitted_ops=10221059 qubits=1152 avg_tof=1363000 score=1570176000 c=0 p=0 a=0

@@ -172,6 +172,9 @@ agent instructions or used as a preflight before route work:
 - `skills/candidate-validation-packet-gate.md`: check remote validation packets
   for host, owner, ops, score edge, c/p/a, artifacts, and no-submit discipline
   before FOR-AKASH language.
+- `skills/transcript-overlap-gate.md`: gate transcript peak-overlap drop
+  packets before implementation, blocking active-only origins, stale indexes,
+  dirty probes, missing peak calls, and premature residual/compute requests.
 - `skills/paper-gidney-constant-workspace-adder.md`: apply Gidney 2025
   constant-workspace adders only after a toy proof and one-callsite residual
   gate.
@@ -259,6 +262,7 @@ The bridge names are:
 - `compute-restart-gate`
 - `compute-unlock-gate`
 - `candidate-validation-packet-gate`
+- `transcript-overlap-gate`
 - `paper-gidney-constant-workspace-adder`
 - `paper-mbu-modular-arithmetic`
 - `paper-hrs-dirty-constant-adder`

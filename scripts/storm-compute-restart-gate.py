@@ -45,9 +45,16 @@ FULL_CLEAN_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 NO_SUBMIT_RE = re.compile(r"\bno_submit_ack\s*=\s*yes\b", re.IGNORECASE)
+SOURCE_BASE_RE = re.compile(r"\b(?:source_base|source|base|source commit)\s*[=:]\s*([0-9a-f]{6,40})\b", re.IGNORECASE)
+FRONTIER_SCORE_RE = re.compile(r"\bfrontier(?:_score| score)?\s*[=:]\s*([0-9][0-9_]*(?:\.[0-9]+)?)\b", re.IGNORECASE)
+QUBITS_RE = re.compile(r"\b(?:q|qubits?)\s*[=:]\s*([0-9][0-9_]*)\b", re.IGNORECASE)
+DELTA_RE = re.compile(r"\b(?:expected_avgT_delta|expected_delta|expected_ops_delta|delta)\s*[=:]\s*(-?[0-9]+(?:\.[0-9]+)?)\b", re.IGNORECASE)
+VALIDATION_OWNER_RE = re.compile(r"\b(?:validation_owner|validator)\s*[=:]\s*([A-Za-z0-9_.-]+)\b", re.IGNORECASE)
+BUDGET_RE = re.compile(r"\b(?:budget|max_budget|compute_budget|max_nonce|max_range|max_minutes|max_dollars|max_shots)\s*[=:]\s*\S+", re.IGNORECASE)
+STOP_RE = re.compile(r"\b(?:stop_condition|kill_condition|kill_gate|stop_after|abort_if)\s*[=:]\s*\S+", re.IGNORECASE)
 OWNER_RE = re.compile(r"\b(?:owner|agent|from)\s*[=:]\s*([A-Za-z0-9_.-]+)\b|\bACK\s+([A-Za-z0-9_.-]+)\b", re.IGNORECASE)
 NEXT_RE = re.compile(r"\bnext\s*[=:]\s*([A-Za-z0-9_.:/@+-]+)\b", re.IGNORECASE)
-POD_RE = re.compile(r"\b(?:pod|runpod|instance|machine)\s*[=:]\s*([A-Za-z0-9_.:-]+)|\brunpod:([A-Za-z0-9_.:-]+)", re.IGNORECASE)
+POD_RE = re.compile(r"\b(?:pod|runpod|instance|machine)\s*[=:]\s*([A-Za-z0-9_.:-]+)|\brunpod:([A-Za-z0-9_.-]+)", re.IGNORECASE)
 ROUTE_RE = re.compile(r"\b(?:route|range|shard|candidate|lane)\s*[=:]\s*([A-Za-z0-9_.:/@+,\[\)-]+)", re.IGNORECASE)
 EVIDENCE_RE = re.compile(r"\bevidence_label\s*[=:]\s*(Prefilter|Partial|Local full run|Promoted)\b", re.IGNORECASE)
 STALE_RE = re.compile(r"\b(?:stale|manual_gpu_island2_missing|route_reopened|fed64cf_stormgate_nonce_retake_gpu)\b", re.IGNORECASE)
@@ -69,7 +76,21 @@ def first_match(pattern: re.Pattern[str], text: str) -> str:
     return next((group for group in match.groups() if group), "")
 
 
-def inspect(text: str) -> dict[str, object]:
+def first_float(pattern: re.Pattern[str], text: str) -> float | None:
+    value = first_match(pattern, text)
+    if not value:
+        return None
+    return float(value.replace("_", ""))
+
+
+def first_int(pattern: re.Pattern[str], text: str) -> int | None:
+    value = first_match(pattern, text)
+    if not value:
+        return None
+    return int(value.replace("_", ""))
+
+
+def inspect(text: str, expected_source: str, expected_qubits: int) -> dict[str, object]:
     scanner = bool(SCANNER_RE.search(text))
     official_eval = bool(OFFICIAL_EVAL_RE.search(text))
     closed = bool(CLOSED_RE.search(text))
@@ -85,6 +106,14 @@ def inspect(text: str) -> dict[str, object]:
     route = first_match(ROUTE_RE, text)
     next_action = first_match(NEXT_RE, text)
     evidence_label = first_match(EVIDENCE_RE, text)
+    source_base = first_match(SOURCE_BASE_RE, text)
+    frontier_score = first_float(FRONTIER_SCORE_RE, text)
+    qubits = first_int(QUBITS_RE, text)
+    delta = first_float(DELTA_RE, text)
+    validation_owner = first_match(VALIDATION_OWNER_RE, text)
+    budget = bool(BUDGET_RE.search(text))
+    stop_condition = bool(STOP_RE.search(text))
+    negative_edge = delta is not None and delta < 0
 
     failures: list[str] = []
     holds: list[str] = []
@@ -105,6 +134,24 @@ def inspect(text: str) -> dict[str, object]:
 
     if scanner and not owner:
         holds.append("missing_owner")
+    if scanner and not source_base:
+        holds.append("missing_source_base")
+    if scanner and expected_source and source_base and source_base != expected_source:
+        failures.append("stale_source_base")
+    if scanner and frontier_score is None:
+        holds.append("missing_frontier_score")
+    if scanner and qubits is None:
+        holds.append("missing_qubits")
+    if scanner and expected_qubits > 0 and qubits is not None and qubits != expected_qubits:
+        failures.append("wrong_qubit_tier")
+    if scanner and not negative_edge:
+        holds.append("missing_negative_expected_edge")
+    if scanner and not validation_owner:
+        holds.append("missing_validation_owner")
+    if scanner and not budget:
+        holds.append("missing_budget")
+    if scanner and not stop_condition:
+        holds.append("missing_stop_condition")
     if scanner and not pod:
         holds.append("missing_pod_identity")
     if scanner and not route:
@@ -142,6 +189,16 @@ def inspect(text: str) -> dict[str, object]:
         "route_or_range": route,
         "next_action": next_action,
         "evidence_label": evidence_label,
+        "source_base": source_base,
+        "expected_source": expected_source,
+        "frontier_score": frontier_score,
+        "qubits": qubits,
+        "expected_qubits": expected_qubits,
+        "delta": delta,
+        "negative_edge": negative_edge,
+        "validation_owner": validation_owner,
+        "budget": budget,
+        "stop_condition": stop_condition,
         "no_submit_ack": no_submit,
         "failures": failures,
         "holds": holds,
@@ -167,6 +224,11 @@ def text_summary(row: dict[str, object]) -> str:
         f"stale_or_manual={str(row['stale_or_manual']).lower()} "
         f"owner={row['owner'] or 'missing'} pod_identity={row['pod_identity'] or 'missing'} "
         f"route_or_range={row['route_or_range'] or 'missing'} next_action={row['next_action'] or 'missing'} "
+        f"source_base={row['source_base'] or 'missing'} expected_source={row['expected_source'] or 'none'} "
+        f"frontier_score={row['frontier_score']} qubits={row['qubits']} expected_qubits={row['expected_qubits']} "
+        f"delta={row['delta']} negative_edge={str(row['negative_edge']).lower()} "
+        f"validation_owner={row['validation_owner'] or 'missing'} budget={str(row['budget']).lower()} "
+        f"stop_condition={str(row['stop_condition']).lower()} "
         f"evidence_label={row['evidence_label'] or 'missing'} "
         f"no_submit_ack={str(row['no_submit_ack']).lower()} decision={row['decision']} "
         f"failures={join(row['failures'])} holds={join(row['holds'])} warnings={join(row['warnings'])}"
@@ -176,6 +238,8 @@ def text_summary(row: dict[str, object]) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("inputs", nargs="+", type=Path)
+    parser.add_argument("--expected-source", default="d44cad3")
+    parser.add_argument("--expected-qubits", type=int, default=1152)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--require-pass", action="store_true")
     args = parser.parse_args()
@@ -185,7 +249,7 @@ def main() -> int:
         print(f"compute_restart_gate=fail missing_inputs={','.join(missing)}", file=sys.stderr)
         return 2
 
-    row = inspect(read_text(args.inputs))
+    row = inspect(read_text(args.inputs), args.expected_source, args.expected_qubits)
     if args.json:
         print(json.dumps(row, sort_keys=True))
     else:

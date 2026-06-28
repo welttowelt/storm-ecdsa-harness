@@ -13,7 +13,8 @@ Add --require-pass when the caller needs a hard shell gate.
 
 - packet has route_id, owner, next, frontier_score, and the expected q-tier;
 - source is bound to the current frontier and includes a source hash;
-- source location is a trailmix_ludicrous/*.rs:<line> site;
+- source location is a public `src/point_add/*.rs:<line>` site, including
+  non-`trailmix_ludicrous` support code such as `arith.rs`;
 - packet names kind, evidence label, and expected negative delta;
 - novelty is explicit: novelty_status=NEW, outside_closed_ledger=yes, or
   ledger_hit=no;

@@ -9,8 +9,9 @@ closed compute or when the pod queue has no eligible job.
 
 ## Pass Requirements
 
-- scanner packet has owner, pod identity, route/range, next action, and
-  no_submit_ack=yes;
+- scanner packet has owner, validation owner, pod identity, route/range, next
+  action, budget, stop condition, source base, frontier score, q-tier, expected
+  negative edge, and no_submit_ack=yes;
 - compute gate is explicitly open through a Storm route ACK or route_ack=yes;
 - evidence is source-hash-bound CERTIFIED support/proof or a trusted full-clean
   validation packet;

@@ -75,6 +75,7 @@ for path in \
   scripts/storm-candidate-validation-packet-gate.py \
   scripts/storm-apply-cswap-support-gate.py \
   scripts/storm-source-packet-novelty-gate.py \
+  scripts/storm-transcript-overlap-gate.py \
   scripts/storm-compute-restart-gate.py \
   scripts/storm-compute-unlock-gate.py \
   examples/fleet-owner-claim-vague-token.example.txt \
@@ -117,14 +118,20 @@ for path in \
   examples/candidate-validation-packet-pass.example.txt \
   examples/candidate-validation-packet-hold.example.txt \
   examples/candidate-validation-packet-fail.example.txt \
+  examples/candidate-validation-packet-stale.example.txt \
   examples/apply-cswap-support-pass.example.txt \
   examples/apply-cswap-support-hold.example.txt \
   examples/apply-cswap-support-fail.example.txt \
   examples/apply-cswap-support-stale.example.txt \
   examples/source-packet-novelty-pass.example.txt \
+  examples/source-packet-novelty-arith-pass.example.txt \
   examples/source-packet-novelty-hold.example.txt \
   examples/source-packet-novelty-fail.example.txt \
   examples/source-packet-novelty-stale.example.txt \
+  examples/transcript-overlap-pass.example.txt \
+  examples/transcript-overlap-hold.example.txt \
+  examples/transcript-overlap-fail.example.txt \
+  examples/transcript-overlap-stale.example.txt \
   examples/compute-restart-pass.example.txt \
   examples/compute-restart-hold.example.txt \
   examples/compute-restart-fail.example.txt \
@@ -174,6 +181,7 @@ for path in \
   skills/candidate-validation-packet-gate.md \
   skills/apply-cswap-support-gate.md \
   skills/source-packet-novelty-gate.md \
+  skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
   skills/compute-restart-gate.md \
   skills/support-bounded-vented-dead-carry.md \
@@ -230,6 +238,7 @@ for path in \
   .agents/skills/candidate-validation-packet-gate/SKILL.md \
   .agents/skills/apply-cswap-support-gate/SKILL.md \
   .agents/skills/source-packet-novelty-gate/SKILL.md \
+  .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
   .agents/skills/compute-restart-gate/SKILL.md \
   .agents/skills/paper-gidney-constant-workspace-adder/SKILL.md \
@@ -342,15 +351,21 @@ need_text scripts/storm-local-heavy-compute-gate.py "local heavy compute gate" "
 need_text scripts/storm-local-heavy-compute-gate.py "mac stop decision" "stop-mac-local-heavy-compute"
 need_text scripts/storm-candidate-validation-packet-gate.py "candidate validation packet gate" "candidate_validation_packet_gate="
 need_text scripts/storm-candidate-validation-packet-gate.py "akash handoff decision" "candidate-for-akash-handoff-no-submit"
+need_text scripts/storm-candidate-validation-packet-gate.py "stale source failure" "stale_source_base"
 need_text scripts/storm-apply-cswap-support-gate.py "apply cswap support gate" "apply_cswap_support_gate="
 need_text scripts/storm-apply-cswap-support-gate.py "per step bit decision" "complete-per-step-per-bit-proof"
 need_text scripts/storm-apply-cswap-support-gate.py "stale source decision" "stale_source_base"
 need_text scripts/storm-source-packet-novelty-gate.py "source packet novelty gate" "source_packet_novelty_gate="
 need_text scripts/storm-source-packet-novelty-gate.py "bounded source proof decision" "admit-one-bounded-source-proof-no-compute"
 need_text scripts/storm-source-packet-novelty-gate.py "closed ledger failure" "all_current_unknowns_closed"
+need_text scripts/storm-source-packet-novelty-gate.py "point add source location" "src/point_add"
+need_text scripts/storm-transcript-overlap-gate.py "transcript overlap gate" "transcript_overlap_gate="
+need_text scripts/storm-transcript-overlap-gate.py "source theorem review decision" "source-theorem-review-no-compute"
+need_text scripts/storm-transcript-overlap-gate.py "score edge failure" "score_no_edge"
 need_text scripts/storm-compute-restart-gate.py "compute restart gate" "compute_restart_gate="
 need_text scripts/storm-compute-restart-gate.py "scanner closed failure" "scanner_restart_under_closed_compute_gate"
 need_text scripts/storm-compute-restart-gate.py "scanner route ack failure" "scanner_without_route_ack_and_certified_evidence"
+need_text scripts/storm-compute-restart-gate.py "restart budget gate" "missing_budget"
 need_text scripts/storm-compute-unlock-gate.py "compute unlock gate" "compute_unlock_gate="
 need_text scripts/storm-compute-unlock-gate.py "no submit dispatch decision" "compute-unlock-ready-for-storm-dispatch-no-submit"
 need_text scripts/storm-compute-unlock-gate.py "closed compute failure" "compute_closed_without_unlock_packet"
@@ -376,6 +391,8 @@ need_text skills/apply-cswap-support-gate.md "apply cswap support skill" "per-st
 need_text skills/apply-cswap-support-gate.md "machine readable packet" "frontier_score"
 need_text skills/source-packet-novelty-gate.md "source packet novelty skill" "outside_closed_ledger"
 need_text skills/source-packet-novelty-gate.md "source packet no compute" "no compute"
+need_text skills/transcript-overlap-gate.md "transcript overlap skill" "transcript peak-overlap"
+need_text skills/transcript-overlap-gate.md "active only failure" "active-only"
 need_text skills/compute-restart-gate.md "compute restart skill" "scanner restart"
 need_text skills/compute-restart-gate.md "compute restart no submit" "no submit authority"
 need_text skills/compute-unlock-gate.md "compute unlock skill" "storm_route_ack"
@@ -391,6 +408,7 @@ need_text .agents/skills/local-heavy-compute-gate/SKILL.md "bridge" "Codex-disco
 need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/apply-cswap-support-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/transcript-overlap-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-unlock-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-restart-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
@@ -1584,6 +1602,11 @@ if ! python3 scripts/storm-compute-restart-gate.py \
 elif ! grep -q 'compute_restart_gate=pass' "$tmpdir/compute-restart-pass.out" ||
      ! grep -q 'scanner=true' "$tmpdir/compute-restart-pass.out" ||
      ! grep -q 'certified_evidence=true' "$tmpdir/compute-restart-pass.out" ||
+     ! grep -q 'source_base=d44cad3' "$tmpdir/compute-restart-pass.out" ||
+     ! grep -q 'validation_owner=Storm-Codex' "$tmpdir/compute-restart-pass.out" ||
+     ! grep -q 'budget=true' "$tmpdir/compute-restart-pass.out" ||
+     ! grep -q 'stop_condition=true' "$tmpdir/compute-restart-pass.out" ||
+     ! grep -q 'negative_edge=true' "$tmpdir/compute-restart-pass.out" ||
      ! grep -q 'scanner-restart-gate-cleared' "$tmpdir/compute-restart-pass.out"; then
   printf 'public_harness_check=fail compute_restart_pass_output\n' >&2
   cat "$tmpdir/compute-restart-pass.out" >&2
@@ -1619,6 +1642,8 @@ if python3 scripts/storm-compute-restart-gate.py \
 elif ! grep -q 'compute_restart_gate=hold' "$tmpdir/compute-restart-hold.out" ||
      ! grep -q 'missing_owner' "$tmpdir/compute-restart-hold.out" ||
      ! grep -q 'missing_route_or_range' "$tmpdir/compute-restart-hold.out" ||
+     ! grep -q 'missing_budget' "$tmpdir/compute-restart-hold.out" ||
+     ! grep -q 'missing_stop_condition' "$tmpdir/compute-restart-hold.out" ||
      ! grep -q 'complete-route-owner-and-gate-evidence' "$tmpdir/compute-restart-hold.out"; then
   printf 'public_harness_check=fail compute_restart_hold_output\n' >&2
   cat "$tmpdir/compute-restart-hold.out" >&2
@@ -1705,6 +1730,7 @@ if ! python3 scripts/storm-candidate-validation-packet-gate.py \
   fail=1
 elif ! grep -q 'candidate_validation_packet_gate=pass' "$tmpdir/candidate-validation-packet-pass.out" ||
      ! grep -q 'decision=candidate-for-akash-handoff-no-submit' "$tmpdir/candidate-validation-packet-pass.out" ||
+     ! grep -q 'source_base=d44cad3' "$tmpdir/candidate-validation-packet-pass.out" ||
      ! grep -q 'no_submit_ack=true' "$tmpdir/candidate-validation-packet-pass.out"; then
   printf 'public_harness_check=fail candidate_validation_packet_pass_output\n' >&2
   cat "$tmpdir/candidate-validation-packet-pass.out" >&2
@@ -1721,6 +1747,7 @@ if python3 scripts/storm-candidate-validation-packet-gate.py \
   fail=1
 elif ! grep -q 'candidate_validation_packet_gate=hold' "$tmpdir/candidate-validation-packet-hold.out" ||
      ! grep -q 'missing_remote_host' "$tmpdir/candidate-validation-packet-hold.out" ||
+     ! grep -q 'missing_source_base' "$tmpdir/candidate-validation-packet-hold.out" ||
      ! grep -q 'missing_artifact_evidence' "$tmpdir/candidate-validation-packet-hold.out"; then
   printf 'public_harness_check=fail candidate_validation_packet_hold_output\n' >&2
   cat "$tmpdir/candidate-validation-packet-hold.out" >&2
@@ -1743,6 +1770,23 @@ elif ! grep -q 'candidate_validation_packet_gate=fail' "$tmpdir/candidate-valida
   printf 'public_harness_check=fail candidate_validation_packet_fail_output\n' >&2
   cat "$tmpdir/candidate-validation-packet-fail.out" >&2
   cat "$tmpdir/candidate-validation-packet-fail.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-candidate-validation-packet-gate.py \
+  examples/candidate-validation-packet-stale.example.txt \
+  --require-pass \
+  >"$tmpdir/candidate-validation-packet-stale.out" \
+  2>"$tmpdir/candidate-validation-packet-stale.err"; then
+  printf 'public_harness_check=fail candidate_validation_packet_stale_unexpected_pass\n' >&2
+  cat "$tmpdir/candidate-validation-packet-stale.out" >&2
+  fail=1
+elif ! grep -q 'candidate_validation_packet_gate=fail' "$tmpdir/candidate-validation-packet-stale.out" ||
+     ! grep -q 'stale_source_base' "$tmpdir/candidate-validation-packet-stale.out" ||
+     ! grep -q 'source_base=58866a2' "$tmpdir/candidate-validation-packet-stale.out"; then
+  printf 'public_harness_check=fail candidate_validation_packet_stale_output\n' >&2
+  cat "$tmpdir/candidate-validation-packet-stale.out" >&2
+  cat "$tmpdir/candidate-validation-packet-stale.err" >&2
   fail=1
 fi
 
@@ -1839,6 +1883,22 @@ elif ! grep -q 'source_packet_novelty_gate=pass' "$tmpdir/source-packet-novelty-
   fail=1
 fi
 
+if ! python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-arith-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-arith-pass.out" \
+  2>"$tmpdir/source-packet-novelty-arith-pass.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_arith_pass_failed\n' >&2
+  cat "$tmpdir/source-packet-novelty-arith-pass.err" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=pass' "$tmpdir/source-packet-novelty-arith-pass.out" ||
+     ! grep -q 'source_location=src/point_add/arith.rs:1322' "$tmpdir/source-packet-novelty-arith-pass.out" ||
+     ! grep -q 'decision=admit-one-bounded-source-proof-no-compute' "$tmpdir/source-packet-novelty-arith-pass.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_arith_pass_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-arith-pass.out" >&2
+  fail=1
+fi
+
 if python3 scripts/storm-source-packet-novelty-gate.py \
   examples/source-packet-novelty-hold.example.txt \
   --require-pass \
@@ -1890,6 +1950,79 @@ elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-
   printf 'public_harness_check=fail source_packet_novelty_stale_output\n' >&2
   cat "$tmpdir/source-packet-novelty-stale.out" >&2
   cat "$tmpdir/source-packet-novelty-stale.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-transcript-overlap-gate.py \
+  examples/transcript-overlap-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/transcript-overlap-pass.out" \
+  2>"$tmpdir/transcript-overlap-pass.err"; then
+  printf 'public_harness_check=fail transcript_overlap_pass_failed\n' >&2
+  cat "$tmpdir/transcript-overlap-pass.err" >&2
+  fail=1
+elif ! grep -q 'transcript_overlap_gate=pass' "$tmpdir/transcript-overlap-pass.out" ||
+     ! grep -q 'score_edge_ok=true' "$tmpdir/transcript-overlap-pass.out" ||
+     ! grep -q 'source_hash_bound=true' "$tmpdir/transcript-overlap-pass.out" ||
+     ! grep -q 'exact_support=true' "$tmpdir/transcript-overlap-pass.out" ||
+     ! grep -q 'decision=source-theorem-review-no-compute' "$tmpdir/transcript-overlap-pass.out"; then
+  printf 'public_harness_check=fail transcript_overlap_pass_output\n' >&2
+  cat "$tmpdir/transcript-overlap-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-transcript-overlap-gate.py \
+  examples/transcript-overlap-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/transcript-overlap-hold.out" \
+  2>"$tmpdir/transcript-overlap-hold.err"; then
+  printf 'public_harness_check=fail transcript_overlap_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/transcript-overlap-hold.out" >&2
+  fail=1
+elif ! grep -q 'transcript_overlap_gate=hold' "$tmpdir/transcript-overlap-hold.out" ||
+     ! grep -q 'missing_source_hash_bound_context' "$tmpdir/transcript-overlap-hold.out" ||
+     ! grep -q 'missing_exact_support_certified' "$tmpdir/transcript-overlap-hold.out" ||
+     ! grep -q 'missing_score_edge' "$tmpdir/transcript-overlap-hold.out"; then
+  printf 'public_harness_check=fail transcript_overlap_hold_output\n' >&2
+  cat "$tmpdir/transcript-overlap-hold.out" >&2
+  cat "$tmpdir/transcript-overlap-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-transcript-overlap-gate.py \
+  examples/transcript-overlap-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/transcript-overlap-fail.out" \
+  2>"$tmpdir/transcript-overlap-fail.err"; then
+  printf 'public_harness_check=fail transcript_overlap_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/transcript-overlap-fail.out" >&2
+  fail=1
+elif ! grep -q 'transcript_overlap_gate=fail' "$tmpdir/transcript-overlap-fail.out" ||
+     ! grep -q 'dirty_bounded_probe' "$tmpdir/transcript-overlap-fail.out" ||
+     ! grep -q 'stale_index_warnings' "$tmpdir/transcript-overlap-fail.out" ||
+     ! grep -q 'active_only_origin_map' "$tmpdir/transcript-overlap-fail.out" ||
+     ! grep -q 'score_no_edge' "$tmpdir/transcript-overlap-fail.out" ||
+     ! grep -q 'missing_required_peak_calls' "$tmpdir/transcript-overlap-fail.out"; then
+  printf 'public_harness_check=fail transcript_overlap_fail_output\n' >&2
+  cat "$tmpdir/transcript-overlap-fail.out" >&2
+  cat "$tmpdir/transcript-overlap-fail.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-transcript-overlap-gate.py \
+  examples/transcript-overlap-stale.example.txt \
+  --require-pass \
+  >"$tmpdir/transcript-overlap-stale.out" \
+  2>"$tmpdir/transcript-overlap-stale.err"; then
+  printf 'public_harness_check=fail transcript_overlap_stale_unexpected_pass\n' >&2
+  cat "$tmpdir/transcript-overlap-stale.out" >&2
+  fail=1
+elif ! grep -q 'transcript_overlap_gate=fail' "$tmpdir/transcript-overlap-stale.out" ||
+     ! grep -q 'stale_source_base' "$tmpdir/transcript-overlap-stale.out" ||
+     ! grep -q 'source_base=58866a2' "$tmpdir/transcript-overlap-stale.out"; then
+  printf 'public_harness_check=fail transcript_overlap_stale_output\n' >&2
+  cat "$tmpdir/transcript-overlap-stale.out" >&2
+  cat "$tmpdir/transcript-overlap-stale.err" >&2
   fail=1
 fi
 

@@ -1,0 +1,5 @@
+ACK Validator CLAIM candidate-stale-source skill=validation-submit-gate file=studio:validator/report.md next=reject no_submit_ack=yes
+host=studio owner=Validator source_base=58866a2 frontier_score=1571592960
+official validation path: build_circuit then eval_circuit
+emitted_ops=10221059 qubits=1152 avg_tof=1363000 score=1570176000 c=0 p=0 a=0
+artifacts preserved: score.json ops.bin results.tsv report.md

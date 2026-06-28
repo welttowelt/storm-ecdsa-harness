@@ -14,6 +14,9 @@ Use them to teach agents the workflow:
 - apply-overlap fixtures separate certified facts from restore-proof failures,
 - wall-owner summaries are regenerated before source-certificate scouting,
 - source-certificate scouts filter already-closed context rows before mining,
+- source-packet novelty checks accept public `src/point_add` sites beyond one
+  subdirectory,
+- candidate validation packets fail stale source bases before handoff language,
 - scanner output stays `Prefilter` until official validation passes.
 
 The examples intentionally avoid:
