@@ -97,3 +97,72 @@ Implemented process-control hardening only:
   score-no-edge rows cannot be mistaken for admitted routes.
 
 No candidate, no official clean run, no pod, no alert, and no submit authority.
+
+## Follow-up 5-loop audit
+
+### Loop 1
+
+Bluesky audit:
+- Route or idea: Treat required summary fields as evidence, not optional text.
+- Best case: malformed or missing channel counts cannot default to clean.
+- Smallest useful experiment: remove candidate classical from a clean packet.
+
+Redsky audit:
+- Strongest objection: parser defaults turned missing integers into zero.
+- Fastest falsifier: CAND_SUMMARY without classical looked clean.
+- Decision: missing or malformed required fields now hold with
+  incomplete-summary-no-admission.
+
+### Loop 2
+
+Bluesky audit:
+- Route or idea: Require BASE/CAND/COMPARE to describe the same sample depth.
+- Best case: mismatched rows cannot be stitched into a fake route-clean packet.
+- Smallest useful experiment: compare summaries with different shots.
+
+Redsky audit:
+- Strongest objection: compare agreement is meaningless if summaries are from
+  different shot sets.
+- Fastest falsifier: distinct shot counts in the three rows.
+- Decision: shot-mismatch-no-admission blocks admission.
+
+### Loop 3
+
+Bluesky audit:
+- Route or idea: Do not admit short clean route-compare probes.
+- Best case: 256-shot diagnostics remain useful for routing but cannot unlock
+  residual, pod, handoff, submit, or alert language.
+- Smallest useful experiment: clean score-edge packet with shots=256.
+
+Redsky audit:
+- Strongest objection: partial route-compare is not a 9024 residual.
+- Fastest falsifier: clean 256-shot edge.
+- Decision: default --min-shots=9024; short rows hold as
+  insufficient-shots-no-admission.
+
+### Loop 4
+
+Bluesky audit:
+- Route or idea: Match benchmark score arithmetic.
+- Best case: raw float edges cannot pass when rounded average Toffoli ties the
+  frontier.
+- Smallest useful experiment: avg_tof=1364229.999 at q=1152.
+
+Redsky audit:
+- Strongest objection: official q1152 score uses rounded Toffoli, so raw score
+  can claim a false one-Toffoli edge.
+- Fastest falsifier: raw score below frontier but rounded score equal.
+- Decision: admission score is qubits * floor(avg_tof + 0.5), and output now
+  exposes raw_score plus avg_tof_rounded.
+
+### Loop 5
+
+Bluesky audit:
+- Route or idea: Assert the hard shell mode in the public harness.
+- Best case: launch scripts can safely use --require-admission.
+- Smallest useful experiment: dirty row exits nonzero; admitted row exits zero.
+
+Redsky audit:
+- Strongest objection: docs can claim strict mode while shell behavior drifts.
+- Fastest falsifier: dirty strict run returns 0.
+- Decision: check-public-harness.sh now tests strict fail/pass behavior.

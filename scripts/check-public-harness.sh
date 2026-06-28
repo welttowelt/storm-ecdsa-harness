@@ -424,6 +424,8 @@ need_text scripts/storm-dead-drop-fixedpoint-gate.py "dead drop fixedpoint" "dea
 need_text scripts/storm-dead-drop-fixedpoint-gate.py "fixedpoint required" "fixedpoint-required"
 need_text scripts/storm-route-compare-admission.py "route compare admission gate" "route_compare_admission="
 need_text scripts/storm-route-compare-admission.py "route compare admitted flag" "admitted="
+need_text scripts/storm-route-compare-admission.py "route compare min shots" "min_shots"
+need_text scripts/storm-route-compare-admission.py "route compare rounded score" "avg_tof_rounded"
 
 need_text examples/operator-card.example.md "falsifiable decision" "Falsifiable decision"
 need_text examples/audit-card.example.md "rci tony" "RCI/Tony"
@@ -2755,9 +2757,9 @@ elif ! grep -q 'route_compare_admission=fail' "$tmpdir/route-compare-dirty-admit
 fi
 
 cat >"$tmpdir/route-compare-no-edge.out" <<'EOF'
-BASE_SUMMARY shots=256 ops=10228095 qubits=1147 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1396798.035 avg_cliff=5632151.273
-CAND_SUMMARY shots=256 ops=10228101 qubits=1147 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1396718.473 avg_cliff=5631466.793
-COMPARE_SUMMARY shots=256 output_diff=0 phase_diff_batches=0
+BASE_SUMMARY shots=9024 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5632151.273
+CAND_SUMMARY shots=9024 ops=10228101 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5631466.793
+COMPARE_SUMMARY shots=9024 output_diff=0 phase_diff_batches=0
 EOF
 if ! python3 scripts/storm-route-compare-admission.py \
   --route-compare "$tmpdir/route-compare-no-edge.out" \
@@ -2774,6 +2776,112 @@ elif ! grep -q 'route_compare_admission=fail' "$tmpdir/route-compare-no-edge-adm
      ! grep -q 'decision=score-no-edge' "$tmpdir/route-compare-no-edge-admit.out"; then
   printf 'public_harness_check=fail route_compare_no_edge_decision\n' >&2
   cat "$tmpdir/route-compare-no-edge-admit.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/route-compare-incomplete.out" <<'EOF'
+BASE_SUMMARY shots=9024 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5632151.273
+CAND_SUMMARY shots=9024 ops=10228101 qubits=1152 bits=613101 phase_batches=0 ancilla_batches=0 avg_tof=1364228.000 avg_cliff=5631466.793
+COMPARE_SUMMARY shots=9024 output_diff=0 phase_diff_batches=0
+EOF
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-incomplete.out" \
+  --frontier-score 1571592960 >"$tmpdir/route-compare-incomplete-admit.out" 2>"$tmpdir/route-compare-incomplete-admit.err"; then
+  printf 'public_harness_check=fail route_compare_incomplete_failed\n' >&2
+  cat "$tmpdir/route-compare-incomplete-admit.err" >&2
+  fail=1
+elif ! grep -q 'route_compare_admission=hold' "$tmpdir/route-compare-incomplete-admit.out" ||
+     ! grep -q 'admitted=0' "$tmpdir/route-compare-incomplete-admit.out" ||
+     ! grep -q 'candidate_clean=0' "$tmpdir/route-compare-incomplete-admit.out" ||
+     ! grep -q 'decision=incomplete-summary-no-admission' "$tmpdir/route-compare-incomplete-admit.out" ||
+     ! grep -q 'candidate_classical_missing' "$tmpdir/route-compare-incomplete-admit.out"; then
+  printf 'public_harness_check=fail route_compare_incomplete_decision\n' >&2
+  cat "$tmpdir/route-compare-incomplete-admit.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/route-compare-malformed.out" <<'EOF'
+BASE_SUMMARY shots=9024 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5632151.273
+CAND_SUMMARY shots=9024 ops=10228101 qubits=1152 bits=613101 classical=not-a-number phase_batches=0 ancilla_batches=0 avg_tof=1364228.000 avg_cliff=5631466.793
+COMPARE_SUMMARY shots=9024 output_diff=0 phase_diff_batches=0
+EOF
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-malformed.out" \
+  --frontier-score 1571592960 >"$tmpdir/route-compare-malformed-admit.out" 2>"$tmpdir/route-compare-malformed-admit.err"; then
+  printf 'public_harness_check=fail route_compare_malformed_failed\n' >&2
+  cat "$tmpdir/route-compare-malformed-admit.err" >&2
+  fail=1
+elif ! grep -q 'route_compare_admission=hold' "$tmpdir/route-compare-malformed-admit.out" ||
+     ! grep -q 'admitted=0' "$tmpdir/route-compare-malformed-admit.out" ||
+     ! grep -q 'candidate_clean=0' "$tmpdir/route-compare-malformed-admit.out" ||
+     ! grep -q 'decision=incomplete-summary-no-admission' "$tmpdir/route-compare-malformed-admit.out" ||
+     ! grep -q 'candidate_classical_malformed' "$tmpdir/route-compare-malformed-admit.out"; then
+  printf 'public_harness_check=fail route_compare_malformed_decision\n' >&2
+  cat "$tmpdir/route-compare-malformed-admit.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/route-compare-shot-mismatch.out" <<'EOF'
+BASE_SUMMARY shots=9024 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5630100.000
+CAND_SUMMARY shots=9024 ops=10221377 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364228.000 avg_cliff=5630000.000
+COMPARE_SUMMARY shots=256 output_diff=0 phase_diff_batches=0
+EOF
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-shot-mismatch.out" \
+  --frontier-score 1571592960 >"$tmpdir/route-compare-shot-mismatch-admit.out" 2>"$tmpdir/route-compare-shot-mismatch-admit.err"; then
+  printf 'public_harness_check=fail route_compare_shot_mismatch_failed\n' >&2
+  cat "$tmpdir/route-compare-shot-mismatch-admit.err" >&2
+  fail=1
+elif ! grep -q 'route_compare_admission=fail' "$tmpdir/route-compare-shot-mismatch-admit.out" ||
+     ! grep -q 'admitted=0' "$tmpdir/route-compare-shot-mismatch-admit.out" ||
+     ! grep -q 'score_edge=1' "$tmpdir/route-compare-shot-mismatch-admit.out" ||
+     ! grep -q 'decision=shot-mismatch-no-admission' "$tmpdir/route-compare-shot-mismatch-admit.out"; then
+  printf 'public_harness_check=fail route_compare_shot_mismatch_decision\n' >&2
+  cat "$tmpdir/route-compare-shot-mismatch-admit.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/route-compare-short-edge.out" <<'EOF'
+BASE_SUMMARY shots=256 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5630100.000
+CAND_SUMMARY shots=256 ops=10221377 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364228.000 avg_cliff=5630000.000
+COMPARE_SUMMARY shots=256 output_diff=0 phase_diff_batches=0
+EOF
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-short-edge.out" \
+  --frontier-score 1571592960 >"$tmpdir/route-compare-short-edge-admit.out" 2>"$tmpdir/route-compare-short-edge-admit.err"; then
+  printf 'public_harness_check=fail route_compare_short_edge_failed\n' >&2
+  cat "$tmpdir/route-compare-short-edge-admit.err" >&2
+  fail=1
+elif ! grep -q 'route_compare_admission=hold' "$tmpdir/route-compare-short-edge-admit.out" ||
+     ! grep -q 'admitted=0' "$tmpdir/route-compare-short-edge-admit.out" ||
+     ! grep -q 'score_edge=1' "$tmpdir/route-compare-short-edge-admit.out" ||
+     ! grep -q 'shots=256' "$tmpdir/route-compare-short-edge-admit.out" ||
+     ! grep -q 'min_shots=9024' "$tmpdir/route-compare-short-edge-admit.out" ||
+     ! grep -q 'decision=insufficient-shots-no-admission' "$tmpdir/route-compare-short-edge-admit.out"; then
+  printf 'public_harness_check=fail route_compare_short_edge_decision\n' >&2
+  cat "$tmpdir/route-compare-short-edge-admit.out" >&2
+  fail=1
+fi
+
+cat >"$tmpdir/route-compare-round-tie.out" <<'EOF'
+BASE_SUMMARY shots=9024 ops=10228095 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364230.000 avg_cliff=5630100.000
+CAND_SUMMARY shots=9024 ops=10221377 qubits=1152 bits=613101 classical=0 phase_batches=0 ancilla_batches=0 avg_tof=1364229.999 avg_cliff=5630000.000
+COMPARE_SUMMARY shots=9024 output_diff=0 phase_diff_batches=0
+EOF
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-round-tie.out" \
+  --frontier-score 1571592960 >"$tmpdir/route-compare-round-tie-admit.out" 2>"$tmpdir/route-compare-round-tie-admit.err"; then
+  printf 'public_harness_check=fail route_compare_round_tie_failed\n' >&2
+  cat "$tmpdir/route-compare-round-tie-admit.err" >&2
+  fail=1
+elif ! grep -q 'route_compare_admission=fail' "$tmpdir/route-compare-round-tie-admit.out" ||
+     ! grep -q 'admitted=0' "$tmpdir/route-compare-round-tie-admit.out" ||
+     ! grep -q 'score_edge=0' "$tmpdir/route-compare-round-tie-admit.out" ||
+     ! grep -q 'score=1571592960.000000' "$tmpdir/route-compare-round-tie-admit.out" ||
+     ! grep -q 'avg_tof_rounded=1364230' "$tmpdir/route-compare-round-tie-admit.out" ||
+     ! grep -q 'decision=score-no-edge' "$tmpdir/route-compare-round-tie-admit.out"; then
+  printf 'public_harness_check=fail route_compare_round_tie_decision\n' >&2
+  cat "$tmpdir/route-compare-round-tie-admit.out" >&2
   fail=1
 fi
 
@@ -2797,6 +2905,28 @@ elif ! grep -q 'route_compare_admission=pass' "$tmpdir/route-compare-edge-admit.
      ! grep -q 'decision=route-clean-score-edge' "$tmpdir/route-compare-edge-admit.out"; then
   printf 'public_harness_check=fail route_compare_edge_decision\n' >&2
   cat "$tmpdir/route-compare-edge-admit.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-dirty.out" \
+  --frontier-score 1571592960 \
+  --require-admission >"$tmpdir/route-compare-dirty-strict.out" 2>"$tmpdir/route-compare-dirty-strict.err"; then
+  printf 'public_harness_check=fail route_compare_dirty_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/route-compare-dirty-strict.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-route-compare-admission.py \
+  --route-compare "$tmpdir/route-compare-edge.out" \
+  --frontier-score 1571592960 \
+  --require-admission >"$tmpdir/route-compare-edge-strict.out" 2>"$tmpdir/route-compare-edge-strict.err"; then
+  printf 'public_harness_check=fail route_compare_edge_strict_failed\n' >&2
+  cat "$tmpdir/route-compare-edge-strict.err" >&2
+  fail=1
+elif ! grep -q 'admitted=1' "$tmpdir/route-compare-edge-strict.out"; then
+  printf 'public_harness_check=fail route_compare_edge_strict_output\n' >&2
+  cat "$tmpdir/route-compare-edge-strict.out" >&2
   fail=1
 fi
 
