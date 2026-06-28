@@ -65,6 +65,7 @@ for path in \
   scripts/storm-q1152-binder-ledger.py \
   scripts/storm-mcx-incrementer-budget.py \
   scripts/storm-construction-package-gate.py \
+  scripts/storm-construction-intake-gate.py \
   scripts/storm-frontier-escape-gate.py \
   scripts/storm-square-static-gap-audit.py \
   scripts/storm-single-ccx-fanout-ledger.py \
@@ -162,6 +163,9 @@ for path in \
   examples/emit-bundle-support-closure.example.txt \
   examples/emit-bundle-support-hold.example.txt \
   examples/emit-bundle-support-fail.example.txt \
+  examples/construction-intake-pass.example.txt \
+  examples/construction-intake-hold.example.txt \
+  examples/construction-intake-fail.example.txt \
   examples/ffg-pair-complete-no-recompute.example.txt \
   examples/ffg-pair-complete-recompute-hold.example.txt \
   examples/transcript-overlap-pass.example.txt \
@@ -236,6 +240,7 @@ for path in \
   skills/gidney-ccz-residual-gate.md \
   skills/qoffset-host-accounting-gate.md \
   skills/emit-bundle-support-gate.md \
+  skills/construction-intake-gate.md \
   skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
   skills/compute-restart-gate.md \
@@ -301,6 +306,7 @@ for path in \
   .agents/skills/gidney-ccz-residual-gate/SKILL.md \
   .agents/skills/qoffset-host-accounting-gate/SKILL.md \
   .agents/skills/emit-bundle-support-gate/SKILL.md \
+  .agents/skills/construction-intake-gate/SKILL.md \
   .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
   .agents/skills/compute-restart-gate/SKILL.md \
@@ -398,6 +404,8 @@ need_text scripts/storm-q1152-binder-ledger.py "mcx floor" "none_kg_prefix_ancil
 need_text scripts/storm-mcx-incrementer-budget.py "mcx incrementer budget" "mcx_incrementer_budget=pass"
 need_text scripts/storm-mcx-incrementer-budget.py "candidate budget fail" "candidate-budget-fail"
 need_text scripts/storm-construction-package-gate.py "construction package gate" "construction_package_gate=pass"
+need_text scripts/storm-construction-intake-gate.py "construction intake gate" "construction_intake_gate="
+need_text scripts/storm-construction-intake-gate.py "paper-only failure" "paper_only_or_scout_only"
 need_text scripts/storm-construction-package-gate.py "package nack" "package-nack"
 need_text scripts/storm-frontier-escape-gate.py "frontier escape gate" "frontier_escape_gate=pass"
 need_text scripts/storm-frontier-escape-gate.py "escape nack" "escape-nack"
@@ -584,6 +592,9 @@ need_text examples/emit-bundle-support-pass.example.txt "emit bundle pass fixtur
 need_text examples/emit-bundle-support-closure.example.txt "emit bundle closure fixture" "emit-bundle-counterexample"
 need_text examples/emit-bundle-support-hold.example.txt "emit bundle hold fixture" "complete-shared-invariant-packet"
 need_text examples/emit-bundle-support-fail.example.txt "emit bundle fail fixture" "launch runpod gpu scanner"
+need_text examples/construction-intake-pass.example.txt "construction intake pass fixture" "construction-intake-source-bound"
+need_text examples/construction-intake-hold.example.txt "construction intake hold fixture" "construction-intake-incomplete"
+need_text examples/construction-intake-fail.example.txt "construction intake fail fixture" "paper_only=yes"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -622,6 +633,8 @@ need_text skills/q1152-structural-core.md "q1152 structural core" "wall-gated co
 need_text skills/q1152-structural-core.md "trusted eval" "Trusted eval"
 need_text skills/construction-package-gate.md "construction package gate" "Construction Package Gate"
 need_text skills/construction-package-gate.md "package nack" "package-nack"
+need_text skills/construction-intake-gate.md "construction intake gate" "Construction Intake Gate"
+need_text skills/construction-intake-gate.md "construction intake no compute" "no-compute"
 need_text skills/frontier-escape-gate.md "frontier escape gate" "Frontier Escape Gate"
 need_text skills/frontier-escape-gate.md "ready for validation" "ready-for-validation"
 need_text skills/support-bounded-vented-dead-carry.md "support bounded vent" "Support-Bounded Vented Dead-Carry"
@@ -629,6 +642,7 @@ need_text skills/support-bounded-vented-dead-carry.md "dead predicate" "source-h
 need_text skills/support-bounded-vented-dead-carry.md "headroom cap" "TLM_SQUARE_PEAK_CAP"
 need_text .agents/skills/q1152-structural-core/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/construction-package-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/construction-intake-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/frontier-escape-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text skills/paper-gidney-constant-workspace-adder.md "gidney source" "arXiv:2507.23079"
 need_text skills/paper-mbu-modular-arithmetic.md "mbu phase cleanup" "phase correction"
@@ -883,6 +897,53 @@ elif ! grep -q 'emit_bundle_support_gate=fail' "$tmpdir/emit-bundle-support-fail
      ! grep -q 'premature_compute_or_residual_request' "$tmpdir/emit-bundle-support-fail.out"; then
   printf 'public_harness_check=fail emit_bundle_support_fail_output\n' >&2
   cat "$tmpdir/emit-bundle-support-fail.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-construction-intake-gate.py \
+  examples/construction-intake-pass.example.txt \
+  --require-pass >"$tmpdir/construction-intake-pass.out" 2>"$tmpdir/construction-intake-pass.err"; then
+  printf 'public_harness_check=fail construction_intake_pass_failed\n' >&2
+  cat "$tmpdir/construction-intake-pass.err" >&2
+  cat "$tmpdir/construction-intake-pass.out" >&2
+  fail=1
+elif ! grep -q 'construction_intake_gate=pass' "$tmpdir/construction-intake-pass.out" ||
+     ! grep -q 'decision=construction-intake-review-no-compute' "$tmpdir/construction-intake-pass.out" ||
+     ! grep -q 'count_edge=true' "$tmpdir/construction-intake-pass.out"; then
+  printf 'public_harness_check=fail construction_intake_pass_output\n' >&2
+  cat "$tmpdir/construction-intake-pass.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-construction-intake-gate.py \
+  examples/construction-intake-hold.example.txt >"$tmpdir/construction-intake-hold.out" 2>"$tmpdir/construction-intake-hold.err"; then
+  printf 'public_harness_check=fail construction_intake_hold_unexpected_error\n' >&2
+  cat "$tmpdir/construction-intake-hold.err" >&2
+  fail=1
+elif ! grep -q 'construction_intake_gate=hold' "$tmpdir/construction-intake-hold.out" ||
+     ! grep -q 'missing_candidate_hash' "$tmpdir/construction-intake-hold.out" ||
+     ! grep -q 'missing_phase_obligation' "$tmpdir/construction-intake-hold.out"; then
+  printf 'public_harness_check=fail construction_intake_hold_output\n' >&2
+  cat "$tmpdir/construction-intake-hold.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-construction-intake-gate.py \
+  examples/construction-intake-hold.example.txt \
+  --require-pass >"$tmpdir/construction-intake-hold-strict.out" 2>"$tmpdir/construction-intake-hold-strict.err"; then
+  printf 'public_harness_check=fail construction_intake_hold_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/construction-intake-hold-strict.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-construction-intake-gate.py \
+  examples/construction-intake-fail.example.txt >"$tmpdir/construction-intake-fail.out" 2>"$tmpdir/construction-intake-fail.err"; then
+  printf 'public_harness_check=fail construction_intake_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/construction-intake-fail.out" >&2
+  fail=1
+elif ! grep -q 'construction_intake_gate=fail' "$tmpdir/construction-intake-fail.out" ||
+     ! grep -q 'paper_only_or_scout_only' "$tmpdir/construction-intake-fail.out" ||
+     ! grep -q 'premature_compute_or_residual_request' "$tmpdir/construction-intake-fail.out" ||
+     ! grep -q 'nonpositive_score_edge' "$tmpdir/construction-intake-fail.out"; then
+  printf 'public_harness_check=fail construction_intake_fail_output\n' >&2
+  cat "$tmpdir/construction-intake-fail.out" >&2
   fail=1
 fi
 

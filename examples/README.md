@@ -24,6 +24,8 @@ Use them to teach agents the workflow:
   counterexample closures, incomplete packets, and proof-unknown NACKs,
 - emit-bundle fixtures separate certified shared-invariant bundles from
   counterexample closures, incomplete packets, and unsafe single-row claims,
+- construction-intake fixtures separate source-bound paper construction packets
+  from incomplete handoffs and paper-only compute asks,
 - FFG pair-complete fixtures distinguish no-recompute NACKs from recompute
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or

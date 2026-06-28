@@ -1,0 +1,22 @@
+ACK Codex-Vector CLAIM construction-intake-paper-only skill=redsky+construction-intake-gate file=paper-mining/cycle-summary.md next=launch runpod gpu scanner no_submit_ack=yes
+route_id=d44cad3_construction_intake_paper_only
+owner=Codex-Vector
+host=studio
+paper_url=arxiv:2507.23079
+paper_only=yes
+source_base=d44cad3
+source_replacement=full_width_adder
+current_q=1152
+target_q=1152
+current_avg_tof=1364230
+extra_avg_tof=2500
+frontier_score=1571592960
+score_edge=-1000
+restore_obligation=unknown
+phase_obligation=unknown
+ancilla_obligation=unknown
+toy_falsifier=none
+support_status=UNKNOWN
+proof_status=UNPROVEN
+evidence_label=Prefilter
+no_submit_ack=yes
