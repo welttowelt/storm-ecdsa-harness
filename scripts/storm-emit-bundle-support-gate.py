@@ -61,6 +61,14 @@ COMPUTE_REQUEST_RE = re.compile(
 PREMATURE_RE = re.compile(r"\b(?:FOR[- ]AKASH|WINNER|mobile alert|submit(?:ted)?|ready[- ]to[- ]submit|Akash-ready)\b", re.IGNORECASE)
 LOCAL_RE = re.compile(r"\b(?:host|machine)\s*[=:]\s*(?:mac|macbook|local|darwin)\b|\b(?:MacBook|mac-local|/Users/[A-Za-z0-9_.-]+)\b", re.IGNORECASE)
 REMOTE_RE = re.compile(r"\b(?:host|machine)\s*[=:]\s*(?:studio|runpod|vast|pod|remote)\b|\bstudio\b", re.IGNORECASE)
+NEGATED_GUARDRAIL_RE = re.compile(
+    r"\b(?:no|never)\s+(?:compute|pods?|residual|route[-_ ]?compare|benchmark|alert|winner|akash|submit|submission)\b|"
+    r"\b(?:do not|must not|cannot|can not)\s+(?:launch|start|restart|rearm|scale|dispatch|run|trigger|alert|write|submit)\b|"
+    r"\b(?:does not|do not)\s+(?:authorize|license)\b|"
+    r"\bnot\s+(?:authorized|licensed|allowed|a submit|a submission|ready[- ]to[- ]submit)\b|"
+    r"\bwithout\s+storm[-_ ]?(?:compute[-_ ]?)?unlock\b",
+    re.IGNORECASE,
+)
 
 
 def read_text(paths: Iterable[Path]) -> str:
@@ -106,11 +114,30 @@ def source_hashes(text: str) -> list[str]:
     return values
 
 
+def risk_scan_text(text: str) -> str:
+    """Drop explicit negative guardrails before scanning for risky requests."""
+    kept: list[str] = []
+    skip_continuation = False
+    for line in text.splitlines():
+        stripped = line.strip()
+        if skip_continuation:
+            if not stripped or re.search(r"[.!?]\s*$", stripped):
+                skip_continuation = False
+            continue
+        if NEGATED_GUARDRAIL_RE.search(line):
+            if stripped and not re.search(r"[.!?]\s*$", stripped):
+                skip_continuation = True
+            continue
+        kept.append(line)
+    return "\n".join(kept)
+
+
 def win_total(frontier_toffoli: int, shots: int) -> int:
     return math.ceil((frontier_toffoli - 0.5) * shots) - 1
 
 
 def inspect(text: str, expected_source: str, expected_qubits: int, shots: int, frontier_toffoli: int, current_total: int) -> dict[str, object]:
+    risk_text = risk_scan_text(text)
     route_id = first_match(ROUTE_ID_RE, text)
     owner = first_match(OWNER_RE, text)
     next_action = first_match(NEXT_RE, text)
@@ -143,9 +170,9 @@ def inspect(text: str, expected_source: str, expected_qubits: int, shots: int, f
 
     if LOCAL_RE.search(text):
         failures.append("local_heavy_context")
-    if COMPUTE_REQUEST_RE.search(text):
+    if COMPUTE_REQUEST_RE.search(risk_text):
         failures.append("premature_compute_or_residual_request")
-    if PREMATURE_RE.search(text):
+    if PREMATURE_RE.search(risk_text):
         failures.append("premature_submit_or_alert_language")
     if not NO_SUBMIT_RE.search(text):
         failures.append("missing_no_submit_ack")
