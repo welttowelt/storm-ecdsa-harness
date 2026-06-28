@@ -1,0 +1,5 @@
+ACK Worker CLAIM q1152-fanout-demo skill=redsky+ecdsafail-fleet-overwatch file=runpod:demo-pod:./gpu_forever.sh:[1000,2000) next=collapse-duplicate-wrappers no_submit_ack=yes
+ps 1001 ./gpu_forever.sh pod=demo-pod range=[1000,2000) log=fanout/gpu-a.log
+ps 1002 ./gpu_forever.sh pod=demo-pod range=[1000,2000) log=fanout/gpu-b.log
+ps 1003 ./ev.sh pod=demo-pod nonce=123
+ps 1004 ./ev.sh pod=demo-pod DIALOG_TAIL_NONCE=123

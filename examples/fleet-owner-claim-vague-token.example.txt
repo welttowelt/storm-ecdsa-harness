@@ -1,0 +1,4 @@
+ACK Worker CLAIM q1152-fanout-runpod
+owner=Worker route=q1152-fanout range=[1000,2000)
+active process=gpu_forever log_path=fanout-runpod/gpu_hunt.log
+next=harvest-range-and-official-eval-survivors no_submit_ack=yes

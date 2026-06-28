@@ -49,6 +49,7 @@ for path in \
   scripts/apply-overlap-ledger.sh \
   scripts/qcut-candidate-prefilter.sh \
   scripts/storm-exact-miner.py \
+  scripts/storm-claim-ledger.py \
   scripts/storm-audit-impact.py \
   scripts/storm-mailbox-action-scan.py \
   scripts/storm-wall-owner-summary.py \
@@ -66,8 +67,12 @@ for path in \
   scripts/storm-single-ccx-fanout-ledger.py \
   scripts/storm-fanout-qstate-guard.py \
   scripts/storm-fanout-survivor-phase-gate.py \
+  scripts/storm-fanout-burst-triage-gate.py \
   scripts/storm-official-eval-isolation-gate.py \
   scripts/storm-fleet-owner-claim-gate.py \
+  scripts/storm-pod-wrapper-dup-gate.py \
+  examples/fleet-owner-claim-vague-token.example.txt \
+  examples/official-eval-isolation-helper-storm.example.sh \
   scripts/storm-q1152-avgt-theorem.py \
   scripts/storm-cout-host-row-gate.py \
   scripts/storm-zero-host-accounting-gate.py \
@@ -90,11 +95,16 @@ for path in \
   examples/apply-overlap-trace.example.txt \
   examples/apply-overlap-restore-missing.example.txt \
   examples/fanout-survivor-phase-gate.example.txt \
+  examples/fanout-burst-triage-nack.example.txt \
+  examples/fanout-burst-triage-candidate.example.txt \
   examples/official-eval-isolation-unsafe.example.sh \
   examples/official-eval-isolation-locked.example.sh \
   examples/official-eval-isolation-workdir.example.sh \
   examples/fleet-owner-claim-pass.example.txt \
   examples/fleet-owner-claim-missing.example.txt \
+  examples/fleet-owner-claim-combined-tail.example.txt \
+  examples/pod-wrapper-dup-pass.example.txt \
+  examples/pod-wrapper-dup-fail.example.txt \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
@@ -127,9 +137,11 @@ for path in \
   skills/single-ccx-fanout-throughput.md \
   skills/fanout-runpod-qstate-guard.md \
   skills/fanout-survivor-phase-gate.md \
+  skills/fanout-burst-triage-gate.md \
   skills/official-fast-exit-eval.md \
   skills/official-eval-isolation-gate.md \
   skills/fleet-owner-claim-gate.md \
+  skills/pod-wrapper-dup-gate.md \
   skills/support-bounded-vented-dead-carry.md \
   skills/paper-gidney-constant-workspace-adder.md \
   skills/paper-mbu-modular-arithmetic.md \
@@ -175,9 +187,11 @@ for path in \
   .agents/skills/frontier-escape-gate/SKILL.md \
   .agents/skills/single-ccx-fanout-throughput/SKILL.md \
   .agents/skills/fanout-survivor-phase-gate/SKILL.md \
+  .agents/skills/fanout-burst-triage-gate/SKILL.md \
   .agents/skills/official-fast-exit-eval/SKILL.md \
   .agents/skills/official-eval-isolation-gate/SKILL.md \
   .agents/skills/fleet-owner-claim-gate/SKILL.md \
+  .agents/skills/pod-wrapper-dup-gate/SKILL.md \
   .agents/skills/paper-gidney-constant-workspace-adder/SKILL.md \
   .agents/skills/paper-mbu-modular-arithmetic/SKILL.md \
   .agents/skills/paper-hrs-dirty-constant-adder/SKILL.md \
@@ -275,10 +289,16 @@ need_text scripts/storm-single-ccx-fanout-ledger.py "trusted eval nack" "trusted
 need_text scripts/storm-fanout-qstate-guard.py "qstate guard" "qstate_guard=ok"
 need_text scripts/storm-fanout-survivor-phase-gate.py "survivor phase gate" "fanout_survivor_phase_gate="
 need_text scripts/storm-fanout-survivor-phase-gate.py "phase gap" "phase_gap"
+need_text scripts/storm-fanout-burst-triage-gate.py "fanout burst triage gate" "fanout_burst_triage_gate="
+need_text scripts/storm-fanout-burst-triage-gate.py "full validation decision" "full-local-validation-required"
 need_text scripts/storm-official-eval-isolation-gate.py "official eval isolation gate" "official_eval_isolation_gate="
 need_text scripts/storm-official-eval-isolation-gate.py "shared artifact race" "shared_artifact_without_lock_or_isolation"
 need_text scripts/storm-fleet-owner-claim-gate.py "fleet owner claim gate" "fleet_owner_claim_gate="
 need_text scripts/storm-fleet-owner-claim-gate.py "no submit ack" "no_submit_ack"
+need_text scripts/storm-fleet-owner-claim-gate.py "strict packet mode" "strict-single-packet"
+need_text scripts/storm-pod-wrapper-dup-gate.py "pod wrapper duplicate gate" "pod_wrapper_dup_gate="
+need_text scripts/storm-pod-wrapper-dup-gate.py "duplicate eval failure" "duplicate_eval_nonce_wrapper"
+need_text scripts/storm-claim-ledger.py "claim ledger summary" "claim_ledger_summary"
 need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
 need_text patches/fanout-no-clone-d44.patch "fanout no clone patch" "rewrite_first_target_fanout\\(&ops"
@@ -288,14 +308,19 @@ need_text skills/single-ccx-fanout-throughput.md "fanout throughput skill" "thro
 need_text skills/single-ccx-fanout-throughput.md "fanout not winner" "not a winner"
 need_text skills/fanout-runpod-qstate-guard.md "qstate guard skill" "qstate_guard=ok"
 need_text skills/fanout-survivor-phase-gate.md "survivor phase skill" "phase-aware official eval"
+need_text skills/fanout-burst-triage-gate.md "fanout burst skill" "FANOUT_NONCE_LIST"
 need_text skills/official-fast-exit-eval.md "official fast exit" "dirty-triage"
 need_text skills/official-eval-isolation-gate.md "official eval isolation skill" "triage-only evidence"
 need_text skills/fleet-owner-claim-gate.md "fleet owner claim skill" "paid instance survives audit"
+need_text skills/fleet-owner-claim-gate.md "strict packet skill" "strict-single-packet"
+need_text skills/pod-wrapper-dup-gate.md "pod wrapper duplicate skill" "Duplicate GPU wrappers"
 need_text .agents/skills/single-ccx-fanout-throughput/SKILL.md "bridge" "fanout-no-clone-d44.patch"
 need_text .agents/skills/fanout-survivor-phase-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/fanout-burst-triage-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/official-fast-exit-eval/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/official-eval-isolation-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/fleet-owner-claim-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/pod-wrapper-dup-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
 need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
@@ -1226,6 +1251,57 @@ elif ! grep -q 'fanout_survivor_phase_gate=nack' "$tmpdir/fanout-survivor-phase-
   fail=1
 fi
 
+cat >"$tmpdir/fanout-survivor-phase-gate-double-nonce.log" <<'EOF'
+STORM_RUNPOD_GPU_CLEAN_PREFILTER nonce=nonce=431 launching_eval=1
+official eval NACK nonce=431 classical=1 phase=0 ancilla=0
+EOF
+if ! python3 scripts/storm-fanout-survivor-phase-gate.py \
+  "$tmpdir/fanout-survivor-phase-gate-double-nonce.log" \
+  >"$tmpdir/fanout-survivor-phase-gate-double-nonce.out" \
+  2>"$tmpdir/fanout-survivor-phase-gate-double-nonce.err"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_double_nonce_failed\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-double-nonce.err" >&2
+  fail=1
+elif ! grep -q 'fanout_survivor_phase_gate=nack' "$tmpdir/fanout-survivor-phase-gate-double-nonce.out" ||
+     ! grep -q 'gpu_survivors=1' "$tmpdir/fanout-survivor-phase-gate-double-nonce.out" ||
+     ! grep -q 'official_dirty=1' "$tmpdir/fanout-survivor-phase-gate-double-nonce.out" ||
+     ! grep -q 'classical_dirty=1' "$tmpdir/fanout-survivor-phase-gate-double-nonce.out"; then
+  printf 'public_harness_check=fail fanout_survivor_phase_gate_double_nonce_output\n' >&2
+  cat "$tmpdir/fanout-survivor-phase-gate-double-nonce.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-fanout-burst-triage-gate.py \
+  examples/fanout-burst-triage-nack.example.txt \
+  --require-no-candidate \
+  >"$tmpdir/fanout-burst-triage-nack.out" \
+  2>"$tmpdir/fanout-burst-triage-nack.err"; then
+  printf 'public_harness_check=fail fanout_burst_triage_nack_failed\n' >&2
+  cat "$tmpdir/fanout-burst-triage-nack.err" >&2
+  fail=1
+elif ! grep -q 'fanout_burst_triage_gate=nack' "$tmpdir/fanout-burst-triage-nack.out" ||
+     ! grep -q 'clean_summary=0' "$tmpdir/fanout-burst-triage-nack.out" ||
+     ! grep -q 'best_dirty=1' "$tmpdir/fanout-burst-triage-nack.out"; then
+  printf 'public_harness_check=fail fanout_burst_triage_nack_output\n' >&2
+  cat "$tmpdir/fanout-burst-triage-nack.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-fanout-burst-triage-gate.py \
+  examples/fanout-burst-triage-candidate.example.txt \
+  >"$tmpdir/fanout-burst-triage-candidate.out" \
+  2>"$tmpdir/fanout-burst-triage-candidate.err"; then
+  printf 'public_harness_check=fail fanout_burst_triage_candidate_failed\n' >&2
+  cat "$tmpdir/fanout-burst-triage-candidate.err" >&2
+  fail=1
+elif ! grep -q 'fanout_burst_triage_gate=candidate' "$tmpdir/fanout-burst-triage-candidate.out" ||
+     ! grep -q 'zero_rows=1' "$tmpdir/fanout-burst-triage-candidate.out" ||
+     ! grep -q 'decision=full-local-validation-required' "$tmpdir/fanout-burst-triage-candidate.out"; then
+  printf 'public_harness_check=fail fanout_burst_triage_candidate_output\n' >&2
+  cat "$tmpdir/fanout-burst-triage-candidate.out" >&2
+  fail=1
+fi
+
 if python3 scripts/storm-official-eval-isolation-gate.py \
   examples/official-eval-isolation-unsafe.example.sh \
   --require-pass \
@@ -1272,6 +1348,21 @@ elif ! grep -q 'official_eval_isolation_gate=pass' "$tmpdir/official-eval-isolat
   fail=1
 fi
 
+if python3 scripts/storm-official-eval-isolation-gate.py \
+  examples/official-eval-isolation-helper-storm.example.sh \
+  >"$tmpdir/official-eval-isolation-helper-storm.out" \
+  2>"$tmpdir/official-eval-isolation-helper-storm.err"; then
+  printf 'public_harness_check=fail official_eval_isolation_helper_storm_should_fail\n' >&2
+  cat "$tmpdir/official-eval-isolation-helper-storm.out" >&2
+  fail=1
+elif ! grep -q 'official_eval_isolation_gate=fail' "$tmpdir/official-eval-isolation-helper-storm.out" ||
+     ! grep -q 'background_or_parallel_eval_helper' "$tmpdir/official-eval-isolation-helper-storm.out"; then
+  printf 'public_harness_check=fail official_eval_isolation_helper_storm_output\n' >&2
+  cat "$tmpdir/official-eval-isolation-helper-storm.out" >&2
+  cat "$tmpdir/official-eval-isolation-helper-storm.err" >&2
+  fail=1
+fi
+
 if ! python3 scripts/storm-fleet-owner-claim-gate.py \
   examples/fleet-owner-claim-pass.example.txt \
   --require-pass \
@@ -1302,6 +1393,112 @@ elif ! grep -q 'fleet_owner_claim_gate=fail' "$tmpdir/fleet-owner-claim-missing.
   printf 'public_harness_check=fail fleet_owner_claim_missing_output\n' >&2
   cat "$tmpdir/fleet-owner-claim-missing.out" >&2
   cat "$tmpdir/fleet-owner-claim-missing.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-fleet-owner-claim-gate.py \
+  examples/fleet-owner-claim-vague-token.example.txt \
+  >"$tmpdir/fleet-owner-claim-vague-token.out" \
+  2>"$tmpdir/fleet-owner-claim-vague-token.err"; then
+  printf 'public_harness_check=fail fleet_owner_claim_vague_token_should_fail\n' >&2
+  cat "$tmpdir/fleet-owner-claim-vague-token.out" >&2
+  fail=1
+elif ! grep -q 'fleet_owner_claim_gate=fail' "$tmpdir/fleet-owner-claim-vague-token.out" ||
+     ! grep -q 'pod_identity' "$tmpdir/fleet-owner-claim-vague-token.out"; then
+  printf 'public_harness_check=fail fleet_owner_claim_vague_token_output\n' >&2
+  cat "$tmpdir/fleet-owner-claim-vague-token.out" >&2
+  cat "$tmpdir/fleet-owner-claim-vague-token.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-fleet-owner-claim-gate.py \
+  examples/fleet-owner-claim-combined-tail.example.txt \
+  --strict-single-packet \
+  --require-pass \
+  >"$tmpdir/fleet-owner-claim-combined-tail.out" \
+  2>"$tmpdir/fleet-owner-claim-combined-tail.err"; then
+  printf 'public_harness_check=fail fleet_owner_claim_combined_tail_should_fail\n' >&2
+  cat "$tmpdir/fleet-owner-claim-combined-tail.out" >&2
+  fail=1
+elif ! grep -q 'fleet_owner_claim_gate=fail' "$tmpdir/fleet-owner-claim-combined-tail.out" ||
+     ! grep -q 'multiple_owner_packets' "$tmpdir/fleet-owner-claim-combined-tail.out"; then
+  printf 'public_harness_check=fail fleet_owner_claim_combined_tail_output\n' >&2
+  cat "$tmpdir/fleet-owner-claim-combined-tail.out" >&2
+  cat "$tmpdir/fleet-owner-claim-combined-tail.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-pod-wrapper-dup-gate.py \
+  examples/pod-wrapper-dup-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-wrapper-dup-pass.out" \
+  2>"$tmpdir/pod-wrapper-dup-pass.err"; then
+  printf 'public_harness_check=fail pod_wrapper_dup_pass_failed\n' >&2
+  cat "$tmpdir/pod-wrapper-dup-pass.err" >&2
+  fail=1
+elif ! grep -q 'pod_wrapper_dup_gate=pass' "$tmpdir/pod-wrapper-dup-pass.out" ||
+     ! grep -q 'queued_marker=true' "$tmpdir/pod-wrapper-dup-pass.out" ||
+     ! grep -q 'lock=true' "$tmpdir/pod-wrapper-dup-pass.out"; then
+  printf 'public_harness_check=fail pod_wrapper_dup_pass_output\n' >&2
+  cat "$tmpdir/pod-wrapper-dup-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-pod-wrapper-dup-gate.py \
+  examples/pod-wrapper-dup-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-wrapper-dup-fail.out" \
+  2>"$tmpdir/pod-wrapper-dup-fail.err"; then
+  printf 'public_harness_check=fail pod_wrapper_dup_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/pod-wrapper-dup-fail.out" >&2
+  fail=1
+elif ! grep -q 'pod_wrapper_dup_gate=fail' "$tmpdir/pod-wrapper-dup-fail.out" ||
+     ! grep -q 'duplicate_gpu_route_wrapper' "$tmpdir/pod-wrapper-dup-fail.out" ||
+     ! grep -q 'duplicate_eval_nonce_wrapper' "$tmpdir/pod-wrapper-dup-fail.out"; then
+  printf 'public_harness_check=fail pod_wrapper_dup_fail_output\n' >&2
+  cat "$tmpdir/pod-wrapper-dup-fail.out" >&2
+  cat "$tmpdir/pod-wrapper-dup-fail.err" >&2
+  fail=1
+fi
+
+python3 scripts/storm-claim-ledger.py append \
+  --ledger "$tmpdir/claim-ledger.jsonl" \
+  --agent Storm-Codex \
+  --kind NACK \
+  --lane q1152-fanout \
+  --skill redsky \
+  --file coord.md \
+  --next keep-validating \
+  --evidence-label Prefilter \
+  --proof-status N/A \
+  --frontier d44cad3/q1152/1571592960 >"$tmpdir/claim-ledger-append.out" 2>"$tmpdir/claim-ledger-append.err" || {
+    printf 'public_harness_check=fail claim_ledger_append_failed\n' >&2
+    cat "$tmpdir/claim-ledger-append.err" >&2
+    fail=1
+  }
+if ! python3 scripts/storm-claim-ledger.py validate \
+  --ledger "$tmpdir/claim-ledger.jsonl" >"$tmpdir/claim-ledger-validate.out" 2>"$tmpdir/claim-ledger-validate.err"; then
+  printf 'public_harness_check=fail claim_ledger_validate_failed\n' >&2
+  cat "$tmpdir/claim-ledger-validate.err" >&2
+  fail=1
+elif ! grep -q 'claim_ledger=pass rows=1' "$tmpdir/claim-ledger-validate.out"; then
+  printf 'public_harness_check=fail claim_ledger_validate_output\n' >&2
+  cat "$tmpdir/claim-ledger-validate.out" >&2
+  fail=1
+fi
+cat >"$tmpdir/claim-ledger-missing-frontier.jsonl" <<'EOF'
+{"agent":"Storm-Codex","evidence_label":"Local full run","file":"coord.md","frontier":"","kind":"CLAIM","lane":"candidate","next":"fresh-frontier","no_submit_ack":"yes","proof_status":"CERTIFIED","skill":"validation-submit-gate","timestamp":"2026-06-28T00:00:00Z"}
+EOF
+if python3 scripts/storm-claim-ledger.py validate \
+  --ledger "$tmpdir/claim-ledger-missing-frontier.jsonl" >"$tmpdir/claim-ledger-missing-frontier.out" 2>"$tmpdir/claim-ledger-missing-frontier.err"; then
+  printf 'public_harness_check=fail claim_ledger_missing_frontier_should_fail\n' >&2
+  cat "$tmpdir/claim-ledger-missing-frontier.out" >&2
+  fail=1
+elif ! grep -q 'Local full run requires frontier' "$tmpdir/claim-ledger-missing-frontier.err" ||
+     ! grep -q 'CERTIFIED proof_status requires frontier' "$tmpdir/claim-ledger-missing-frontier.err"; then
+  printf 'public_harness_check=fail claim_ledger_missing_frontier_output\n' >&2
+  cat "$tmpdir/claim-ledger-missing-frontier.out" >&2
+  cat "$tmpdir/claim-ledger-missing-frontier.err" >&2
   fail=1
 fi
 

@@ -1,0 +1,5 @@
+ACK WorkerA CLAIM pod-a skill=redsky file=runpod:pod-a:./gpu_forever.sh:[1000,2000) next=harvest-a no_submit_ack=yes
+active process=gpu_forever log_path=logs/a.log
+
+ACK WorkerB CLAIM pod-b skill=redsky file=runpod:pod-b:./gpu_forever.sh:[2000,3000) next=harvest-b no_submit_ack=yes
+active process=gpu_forever log_path=logs/b.log

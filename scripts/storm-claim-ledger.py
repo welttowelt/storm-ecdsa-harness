@@ -74,6 +74,10 @@ def validate_row(row: dict[str, Any], index: int) -> list[str]:
         errors.append(f"row {index}: unsupported proof_status {row.get('proof_status')!r}")
     if row.get("no_submit_ack") != "yes":
         errors.append(f"row {index}: no_submit_ack must be yes")
+    if row.get("evidence_label") == "Local full run" and not str(row.get("frontier", "")).strip():
+        errors.append(f"row {index}: Local full run requires frontier")
+    if row.get("proof_status") == "CERTIFIED" and not str(row.get("frontier", "")).strip():
+        errors.append(f"row {index}: CERTIFIED proof_status requires frontier")
     if parse_time(str(row.get("timestamp", ""))) is None:
         errors.append(f"row {index}: timestamp must be RFC3339 UTC")
     expires_at = str(row.get("expires_at", ""))

@@ -1,0 +1,3 @@
+ACK Worker CLAIM q1152-fanout-demo skill=redsky+ecdsafail-fleet-overwatch file=runpod:demo-pod:./gpu_forever.sh:[1000,2000) next=harvest-demo-range no_submit_ack=yes
+ps 1001 ./gpu_forever.sh pod=demo-pod range=[1000,2000) log=fanout/gpu.log
+ps 1002 ./ev.sh pod=demo-pod nonce=123 flock /tmp/storm-official-eval.lock touch /tmp/eval-123.queued

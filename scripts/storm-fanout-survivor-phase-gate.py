@@ -19,9 +19,11 @@ import sys
 from typing import Iterable
 
 
-NONCE_RE = re.compile(r"\bnonce\s*[=:]\s*(\d+)\b", re.IGNORECASE)
+NONCE_RE = re.compile(r"\bnonce\s*[=:]\s*(?:nonce\s*[=:]\s*)?(\d+)\b", re.IGNORECASE)
 GPU_SURVIVOR_RE = re.compile(
-    r"\b(?:gpu|prefilter|stage-1|cuda)\b.*\b(?:clean|survivor)\b|^\s*CLEAN\s+nonce\s*=",
+    r"\bSTORM_RUNPOD_GPU_CLEAN_PREFILTER\b|"
+    r"\b(?:gpu|prefilter|stage-1|cuda)[A-Za-z0-9_-]*.*\b(?:clean|survivor)\b|"
+    r"^\s*CLEAN\s+nonce\s*=",
     re.IGNORECASE,
 )
 OFFICIAL_HINT_RE = re.compile(

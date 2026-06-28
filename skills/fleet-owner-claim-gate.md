@@ -9,6 +9,11 @@ Run a proposed mailbox entry or owner packet through:
 
     python3 scripts/storm-fleet-owner-claim-gate.py owner-packet.txt --require-pass
 
+For mailbox-tail audits, require one coherent packet instead of allowing
+unrelated lines to combine into a false pass:
+
+    python3 scripts/storm-fleet-owner-claim-gate.py owner-packet.txt --strict-single-packet --require-pass
+
 The packet must contain:
 
 - owner or claiming worker,
@@ -22,6 +27,8 @@ The packet must contain:
 
 - Missing owner metadata means terminate or hold the paid instance before more
   spend.
+- Do not run this on a whole mailbox tail unless strict-single-packet is set.
+  Otherwise separate entries can combine into a false pass.
 - A passing owner claim is not a route-quality pass. Still use route-compute,
   survivor, isolation, and submit gates.
 - Keep private endpoints, credentials, and raw private logs out of public
