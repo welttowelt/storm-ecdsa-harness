@@ -1,0 +1,17 @@
+route_id=source-packet-incomplete
+route=source-packet-novelty
+host=studio
+owner=validator
+next=add-source-hash-and-closed-ledger-check
+frontier_score=1571592960
+qubits=1152
+source_base=d44cad3
+source_location=src/point_add/trailmix_ludicrous/new_route.rs:43
+kind=CCX
+primitive_family=manual_source_invariant
+evidence_label=Prefilter
+novelty_status=UNKNOWN
+support_status=UNKNOWN
+expected_avgT_delta=-1
+proof_backlog=one bounded source proof after source hash and ledger check
+no_submit_ack=yes

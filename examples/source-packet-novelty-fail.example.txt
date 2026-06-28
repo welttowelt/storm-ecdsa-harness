@@ -1,0 +1,23 @@
+route_id=source-packet-closed-row
+route=source-packet-novelty
+host=mac
+owner=validator
+next=launch-gpu-scanner
+frontier_score=1571592960
+qubits=1152
+source_base=d44cad3
+source_hash=0123456789abcdef
+source_location=src/point_add/trailmix_ludicrous/gidney.rs:186
+kind=CCX
+primitive_family=gidney_thread_sum
+evidence_label=Local full run
+current_unknown_scored=21
+closed_by_existing_jsonl=21
+NEXT_UNCLOSED empty
+ledger_hit=yes
+support_status=COUNTEREXAMPLE
+proof_status=COUNTEREXAMPLE
+expected_avgT_delta=-1
+compute_request=launch GPUs on the closed packet
+decision=FOR-AKASH after local wrapper
+no_submit_ack=no

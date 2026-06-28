@@ -74,6 +74,7 @@ for path in \
   scripts/storm-local-heavy-compute-gate.py \
   scripts/storm-candidate-validation-packet-gate.py \
   scripts/storm-apply-cswap-support-gate.py \
+  scripts/storm-source-packet-novelty-gate.py \
   examples/fleet-owner-claim-vague-token.example.txt \
   examples/official-eval-isolation-helper-storm.example.sh \
   scripts/storm-q1152-avgt-theorem.py \
@@ -118,6 +119,10 @@ for path in \
   examples/apply-cswap-support-hold.example.txt \
   examples/apply-cswap-support-fail.example.txt \
   examples/apply-cswap-support-stale.example.txt \
+  examples/source-packet-novelty-pass.example.txt \
+  examples/source-packet-novelty-hold.example.txt \
+  examples/source-packet-novelty-fail.example.txt \
+  examples/source-packet-novelty-stale.example.txt \
   templates/exact-skip-candidate.json \
   docs/exact-support-miner.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
@@ -158,6 +163,7 @@ for path in \
   skills/local-heavy-compute-gate.md \
   skills/candidate-validation-packet-gate.md \
   skills/apply-cswap-support-gate.md \
+  skills/source-packet-novelty-gate.md \
   skills/support-bounded-vented-dead-carry.md \
   skills/paper-gidney-constant-workspace-adder.md \
   skills/paper-mbu-modular-arithmetic.md \
@@ -211,6 +217,7 @@ for path in \
   .agents/skills/local-heavy-compute-gate/SKILL.md \
   .agents/skills/candidate-validation-packet-gate/SKILL.md \
   .agents/skills/apply-cswap-support-gate/SKILL.md \
+  .agents/skills/source-packet-novelty-gate/SKILL.md \
   .agents/skills/paper-gidney-constant-workspace-adder/SKILL.md \
   .agents/skills/paper-mbu-modular-arithmetic/SKILL.md \
   .agents/skills/paper-hrs-dirty-constant-adder/SKILL.md \
@@ -324,6 +331,9 @@ need_text scripts/storm-candidate-validation-packet-gate.py "akash handoff decis
 need_text scripts/storm-apply-cswap-support-gate.py "apply cswap support gate" "apply_cswap_support_gate="
 need_text scripts/storm-apply-cswap-support-gate.py "per step bit decision" "complete-per-step-per-bit-proof"
 need_text scripts/storm-apply-cswap-support-gate.py "stale source decision" "stale_source_base"
+need_text scripts/storm-source-packet-novelty-gate.py "source packet novelty gate" "source_packet_novelty_gate="
+need_text scripts/storm-source-packet-novelty-gate.py "bounded source proof decision" "admit-one-bounded-source-proof-no-compute"
+need_text scripts/storm-source-packet-novelty-gate.py "closed ledger failure" "all_current_unknowns_closed"
 need_text scripts/storm-claim-ledger.py "claim ledger summary" "claim_ledger_summary"
 need_text scripts/storm-q1152-avgt-theorem.py "q1152 avgT theorem" "q1152_avgt_theorem=pass"
 need_text scripts/storm-q1152-avgt-theorem.py "condition discount" "classical condition"
@@ -344,6 +354,8 @@ need_text skills/local-heavy-compute-gate.md "local heavy compute skill" "Mac-lo
 need_text skills/candidate-validation-packet-gate.md "candidate validation skill" "FOR-AKASH"
 need_text skills/apply-cswap-support-gate.md "apply cswap support skill" "per-step and per-bit"
 need_text skills/apply-cswap-support-gate.md "machine readable packet" "frontier_score"
+need_text skills/source-packet-novelty-gate.md "source packet novelty skill" "outside_closed_ledger"
+need_text skills/source-packet-novelty-gate.md "source packet no compute" "no compute"
 need_text .agents/skills/single-ccx-fanout-throughput/SKILL.md "bridge" "fanout-no-clone-d44.patch"
 need_text .agents/skills/fanout-survivor-phase-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/fanout-burst-triage-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -354,6 +366,7 @@ need_text .agents/skills/pod-wrapper-dup-gate/SKILL.md "bridge" "Codex-discovera
 need_text .agents/skills/local-heavy-compute-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/apply-cswap-support-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text scripts/storm-cout-host-row-gate.py "cout host row gate" "cout_host_row_gate=pass"
 need_text scripts/storm-cout-host-row-gate.py "safe host row" "SAFE_HOST_ROW"
 need_text scripts/storm-zero-host-accounting-gate.py "zero host accounting" "zero_host_accounting_gate=pass"
@@ -1710,6 +1723,77 @@ elif ! grep -q 'apply_cswap_support_gate=fail' "$tmpdir/apply-cswap-support-stal
   printf 'public_harness_check=fail apply_cswap_support_stale_output\n' >&2
   cat "$tmpdir/apply-cswap-support-stale.out" >&2
   cat "$tmpdir/apply-cswap-support-stale.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-pass.out" \
+  2>"$tmpdir/source-packet-novelty-pass.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_pass_failed\n' >&2
+  cat "$tmpdir/source-packet-novelty-pass.err" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=pass' "$tmpdir/source-packet-novelty-pass.out" ||
+     ! grep -q 'outside_closed_ledger=true' "$tmpdir/source-packet-novelty-pass.out" ||
+     ! grep -q 'support_status=UNKNOWN' "$tmpdir/source-packet-novelty-pass.out" ||
+     ! grep -q 'decision=admit-one-bounded-source-proof-no-compute' "$tmpdir/source-packet-novelty-pass.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_pass_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-hold.out" \
+  2>"$tmpdir/source-packet-novelty-hold.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/source-packet-novelty-hold.out" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=hold' "$tmpdir/source-packet-novelty-hold.out" ||
+     ! grep -q 'missing_source_hash_bound_context' "$tmpdir/source-packet-novelty-hold.out" ||
+     ! grep -q 'missing_novelty_status_new_or_outside_closed_ledger' "$tmpdir/source-packet-novelty-hold.out" ||
+     ! grep -q 'novelty_unknown' "$tmpdir/source-packet-novelty-hold.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_hold_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-hold.out" >&2
+  cat "$tmpdir/source-packet-novelty-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-fail.out" \
+  2>"$tmpdir/source-packet-novelty-fail.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/source-packet-novelty-fail.out" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-fail.out" ||
+     ! grep -q 'source_counterexample_or_ledger_hit' "$tmpdir/source-packet-novelty-fail.out" ||
+     ! grep -q 'all_current_unknowns_closed' "$tmpdir/source-packet-novelty-fail.out" ||
+     ! grep -q 'next_unclosed_empty_without_new_packet' "$tmpdir/source-packet-novelty-fail.out" ||
+     ! grep -q 'premature_compute_request' "$tmpdir/source-packet-novelty-fail.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_fail_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-fail.out" >&2
+  cat "$tmpdir/source-packet-novelty-fail.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-packet-novelty-gate.py \
+  examples/source-packet-novelty-stale.example.txt \
+  --require-pass \
+  >"$tmpdir/source-packet-novelty-stale.out" \
+  2>"$tmpdir/source-packet-novelty-stale.err"; then
+  printf 'public_harness_check=fail source_packet_novelty_stale_unexpected_pass\n' >&2
+  cat "$tmpdir/source-packet-novelty-stale.out" >&2
+  fail=1
+elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-stale.out" ||
+     ! grep -q 'stale_source_base' "$tmpdir/source-packet-novelty-stale.out" ||
+     ! grep -q 'source_base=58866a2' "$tmpdir/source-packet-novelty-stale.out"; then
+  printf 'public_harness_check=fail source_packet_novelty_stale_output\n' >&2
+  cat "$tmpdir/source-packet-novelty-stale.out" >&2
+  cat "$tmpdir/source-packet-novelty-stale.err" >&2
   fail=1
 fi
 
