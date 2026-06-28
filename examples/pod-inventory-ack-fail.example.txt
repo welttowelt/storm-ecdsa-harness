@@ -1,0 +1,2 @@
+ACK Watcher CLAIM pod-inventory-refresh owner=unknown provider=runpod pod_id=demo-pod-789 status=running job=none no_submit_ack=yes
+start runpod gpu scanner after inventory refresh

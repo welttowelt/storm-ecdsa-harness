@@ -1,0 +1,2 @@
+ACK Watcher CLAIM pod-inventory-refresh owner=UNKNOWN provider=vast pod_id=demo-vast-456 status=unreachable job=unknown stop_condition=verify-provider-dashboard no_start=yes no_submit_ack=yes
+route=none

@@ -13,5 +13,9 @@ After a HOT STOP or before maintaining any ECDSA.fail process on a laptop, read
 that card and run scripts/storm-local-heavy-compute-gate.py on the redacted
 snapshot.
 
+Treat storm-exact-miner, route_compare, search_driver, lower-q/proof/scanner
+loops, benchmark/build/eval commands, and recurring wrappers as heavy when the
+host is Mac-local or unknown.
+
 This bridge is local-only. It does not inspect live processes, kill jobs, load
 private endpoints, credentials, telemetry, or always-on behavior.

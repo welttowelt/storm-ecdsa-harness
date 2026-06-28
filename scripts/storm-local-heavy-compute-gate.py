@@ -18,6 +18,8 @@ from typing import Iterable
 
 HEAVY_RE = re.compile(
     r"\b(?:build_circuit|eval_circuit|fanout_nonce_eval|ccx_site_histogram|gpu_island2|"
+    r"route_compare|search_driver|storm-exact-miner(?:\.py)?|lower-q|source-line|"
+    r"ffg(?:[-_ ]?lifetime|[-_ ]?proof)?|proof[-_ ]?loop|scanner|"
     r"kiln-validate-nonce\.sh|vast-fanout|gpu_forever(?:\.sh)?)\b|"
     r"\btarget/release/[A-Za-z0-9_.-]+\b|"
     r"\bcargo\s+(?:build|run)\s+--release\b|"

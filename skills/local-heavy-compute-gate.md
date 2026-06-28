@@ -17,9 +17,10 @@ metadata, use:
 
 ## Discipline
 
-- Mac-local build_circuit, eval_circuit, fanout_nonce_eval, ccx_site_histogram,
-  target/release programs, cargo release builds, validation wrappers, or local
-  fleet loops fail the gate.
+- Mac-local build_circuit, eval_circuit, fanout_nonce_eval, route_compare,
+  search_driver, storm-exact-miner, lower-q/proof/scanner loops,
+  ccx_site_histogram, target/release programs, cargo release builds,
+  validation wrappers, or local fleet loops fail the gate.
 - Mac-local recurring SSH/watch wrappers fail the gate even when they are only
   watching remote work.
 - Unknown-host heavy commands hold until the worker records host, owner, route,

@@ -1,0 +1,2 @@
+ACK Watcher CLAIM pod-inventory-refresh owner=Watcher provider=runpod pod_id=demo-pod-123 status=stopped job=none stop_condition=stopped-no-job no_start=yes no_submit_ack=yes
+route=none

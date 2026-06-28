@@ -4,3 +4,6 @@ ps 4243 ./target/release/build_circuit
 ps 4244 ./target/release/fanout_nonce_eval --range [245760,445760)
 ps 4245 zsh -lc 'while true; do sleep 60; done'
 ps 4246 ecdsafail benchmark
+ps 4247 python3 scripts/storm-exact-miner.py scout --input redacted.jsonl
+ps 4248 ./target/release/route_compare --candidate redacted
+ps 4249 ./search_driver --lower-q proof-loop scanner

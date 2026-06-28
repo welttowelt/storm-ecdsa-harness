@@ -75,6 +75,7 @@ for path in \
   scripts/storm-fleet-owner-claim-gate.py \
   scripts/storm-pod-wrapper-dup-gate.py \
   scripts/storm-local-heavy-compute-gate.py \
+  scripts/storm-pod-inventory-ack-gate.py \
   scripts/storm-candidate-validation-packet-gate.py \
   scripts/storm-apply-cswap-support-gate.py \
   scripts/storm-source-packet-novelty-gate.py \
@@ -122,6 +123,9 @@ for path in \
   examples/local-heavy-compute-pass.example.txt \
   examples/local-heavy-compute-fail.example.txt \
   examples/local-heavy-compute-hold.example.txt \
+  examples/pod-inventory-ack-pass.example.txt \
+  examples/pod-inventory-ack-hold.example.txt \
+  examples/pod-inventory-ack-fail.example.txt \
   examples/candidate-validation-packet-pass.example.txt \
   examples/candidate-validation-packet-hold.example.txt \
   examples/candidate-validation-packet-fail.example.txt \
@@ -161,6 +165,7 @@ for path in \
   docs/bluesky-redsky-ffg-pair-complete-toy-2026-06-28.md \
   docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md \
   docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md \
+  docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
   operators/codex-storm.md \
   operators/deep-storm.md \
@@ -197,6 +202,7 @@ for path in \
   skills/fleet-owner-claim-gate.md \
   skills/pod-wrapper-dup-gate.md \
   skills/local-heavy-compute-gate.md \
+  skills/pod-inventory-ack-gate.md \
   skills/route-compare-admission-gate.md \
   skills/ffg-pair-proof-gate.md \
   skills/candidate-validation-packet-gate.md \
@@ -257,6 +263,7 @@ for path in \
   .agents/skills/fleet-owner-claim-gate/SKILL.md \
   .agents/skills/pod-wrapper-dup-gate/SKILL.md \
   .agents/skills/local-heavy-compute-gate/SKILL.md \
+  .agents/skills/pod-inventory-ack-gate/SKILL.md \
   .agents/skills/route-compare-admission-gate/SKILL.md \
   .agents/skills/ffg-pair-proof-gate/SKILL.md \
   .agents/skills/candidate-validation-packet-gate/SKILL.md \
@@ -380,6 +387,9 @@ need_text scripts/storm-pod-wrapper-dup-gate.py "pod wrapper duplicate gate" "po
 need_text scripts/storm-pod-wrapper-dup-gate.py "duplicate eval failure" "duplicate_eval_nonce_wrapper"
 need_text scripts/storm-local-heavy-compute-gate.py "local heavy compute gate" "local_heavy_compute_gate="
 need_text scripts/storm-local-heavy-compute-gate.py "mac stop decision" "stop-mac-local-heavy-compute"
+need_text scripts/storm-local-heavy-compute-gate.py "storm exact miner heat stop" "storm-exact-miner"
+need_text scripts/storm-pod-inventory-ack-gate.py "pod inventory ack gate" "pod_inventory_ack_gate="
+need_text scripts/storm-pod-inventory-ack-gate.py "pod inventory no compute" "inventory-ack-accepted-no-compute"
 need_text scripts/storm-candidate-validation-packet-gate.py "candidate validation packet gate" "candidate_validation_packet_gate="
 need_text scripts/storm-candidate-validation-packet-gate.py "akash handoff decision" "candidate-for-akash-handoff-no-submit"
 need_text scripts/storm-candidate-validation-packet-gate.py "stale source failure" "stale_source_base"
@@ -421,6 +431,9 @@ need_text skills/fleet-owner-claim-gate.md "fleet owner claim skill" "paid insta
 need_text skills/fleet-owner-claim-gate.md "strict packet skill" "strict-single-packet"
 need_text skills/pod-wrapper-dup-gate.md "pod wrapper duplicate skill" "Duplicate GPU wrappers"
 need_text skills/local-heavy-compute-gate.md "local heavy compute skill" "Mac-local heavy compute"
+need_text skills/local-heavy-compute-gate.md "local heavy storm exact miner" "storm-exact-miner"
+need_text skills/pod-inventory-ack-gate.md "pod inventory skill" "Pod Inventory ACK Gate"
+need_text skills/pod-inventory-ack-gate.md "pod inventory no compute" "inventory-ack-accepted-no-compute"
 need_text skills/route-compare-admission-gate.md "route compare admission skill" "Route Compare Admission Gate"
 need_text skills/route-compare-admission-gate.md "strict admission flag" "require-admission"
 need_text skills/ffg-pair-proof-gate.md "ffg pair proof skill" "FFG Pair Proof Gate"
@@ -446,6 +459,7 @@ need_text .agents/skills/official-eval-isolation-gate/SKILL.md "bridge" "Codex-d
 need_text .agents/skills/fleet-owner-claim-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/pod-wrapper-dup-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/local-heavy-compute-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/pod-inventory-ack-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/route-compare-admission-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/ffg-pair-proof-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -495,6 +509,9 @@ need_text examples/ffg-pair-proof-fail.example.txt "ffg pair fail fixture" "cove
 need_text examples/paper-invariant-intake-pass.example.txt "paper invariant pass fixture" "source_backed=yes"
 need_text examples/paper-invariant-intake-hold.example.txt "paper invariant hold fixture" "complete-source-hash"
 need_text examples/paper-invariant-intake-fail.example.txt "paper invariant fail fixture" "paper_only=yes"
+need_text examples/pod-inventory-ack-pass.example.txt "pod inventory pass fixture" "status=stopped"
+need_text examples/pod-inventory-ack-hold.example.txt "pod inventory hold fixture" "status=unreachable"
+need_text examples/pod-inventory-ack-fail.example.txt "pod inventory fail fixture" "owner=unknown"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -509,6 +526,8 @@ need_text docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md "ffg pair proof 
 need_text docs/bluesky-redsky-ffg-pair-proof-gate-2026-06-28.md "ffg proof no compute" "no compute unlock"
 need_text docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md "paper invariant audit" "Paper Invariant Intake"
 need_text docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md "paper invariant no compute" "does not open residual"
+need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md "pod inventory audit" "Pod Inventory ACK Gate"
+need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md "pod inventory no compute" "does not unlock"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "current source" "f8e215b"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "no submit gate" "No clean winning candidate"
 need_text operators/kimi-storm.md "kimi boss" "operator boss"
@@ -1760,8 +1779,10 @@ if python3 scripts/storm-local-heavy-compute-gate.py \
   cat "$tmpdir/local-heavy-compute-fail.out" >&2
   fail=1
 elif ! grep -q 'local_heavy_compute_gate=fail' "$tmpdir/local-heavy-compute-fail.out" ||
-     ! grep -q 'local_heavy=4' "$tmpdir/local-heavy-compute-fail.out" ||
+     ! grep -q 'local_heavy=7' "$tmpdir/local-heavy-compute-fail.out" ||
      ! grep -q 'local_recurring=1' "$tmpdir/local-heavy-compute-fail.out" ||
+     ! grep -q 'storm-exact-miner.py' "$tmpdir/local-heavy-compute-fail.out" ||
+     ! grep -q 'route_compare' "$tmpdir/local-heavy-compute-fail.out" ||
      ! grep -q 'stop-mac-local-heavy-compute' "$tmpdir/local-heavy-compute-fail.out"; then
   printf 'public_harness_check=fail local_heavy_compute_fail_output\n' >&2
   cat "$tmpdir/local-heavy-compute-fail.out" >&2
@@ -1784,6 +1805,58 @@ elif ! grep -q 'local_heavy_compute_gate=hold' "$tmpdir/local-heavy-compute-hold
   printf 'public_harness_check=fail local_heavy_compute_hold_output\n' >&2
   cat "$tmpdir/local-heavy-compute-hold.out" >&2
   cat "$tmpdir/local-heavy-compute-hold.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-pass.out" \
+  2>"$tmpdir/pod-inventory-ack-pass.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_pass_failed\n' >&2
+  cat "$tmpdir/pod-inventory-ack-pass.err" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=pass' "$tmpdir/pod-inventory-ack-pass.out" ||
+     ! grep -q 'status=stopped' "$tmpdir/pod-inventory-ack-pass.out" ||
+     ! grep -q 'no_start_ack=true' "$tmpdir/pod-inventory-ack-pass.out" ||
+     ! grep -q 'decision=inventory-ack-accepted-no-compute' "$tmpdir/pod-inventory-ack-pass.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_pass_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-hold.out" \
+  2>"$tmpdir/pod-inventory-ack-hold.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/pod-inventory-ack-hold.out" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=hold' "$tmpdir/pod-inventory-ack-hold.out" ||
+     ! grep -q 'owner_unknown' "$tmpdir/pod-inventory-ack-hold.out" ||
+     ! grep -q 'provider_inventory_not_verified' "$tmpdir/pod-inventory-ack-hold.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_hold_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-hold.out" >&2
+  cat "$tmpdir/pod-inventory-ack-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-fail.out" \
+  2>"$tmpdir/pod-inventory-ack-fail.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/pod-inventory-ack-fail.out" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=fail' "$tmpdir/pod-inventory-ack-fail.out" ||
+     ! grep -q 'ownerless_running_pod' "$tmpdir/pod-inventory-ack-fail.out" ||
+     ! grep -q 'premature_compute_or_start_request' "$tmpdir/pod-inventory-ack-fail.out" ||
+     ! grep -q 'missing_no_start_or_compute_closed_ack' "$tmpdir/pod-inventory-ack-fail.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_fail_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-fail.out" >&2
+  cat "$tmpdir/pod-inventory-ack-fail.err" >&2
   fail=1
 fi
 
