@@ -152,6 +152,9 @@ agent instructions or used as a preflight before route work:
 - `skills/construction-intake-gate.md`: require paper-mined construction packets
   to name a current source replacement, source/candidate hashes, q/T economics,
   restore/phase/ancilla obligations, and a bounded toy falsifier before review.
+- `skills/anvil-mass-ledger-gate.md`: require conditional-Toffoli mass ledgers
+  to be machine-readable, source-bound, score-consistent, and routed to the
+  right next gate before workers promote rows.
 - `skills/pebbling-theorem-gate.md`: require recompute/pebbling packets to name
   the DAG node, producer/consumers, recompute path, score edge, and certified
   restore/phase/ancilla/support proofs before route review.
@@ -307,6 +310,7 @@ The bridge names are:
 - `qoffset-host-accounting-gate`
 - `emit-bundle-support-gate`
 - `construction-intake-gate`
+- `anvil-mass-ledger-gate`
 - `pebbling-theorem-gate`
 - `transcript-overlap-gate`
 - `paper-gidney-constant-workspace-adder`

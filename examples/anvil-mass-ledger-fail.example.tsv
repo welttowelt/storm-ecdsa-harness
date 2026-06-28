@@ -1,0 +1,2 @@
+route_id	source_base	source_location	source_hash	candidate_class	current_q	target_q	current_avg_tof	predicted_avg_tof	candidate_score	score_edge	required_support	known_counterexample	next_gate	frontier_score
+d44cad3_mass_row_bad	58866a2	src/point_add/trailmix_ludicrous/arith.rs:1296	8f407bf998b991b293b7db7e75d3f12f5005e75f363f02ebba11c44eae322504	conditional_toffoli_mass	1152	1152	1364230	1365230	1572744960	-1000	exact-support	no	construction-intake	1571592960
