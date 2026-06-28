@@ -1,0 +1,23 @@
+route_id=gidney-344-source-unsafe
+host=studio
+owner=validator
+next=launch-pods
+rank=2
+count=264146
+frontier_score=1571592960
+q=1152
+source_base=d44cad3
+source_hash=b9b8bfcd03cc3e53
+candidate_index_hash=0123456789abcdef
+source_location=src/point_add/trailmix_ludicrous/gidney.rs:344
+kind=CCX
+primitive_family=gidney_thread_sum
+evidence_label=Prefilter
+novelty_status=NEW
+ledger_hit=no
+support_status=UNKNOWN
+proof_status=UNPROVEN
+expected_avgT_delta=-1
+proof_backlog=one bounded source proof
+launch runpod gpu scanner for residual route_compare benchmark
+no_submit_ack=yes

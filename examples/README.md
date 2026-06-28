@@ -16,6 +16,8 @@ Use them to teach agents the workflow:
 - source-certificate scouts filter already-closed context rows before mining,
 - source-packet novelty checks accept public `src/point_add` sites beyond one
   subdirectory,
+- source-row routing fixtures separate packet-ready rows from counterexample
+  closures and unsafe compute asks,
 - FFG pair-complete fixtures distinguish no-recompute NACKs from recompute
   proof holds,
 - FFG pair-proof fixtures gate full source-bound packets before handoff or

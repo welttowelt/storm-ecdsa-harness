@@ -193,6 +193,9 @@ agent instructions or used as a preflight before route work:
 - `skills/source-packet-novelty-gate.md`: admit only source-bound, candidate
   hash-bound, negative-edge packets outside the closed ledger; fail exhausted
   source-family summaries before any proof or compute request.
+- `skills/source-row-routing-gate.md`: require each q1152 scout row to become
+  either one packet-ready bounded-proof row or one counterexample closure that
+  advances to the next source row, with no compute authority.
 - `skills/transcript-overlap-gate.md`: gate transcript peak-overlap drop
   packets before implementation, blocking active-only origins, stale indexes,
   dirty probes, missing peak calls, and premature residual/compute requests.

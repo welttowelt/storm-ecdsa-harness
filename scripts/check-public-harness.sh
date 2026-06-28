@@ -79,6 +79,7 @@ for path in \
   scripts/storm-candidate-validation-packet-gate.py \
   scripts/storm-apply-cswap-support-gate.py \
   scripts/storm-source-packet-novelty-gate.py \
+  scripts/storm-source-row-routing-gate.py \
   scripts/storm-transcript-overlap-gate.py \
   scripts/storm-compute-restart-gate.py \
   scripts/storm-compute-unlock-gate.py \
@@ -143,6 +144,10 @@ for path in \
   examples/source-packet-novelty-fail.example.txt \
   examples/source-packet-novelty-family-exhausted.example.txt \
   examples/source-packet-novelty-stale.example.txt \
+  examples/source-row-routing-packet.example.txt \
+  examples/source-row-routing-closure.example.txt \
+  examples/source-row-routing-hold.example.txt \
+  examples/source-row-routing-fail.example.txt \
   examples/ffg-pair-complete-no-recompute.example.txt \
   examples/ffg-pair-complete-recompute-hold.example.txt \
   examples/transcript-overlap-pass.example.txt \
@@ -170,6 +175,7 @@ for path in \
   docs/bluesky-redsky-paper-invariant-intake-2026-06-28.md \
   docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md \
   docs/bluesky-redsky-pod-inventory-ack-2026-06-28.json \
+  docs/bluesky-redsky-source-row-routing-2026-06-28.md \
   docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md \
   operators/codex-storm.md \
   operators/deep-storm.md \
@@ -212,6 +218,7 @@ for path in \
   skills/candidate-validation-packet-gate.md \
   skills/apply-cswap-support-gate.md \
   skills/source-packet-novelty-gate.md \
+  skills/source-row-routing-gate.md \
   skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
   skills/compute-restart-gate.md \
@@ -273,6 +280,7 @@ for path in \
   .agents/skills/candidate-validation-packet-gate/SKILL.md \
   .agents/skills/apply-cswap-support-gate/SKILL.md \
   .agents/skills/source-packet-novelty-gate/SKILL.md \
+  .agents/skills/source-row-routing-gate/SKILL.md \
   .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
   .agents/skills/compute-restart-gate/SKILL.md \
@@ -408,6 +416,8 @@ need_text scripts/storm-source-packet-novelty-gate.py "closed ledger failure" "a
 need_text scripts/storm-source-packet-novelty-gate.py "family exhaustion failure" "source_family_exhausted"
 need_text scripts/storm-source-packet-novelty-gate.py "candidate hash field" "candidate_hash"
 need_text scripts/storm-source-packet-novelty-gate.py "point add source location" "src/point_add"
+need_text scripts/storm-source-row-routing-gate.py "source row routing gate" "source_row_routing_gate="
+need_text scripts/storm-source-row-routing-gate.py "source row closure decision" "source-row-closed-advance-next-no-compute"
 need_text scripts/storm-transcript-overlap-gate.py "transcript overlap gate" "transcript_overlap_gate="
 need_text scripts/storm-transcript-overlap-gate.py "source theorem review decision" "source-theorem-review-no-compute"
 need_text scripts/storm-transcript-overlap-gate.py "score edge failure" "score_no_edge"
@@ -451,6 +461,8 @@ need_text skills/source-packet-novelty-gate.md "source packet novelty skill" "ou
 need_text skills/source-packet-novelty-gate.md "source packet no compute" "no compute"
 need_text skills/source-packet-novelty-gate.md "source packet candidate hash" "candidate index/diff hash"
 need_text skills/source-packet-novelty-gate.md "source family exhausted" "exhausted source-family"
+need_text skills/source-row-routing-gate.md "source row routing skill" "Source Row Routing Gate"
+need_text skills/source-row-routing-gate.md "source row no compute" "no-compute"
 need_text skills/transcript-overlap-gate.md "transcript overlap skill" "transcript peak-overlap"
 need_text skills/transcript-overlap-gate.md "active only failure" "active-only"
 need_text skills/compute-restart-gate.md "compute restart skill" "scanner restart"
@@ -472,6 +484,7 @@ need_text .agents/skills/candidate-validation-packet-gate/SKILL.md "bridge" "Cod
 need_text .agents/skills/apply-cswap-support-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/source-packet-novelty-gate/SKILL.md "bridge candidate hash" "candidate index/diff hash"
+need_text .agents/skills/source-row-routing-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/transcript-overlap-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-unlock-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/compute-restart-gate/SKILL.md "bridge" "Codex-discoverable bridge"
@@ -521,6 +534,10 @@ need_text examples/pod-inventory-ack-fail.example.txt "pod inventory fail fixtur
 need_text examples/pod-inventory-ack-account-empty-pass.example.txt "account empty pass fixture" "status=0-pods"
 need_text examples/pod-inventory-ack-account-empty-hold.example.txt "account empty hold fixture" "status=0-pods"
 need_text examples/pod-inventory-ack-account-empty-fail.example.txt "account empty fail fixture" "currentSpendPerHr=0.22"
+need_text examples/source-row-routing-packet.example.txt "source row packet fixture" "gidney-344-source-packet"
+need_text examples/source-row-routing-closure.example.txt "source row closure fixture" "source-closure"
+need_text examples/source-row-routing-hold.example.txt "source row hold fixture" "closure-incomplete"
+need_text examples/source-row-routing-fail.example.txt "source row fail fixture" "launch runpod gpu scanner"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -539,6 +556,8 @@ need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md "pod inventory aud
 need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.md "pod inventory no compute" "does not unlock"
 need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.json "pod inventory loop packet" "process-pod-inventory-ack-five-loop"
 need_text docs/bluesky-redsky-pod-inventory-ack-2026-06-28.json "pod inventory loop no compute" "inventory-ack-accepted-no-compute"
+need_text docs/bluesky-redsky-source-row-routing-2026-06-28.md "source row audit" "Source Row Routing Gate"
+need_text docs/bluesky-redsky-source-row-routing-2026-06-28.md "source row no compute" "no-compute"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "current source" "f8e215b"
 need_text docs/redsky-stormgate-audit-2026-06-20-f8e215b-current.md "no submit gate" "No clean winning candidate"
 need_text operators/kimi-storm.md "kimi boss" "operator boss"
@@ -2172,6 +2191,74 @@ elif ! grep -q 'source_packet_novelty_gate=fail' "$tmpdir/source-packet-novelty-
   printf 'public_harness_check=fail source_packet_novelty_stale_output\n' >&2
   cat "$tmpdir/source-packet-novelty-stale.out" >&2
   cat "$tmpdir/source-packet-novelty-stale.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-source-row-routing-gate.py \
+  examples/source-row-routing-packet.example.txt \
+  --require-pass \
+  >"$tmpdir/source-row-routing-packet.out" \
+  2>"$tmpdir/source-row-routing-packet.err"; then
+  printf 'public_harness_check=fail source_row_routing_packet_failed\n' >&2
+  cat "$tmpdir/source-row-routing-packet.err" >&2
+  fail=1
+elif ! grep -q 'source_row_routing_gate=pass' "$tmpdir/source-row-routing-packet.out" ||
+     ! grep -q 'packet=true' "$tmpdir/source-row-routing-packet.out" ||
+     ! grep -q 'closure=false' "$tmpdir/source-row-routing-packet.out" ||
+     ! grep -q 'decision=source-row-packet-ready-no-compute' "$tmpdir/source-row-routing-packet.out"; then
+  printf 'public_harness_check=fail source_row_routing_packet_output\n' >&2
+  cat "$tmpdir/source-row-routing-packet.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-source-row-routing-gate.py \
+  examples/source-row-routing-closure.example.txt \
+  --require-pass \
+  >"$tmpdir/source-row-routing-closure.out" \
+  2>"$tmpdir/source-row-routing-closure.err"; then
+  printf 'public_harness_check=fail source_row_routing_closure_failed\n' >&2
+  cat "$tmpdir/source-row-routing-closure.err" >&2
+  fail=1
+elif ! grep -q 'source_row_routing_gate=pass' "$tmpdir/source-row-routing-closure.out" ||
+     ! grep -q 'packet=false' "$tmpdir/source-row-routing-closure.out" ||
+     ! grep -q 'closure=true' "$tmpdir/source-row-routing-closure.out" ||
+     ! grep -q 'decision=source-row-closed-advance-next-no-compute' "$tmpdir/source-row-routing-closure.out"; then
+  printf 'public_harness_check=fail source_row_routing_closure_output\n' >&2
+  cat "$tmpdir/source-row-routing-closure.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-row-routing-gate.py \
+  examples/source-row-routing-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/source-row-routing-hold.out" \
+  2>"$tmpdir/source-row-routing-hold.err"; then
+  printf 'public_harness_check=fail source_row_routing_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/source-row-routing-hold.out" >&2
+  fail=1
+elif ! grep -q 'source_row_routing_gate=hold' "$tmpdir/source-row-routing-hold.out" ||
+     ! grep -q 'closure_missing_proof_counterexample' "$tmpdir/source-row-routing-hold.out" ||
+     ! grep -q 'missing_closure_reason_or_artifact' "$tmpdir/source-row-routing-hold.out" ||
+     ! grep -q 'missing_next_source_row' "$tmpdir/source-row-routing-hold.out"; then
+  printf 'public_harness_check=fail source_row_routing_hold_output\n' >&2
+  cat "$tmpdir/source-row-routing-hold.out" >&2
+  cat "$tmpdir/source-row-routing-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-source-row-routing-gate.py \
+  examples/source-row-routing-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/source-row-routing-fail.out" \
+  2>"$tmpdir/source-row-routing-fail.err"; then
+  printf 'public_harness_check=fail source_row_routing_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/source-row-routing-fail.out" >&2
+  fail=1
+elif ! grep -q 'source_row_routing_gate=fail' "$tmpdir/source-row-routing-fail.out" ||
+     ! grep -q 'premature_compute_request' "$tmpdir/source-row-routing-fail.out"; then
+  printf 'public_harness_check=fail source_row_routing_fail_output\n' >&2
+  cat "$tmpdir/source-row-routing-fail.out" >&2
+  cat "$tmpdir/source-row-routing-fail.err" >&2
   fail=1
 fi
 
