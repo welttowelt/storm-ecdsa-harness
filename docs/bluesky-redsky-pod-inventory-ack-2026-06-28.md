@@ -5,6 +5,8 @@
 - Storm-Codex issued a MacBook heat-stop directive at 2026-06-28T03:00:48Z.
 - The same directive required pod watchers to refresh provider-side inventory
   with owner, pod id, status, job, stop condition, and no-submit ACK.
+- Later fleet teardown produced account-level zero-pod ACKs rather than per-pod
+  rows.
 - Existing public gates covered owner claims and duplicate wrappers, but not
   this exact provider inventory ACK shape.
 
@@ -26,9 +28,22 @@
 The gate requires provider, pod id, owner, status, job, stop condition,
 no-start/no-compute ACK, and no_submit_ack=yes.
 
+For `status=0-pods` account rows, pod id and job are replaced by account id,
+zero spend per hour, and at least two provider reads.
+
 Pass means inventory accepted for control-plane review only. It does not unlock
 compute, residual, trusted eval, benchmark, submit, alert, or sentinel writes.
 
 The local-heavy compute gate was also hardened so the same HOT STOP audit catches
 storm-exact-miner, route_compare, search_driver, lower-q/proof/scanner loops,
 and recurring local wrappers.
+
+## Cycle 128 Account-Empty Addendum
+
+1. Public frontier pass: fleet teardown has no candidate or compute unlock.
+2. Code archaeology pass: the previous gate treated account-level zero-pod ACKs
+   as malformed per-pod rows.
+3. Correctness pass: `status=0-pods` is acceptable only with account identity,
+   spend-zero evidence, and double-read provider verification.
+4. Economics pass: nonzero spend on an empty-account ACK is a fail, not a pass.
+5. Handoff pass: account-empty pass still means no-compute inventory review only.

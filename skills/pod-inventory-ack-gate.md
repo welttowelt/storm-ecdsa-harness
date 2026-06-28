@@ -23,13 +23,22 @@ pod inventory.
 - no local-heavy context, compute start request, submit, alert, or Akash
   language appears.
 
+For account-level empty-provider inventory, pod_id and job are replaced by:
+
+- account is present;
+- status=0-pods, pod_count=0, running_pods=0, or equivalent zero-pod evidence;
+- currentSpendPerHr=0, spend_per_hr=0, or equivalent spend-zero evidence;
+- verification_reads>=2, consecutive_reads>=2, or equivalent double-read
+  provider evidence.
+
 ## Decisions
 
 - pass: inventory-ack-accepted-no-compute.
 - hold: owner/status cannot be verified, or required inventory fields are
   missing.
 - fail: running pod is ownerless/unknown, stop condition is missing, or the
-  packet asks to start compute.
+  packet asks to start compute. Empty-account rows also fail if reported spend
+  is nonzero.
 
 This gate does not call provider APIs or stop pods. It checks that the mailbox
 ACK is complete enough for Storm to decide whether a watcher should stop,

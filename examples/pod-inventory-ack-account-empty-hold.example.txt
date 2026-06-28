@@ -1,0 +1,1 @@
+ACK Watcher ACK runpod-inventory-empty owner=Watcher provider=runpod account=demo-account status=0-pods compute_closed=yes stop_condition=no-pods-to-guard no_submit_ack=yes

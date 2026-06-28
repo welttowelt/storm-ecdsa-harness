@@ -126,6 +126,9 @@ for path in \
   examples/pod-inventory-ack-pass.example.txt \
   examples/pod-inventory-ack-hold.example.txt \
   examples/pod-inventory-ack-fail.example.txt \
+  examples/pod-inventory-ack-account-empty-pass.example.txt \
+  examples/pod-inventory-ack-account-empty-hold.example.txt \
+  examples/pod-inventory-ack-account-empty-fail.example.txt \
   examples/candidate-validation-packet-pass.example.txt \
   examples/candidate-validation-packet-hold.example.txt \
   examples/candidate-validation-packet-fail.example.txt \
@@ -391,6 +394,8 @@ need_text scripts/storm-local-heavy-compute-gate.py "mac stop decision" "stop-ma
 need_text scripts/storm-local-heavy-compute-gate.py "storm exact miner heat stop" "storm-exact-miner"
 need_text scripts/storm-pod-inventory-ack-gate.py "pod inventory ack gate" "pod_inventory_ack_gate="
 need_text scripts/storm-pod-inventory-ack-gate.py "pod inventory no compute" "inventory-ack-accepted-no-compute"
+need_text scripts/storm-pod-inventory-ack-gate.py "account empty inventory" "account_empty"
+need_text scripts/storm-pod-inventory-ack-gate.py "nonzero empty spend failure" "account_empty_nonzero_spend"
 need_text scripts/storm-candidate-validation-packet-gate.py "candidate validation packet gate" "candidate_validation_packet_gate="
 need_text scripts/storm-candidate-validation-packet-gate.py "akash handoff decision" "candidate-for-akash-handoff-no-submit"
 need_text scripts/storm-candidate-validation-packet-gate.py "stale source failure" "stale_source_base"
@@ -513,6 +518,9 @@ need_text examples/paper-invariant-intake-fail.example.txt "paper invariant fail
 need_text examples/pod-inventory-ack-pass.example.txt "pod inventory pass fixture" "status=stopped"
 need_text examples/pod-inventory-ack-hold.example.txt "pod inventory hold fixture" "status=unreachable"
 need_text examples/pod-inventory-ack-fail.example.txt "pod inventory fail fixture" "owner=unknown"
+need_text examples/pod-inventory-ack-account-empty-pass.example.txt "account empty pass fixture" "status=0-pods"
+need_text examples/pod-inventory-ack-account-empty-hold.example.txt "account empty hold fixture" "status=0-pods"
+need_text examples/pod-inventory-ack-account-empty-fail.example.txt "account empty fail fixture" "currentSpendPerHr=0.22"
 need_text templates/exact-skip-candidate.json "allocator unchanged" "allocator_unchanged"
 need_text templates/exact-skip-candidate.json "support status" "support_status"
 need_text templates/exact-skip-candidate.json "trace context family" "trace_context_family"
@@ -1860,6 +1868,57 @@ elif ! grep -q 'pod_inventory_ack_gate=fail' "$tmpdir/pod-inventory-ack-fail.out
   printf 'public_harness_check=fail pod_inventory_ack_fail_output\n' >&2
   cat "$tmpdir/pod-inventory-ack-fail.out" >&2
   cat "$tmpdir/pod-inventory-ack-fail.err" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-account-empty-pass.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-account-empty-pass.out" \
+  2>"$tmpdir/pod-inventory-ack-account-empty-pass.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_pass_failed\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-pass.err" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=pass' "$tmpdir/pod-inventory-ack-account-empty-pass.out" ||
+     ! grep -q 'account_empty=true' "$tmpdir/pod-inventory-ack-account-empty-pass.out" ||
+     ! grep -q 'spend_zero=true' "$tmpdir/pod-inventory-ack-account-empty-pass.out" ||
+     ! grep -q 'double_read_verified=true' "$tmpdir/pod-inventory-ack-account-empty-pass.out" ||
+     ! grep -q 'decision=inventory-ack-accepted-no-compute' "$tmpdir/pod-inventory-ack-account-empty-pass.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_pass_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-pass.out" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-account-empty-hold.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-account-empty-hold.out" \
+  2>"$tmpdir/pod-inventory-ack-account-empty-hold.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_hold_unexpected_pass\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-hold.out" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=hold' "$tmpdir/pod-inventory-ack-account-empty-hold.out" ||
+     ! grep -q 'missing_zero_spend_evidence' "$tmpdir/pod-inventory-ack-account-empty-hold.out" ||
+     ! grep -q 'missing_double_read_verification' "$tmpdir/pod-inventory-ack-account-empty-hold.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_hold_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-hold.out" >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-hold.err" >&2
+  fail=1
+fi
+
+if python3 scripts/storm-pod-inventory-ack-gate.py \
+  examples/pod-inventory-ack-account-empty-fail.example.txt \
+  --require-pass \
+  >"$tmpdir/pod-inventory-ack-account-empty-fail.out" \
+  2>"$tmpdir/pod-inventory-ack-account-empty-fail.err"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-fail.out" >&2
+  fail=1
+elif ! grep -q 'pod_inventory_ack_gate=fail' "$tmpdir/pod-inventory-ack-account-empty-fail.out" ||
+     ! grep -q 'account_empty_nonzero_spend' "$tmpdir/pod-inventory-ack-account-empty-fail.out"; then
+  printf 'public_harness_check=fail pod_inventory_ack_account_empty_fail_output\n' >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-fail.out" >&2
+  cat "$tmpdir/pod-inventory-ack-account-empty-fail.err" >&2
   fail=1
 fi
 

@@ -18,3 +18,7 @@ Use the repo-local instructions and run:
 Require provider, pod id, owner, status, job, stop condition, no-start/no-compute
 ACK, and no-submit discipline before a pod inventory ACK is accepted. Fail
 ownerless running pods and compute-start language.
+
+For provider account teardown ACKs, accept account-level status=0-pods only with
+account id, spend-zero evidence, double-read verification, compute-closed ACK,
+stop condition, and no_submit_ack=yes. Nonzero spend on an empty account fails.

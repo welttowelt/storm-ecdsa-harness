@@ -23,7 +23,8 @@ Use them to teach agents the workflow:
 - paper-invariant fixtures block scout-only hits before skill-card or compute
   language,
 - pod-inventory ACK fixtures accept complete no-compute inventory, hold
-  unreachable provider state, and fail ownerless running pods,
+  unreachable provider state, accept verified zero-pod account inventory, and
+  fail ownerless running pods or nonzero empty-account spend,
 - candidate validation packets fail stale source bases before handoff language,
 - scanner output stays `Prefilter` until official validation passes.
 

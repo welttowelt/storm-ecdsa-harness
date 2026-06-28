@@ -171,8 +171,9 @@ agent instructions or used as a preflight before route work:
   storm-exact-miner, route_compare, search_driver, lower-q, proof, and scanner
   loops.
 - `skills/pod-inventory-ack-gate.md`: accept complete provider inventory ACKs,
-  hold unknown/unreachable inventory, and fail ownerless running pods or compute
-  start language after fleet stop directives.
+  hold unknown/unreachable inventory, accept verified zero-pod account inventory,
+  and fail ownerless running pods, nonzero empty-account spend, or compute start
+  language after fleet stop directives.
 - `skills/route-compare-admission-gate.md`: require clean baseline, clean
   candidate, clean compare output, and a strict score edge before route-compare
   evidence can become residual, compute, pod, handoff, submit, or alert work.
