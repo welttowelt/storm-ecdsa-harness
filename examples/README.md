@@ -29,6 +29,10 @@ Use them to teach agents the workflow:
 - anvil-mass-ledger fixtures separate complete conditional-Toffoli economics
   and raw mass ledgers from incomplete rows and stale/score-inconsistent
   promotions,
+- anvil-namespace fixtures separate source-bound high-mass rows from unresolved
+  namespace ambiguity and unsafe compute asks,
+- anvil-exact-redundancy fixtures separate exact-support proof packets from
+  incomplete proof flags and stale/compute overclaims,
 - pebbling-theorem fixtures separate certified recompute/pebbling DAG packets
   from incomplete handoffs and stale/dirty compute asks,
 - FFG pair-complete fixtures distinguish no-recompute NACKs from recompute

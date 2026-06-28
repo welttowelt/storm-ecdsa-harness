@@ -1,0 +1,9 @@
+ACK Vector CLAIM stale-anvil-namespace-overclaim owner=Vector next=storm-compute-unlock-gate no_submit_ack=yes
+route_id=anvil-namespace-stale-overclaim
+source_base=58866a2 frontier_score=1571592960 q=1147 evidence_label=Local full run
+op_index=3194639 kind=CCX q_target=1149 q_c1=1148 q_c2=558 expected_shot_mass=1200 expected_avgT_delta=-1.0
+index_namespace=anvil_raw_to_trace_context namespace_status=MATCHED source_binding_status=BOUND
+source_bound=yes source_location=src/point_add/trailmix_ludicrous/gidney.rs:1233
+source_hash=7afcad3324ee11bb candidate_index_hash=8bfcad3324ee11cc trace_context_hash=9cfcad3324ee11dd
+trace_context_family=gidney_thread_forward_carry support_status=CERTIFIED proof_status=CERTIFIED
+launch runpod gpu scanner after this packet

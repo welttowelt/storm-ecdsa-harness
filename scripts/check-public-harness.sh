@@ -67,6 +67,8 @@ for path in \
   scripts/storm-construction-package-gate.py \
   scripts/storm-construction-intake-gate.py \
   scripts/storm-anvil-mass-ledger-gate.py \
+  scripts/storm-anvil-namespace-gate.py \
+  scripts/storm-anvil-exact-redundancy-gate.py \
   scripts/storm-pebbling-theorem-gate.py \
   scripts/storm-frontier-escape-gate.py \
   scripts/storm-square-static-gap-audit.py \
@@ -172,6 +174,13 @@ for path in \
   examples/anvil-mass-ledger-raw-pass.example.tsv \
   examples/anvil-mass-ledger-hold.example.tsv \
   examples/anvil-mass-ledger-fail.example.tsv \
+  examples/anvil-namespace-pass.example.txt \
+  examples/anvil-namespace-closure.example.txt \
+  examples/anvil-namespace-hold.example.txt \
+  examples/anvil-namespace-fail.example.txt \
+  examples/anvil-exact-redundancy-pass.example.txt \
+  examples/anvil-exact-redundancy-hold.example.txt \
+  examples/anvil-exact-redundancy-fail.example.txt \
   examples/pebbling-theorem-pass.example.txt \
   examples/pebbling-theorem-hold.example.txt \
   examples/pebbling-theorem-fail.example.txt \
@@ -251,6 +260,8 @@ for path in \
   skills/emit-bundle-support-gate.md \
   skills/construction-intake-gate.md \
   skills/anvil-mass-ledger-gate.md \
+  skills/anvil-namespace-gate.md \
+  skills/anvil-exact-redundancy-gate.md \
   skills/pebbling-theorem-gate.md \
   skills/transcript-overlap-gate.md \
   skills/compute-unlock-gate.md \
@@ -319,6 +330,8 @@ for path in \
   .agents/skills/emit-bundle-support-gate/SKILL.md \
   .agents/skills/construction-intake-gate/SKILL.md \
   .agents/skills/anvil-mass-ledger-gate/SKILL.md \
+  .agents/skills/anvil-namespace-gate/SKILL.md \
+  .agents/skills/anvil-exact-redundancy-gate/SKILL.md \
   .agents/skills/pebbling-theorem-gate/SKILL.md \
   .agents/skills/transcript-overlap-gate/SKILL.md \
   .agents/skills/compute-unlock-gate/SKILL.md \
@@ -421,6 +434,10 @@ need_text scripts/storm-construction-intake-gate.py "construction intake gate" "
 need_text scripts/storm-construction-intake-gate.py "paper-only failure" "paper_only_or_scout_only"
 need_text scripts/storm-anvil-mass-ledger-gate.py "anvil mass ledger gate" "anvil_mass_ledger_gate="
 need_text scripts/storm-anvil-mass-ledger-gate.py "counterexample routing failure" "counterexample_routed_to_positive_gate"
+need_text scripts/storm-anvil-namespace-gate.py "anvil namespace gate" "anvil_namespace_gate"
+need_text scripts/storm-anvil-namespace-gate.py "namespace binding hold" "complete-anvil-namespace-binding"
+need_text scripts/storm-anvil-exact-redundancy-gate.py "anvil exact redundancy gate" "anvil_exact_redundancy_gate="
+need_text scripts/storm-anvil-exact-redundancy-gate.py "exact redundancy review decision" "anvil-exact-redundancy-review-no-compute"
 need_text scripts/storm-pebbling-theorem-gate.py "pebbling theorem gate" "pebbling_theorem_gate="
 need_text scripts/storm-pebbling-theorem-gate.py "stale drop state failure" "stale_drop_state"
 need_text scripts/storm-construction-package-gate.py "package nack" "package-nack"
@@ -616,6 +633,13 @@ need_text examples/anvil-mass-ledger-pass.example.tsv "anvil mass ledger pass fi
 need_text examples/anvil-mass-ledger-raw-pass.example.tsv "anvil raw mass ledger pass fixture" "2273872"
 need_text examples/anvil-mass-ledger-hold.example.tsv "anvil mass ledger hold fixture" "d44cad3_mass_row_incomplete"
 need_text examples/anvil-mass-ledger-fail.example.tsv "anvil mass ledger fail fixture" "58866a2"
+need_text examples/anvil-namespace-pass.example.txt "anvil namespace pass fixture" "anvil-630621-namespace-bound"
+need_text examples/anvil-namespace-closure.example.txt "anvil namespace closure fixture" "anvil-630625-namespace-closure"
+need_text examples/anvil-namespace-hold.example.txt "anvil namespace hold fixture" "namespace_status=MISSING"
+need_text examples/anvil-namespace-fail.example.txt "anvil namespace fail fixture" "launch runpod gpu scanner"
+need_text examples/anvil-exact-redundancy-pass.example.txt "anvil exact pass fixture" "anvil-2273872-exact-redundancy"
+need_text examples/anvil-exact-redundancy-hold.example.txt "anvil exact hold fixture" "proof-incomplete"
+need_text examples/anvil-exact-redundancy-fail.example.txt "anvil exact fail fixture" "stale-overclaim-anvil-op"
 need_text examples/pebbling-theorem-pass.example.txt "pebbling theorem pass fixture" "pebbling-theorem-source-bound"
 need_text examples/pebbling-theorem-hold.example.txt "pebbling theorem hold fixture" "pebbling-theorem-incomplete"
 need_text examples/pebbling-theorem-fail.example.txt "pebbling theorem fail fixture" "drop_state=historical"
@@ -661,6 +685,10 @@ need_text skills/construction-intake-gate.md "construction intake gate" "Constru
 need_text skills/construction-intake-gate.md "construction intake no compute" "no-compute"
 need_text skills/anvil-mass-ledger-gate.md "anvil mass ledger gate" "Anvil Mass Ledger Gate"
 need_text skills/anvil-mass-ledger-gate.md "anvil mass ledger no compute" "no compute"
+need_text skills/anvil-namespace-gate.md "anvil namespace gate" "Anvil Namespace Gate"
+need_text skills/anvil-namespace-gate.md "anvil namespace no compute" "no compute"
+need_text skills/anvil-exact-redundancy-gate.md "anvil exact gate" "Anvil Exact Redundancy Gate"
+need_text skills/anvil-exact-redundancy-gate.md "anvil exact no compute" "No pod"
 need_text skills/pebbling-theorem-gate.md "pebbling theorem gate" "Pebbling Theorem Gate"
 need_text skills/pebbling-theorem-gate.md "pebbling theorem no compute" "no-compute"
 need_text skills/frontier-escape-gate.md "frontier escape gate" "Frontier Escape Gate"
@@ -672,6 +700,8 @@ need_text .agents/skills/q1152-structural-core/SKILL.md "bridge" "Codex-discover
 need_text .agents/skills/construction-package-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/construction-intake-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/anvil-mass-ledger-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/anvil-namespace-gate/SKILL.md "bridge" "Codex-discoverable bridge"
+need_text .agents/skills/anvil-exact-redundancy-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/pebbling-theorem-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text .agents/skills/frontier-escape-gate/SKILL.md "bridge" "Codex-discoverable bridge"
 need_text skills/paper-gidney-constant-workspace-adder.md "gidney source" "arXiv:2507.23079"
@@ -1038,6 +1068,113 @@ elif ! grep -q 'anvil_mass_ledger_gate=fail' "$tmpdir/anvil-mass-ledger-fail.out
      ! grep -q 'nonpositive_score_edge_without_nack' "$tmpdir/anvil-mass-ledger-fail.out"; then
   printf 'public_harness_check=fail anvil_mass_ledger_fail_output\n' >&2
   cat "$tmpdir/anvil-mass-ledger-fail.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-anvil-namespace-gate.py \
+  examples/anvil-namespace-pass.example.txt \
+  --require-pass >"$tmpdir/anvil-namespace-pass.out" 2>"$tmpdir/anvil-namespace-pass.err"; then
+  printf 'public_harness_check=fail anvil_namespace_pass_failed\n' >&2
+  cat "$tmpdir/anvil-namespace-pass.err" >&2
+  cat "$tmpdir/anvil-namespace-pass.out" >&2
+  fail=1
+elif ! grep -q 'anvil_namespace_gate=pass' "$tmpdir/anvil-namespace-pass.out" ||
+     ! grep -q 'decision=anvil-row-source-bound-ready-no-compute' "$tmpdir/anvil-namespace-pass.out" ||
+     ! grep -q 'packet=true' "$tmpdir/anvil-namespace-pass.out"; then
+  printf 'public_harness_check=fail anvil_namespace_pass_output\n' >&2
+  cat "$tmpdir/anvil-namespace-pass.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-anvil-namespace-gate.py \
+  examples/anvil-namespace-closure.example.txt \
+  --require-pass >"$tmpdir/anvil-namespace-closure.out" 2>"$tmpdir/anvil-namespace-closure.err"; then
+  printf 'public_harness_check=fail anvil_namespace_closure_failed\n' >&2
+  cat "$tmpdir/anvil-namespace-closure.err" >&2
+  cat "$tmpdir/anvil-namespace-closure.out" >&2
+  fail=1
+elif ! grep -q 'anvil_namespace_gate=pass' "$tmpdir/anvil-namespace-closure.out" ||
+     ! grep -q 'decision=anvil-row-closed-advance-next-no-compute' "$tmpdir/anvil-namespace-closure.out" ||
+     ! grep -q 'closure=true' "$tmpdir/anvil-namespace-closure.out"; then
+  printf 'public_harness_check=fail anvil_namespace_closure_output\n' >&2
+  cat "$tmpdir/anvil-namespace-closure.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-anvil-namespace-gate.py \
+  examples/anvil-namespace-hold.example.txt >"$tmpdir/anvil-namespace-hold.out" 2>"$tmpdir/anvil-namespace-hold.err"; then
+  printf 'public_harness_check=fail anvil_namespace_hold_unexpected_error\n' >&2
+  cat "$tmpdir/anvil-namespace-hold.err" >&2
+  fail=1
+elif ! grep -q 'anvil_namespace_gate=hold' "$tmpdir/anvil-namespace-hold.out" ||
+     ! grep -q 'namespace_missing' "$tmpdir/anvil-namespace-hold.out" ||
+     ! grep -q 'source_binding_unbound' "$tmpdir/anvil-namespace-hold.out"; then
+  printf 'public_harness_check=fail anvil_namespace_hold_output\n' >&2
+  cat "$tmpdir/anvil-namespace-hold.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-anvil-namespace-gate.py \
+  examples/anvil-namespace-hold.example.txt \
+  --require-pass >"$tmpdir/anvil-namespace-hold-strict.out" 2>"$tmpdir/anvil-namespace-hold-strict.err"; then
+  printf 'public_harness_check=fail anvil_namespace_hold_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/anvil-namespace-hold-strict.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-anvil-namespace-gate.py \
+  examples/anvil-namespace-fail.example.txt >"$tmpdir/anvil-namespace-fail.out" 2>"$tmpdir/anvil-namespace-fail.err"; then
+  printf 'public_harness_check=fail anvil_namespace_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/anvil-namespace-fail.out" >&2
+  fail=1
+elif ! grep -q 'anvil_namespace_gate=fail' "$tmpdir/anvil-namespace-fail.out" ||
+     ! grep -q 'premature_compute_or_residual_request' "$tmpdir/anvil-namespace-fail.out" ||
+     ! grep -q 'stale_source_base' "$tmpdir/anvil-namespace-fail.out"; then
+  printf 'public_harness_check=fail anvil_namespace_fail_output\n' >&2
+  cat "$tmpdir/anvil-namespace-fail.out" >&2
+  fail=1
+fi
+
+if ! python3 scripts/storm-anvil-exact-redundancy-gate.py \
+  examples/anvil-exact-redundancy-pass.example.txt \
+  --require-pass >"$tmpdir/anvil-exact-pass.out" 2>"$tmpdir/anvil-exact-pass.err"; then
+  printf 'public_harness_check=fail anvil_exact_pass_failed\n' >&2
+  cat "$tmpdir/anvil-exact-pass.err" >&2
+  cat "$tmpdir/anvil-exact-pass.out" >&2
+  fail=1
+elif ! grep -q 'anvil_exact_redundancy_gate=pass' "$tmpdir/anvil-exact-pass.out" ||
+     ! grep -q 'decision=anvil-exact-redundancy-review-no-compute' "$tmpdir/anvil-exact-pass.out" ||
+     ! grep -q 'certified=true' "$tmpdir/anvil-exact-pass.out"; then
+  printf 'public_harness_check=fail anvil_exact_pass_output\n' >&2
+  cat "$tmpdir/anvil-exact-pass.out" >&2
+  fail=1
+fi
+if ! python3 scripts/storm-anvil-exact-redundancy-gate.py \
+  examples/anvil-exact-redundancy-hold.example.txt >"$tmpdir/anvil-exact-hold.out" 2>"$tmpdir/anvil-exact-hold.err"; then
+  printf 'public_harness_check=fail anvil_exact_hold_unexpected_error\n' >&2
+  cat "$tmpdir/anvil-exact-hold.err" >&2
+  fail=1
+elif ! grep -q 'anvil_exact_redundancy_gate=hold' "$tmpdir/anvil-exact-hold.out" ||
+     ! grep -q 'phase_proof_missing' "$tmpdir/anvil-exact-hold.out" ||
+     ! grep -q 'ancilla_proof_missing' "$tmpdir/anvil-exact-hold.out"; then
+  printf 'public_harness_check=fail anvil_exact_hold_output\n' >&2
+  cat "$tmpdir/anvil-exact-hold.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-anvil-exact-redundancy-gate.py \
+  examples/anvil-exact-redundancy-hold.example.txt \
+  --require-pass >"$tmpdir/anvil-exact-hold-strict.out" 2>"$tmpdir/anvil-exact-hold-strict.err"; then
+  printf 'public_harness_check=fail anvil_exact_hold_strict_unexpected_pass\n' >&2
+  cat "$tmpdir/anvil-exact-hold-strict.out" >&2
+  fail=1
+fi
+if python3 scripts/storm-anvil-exact-redundancy-gate.py \
+  examples/anvil-exact-redundancy-fail.example.txt >"$tmpdir/anvil-exact-fail.out" 2>"$tmpdir/anvil-exact-fail.err"; then
+  printf 'public_harness_check=fail anvil_exact_fail_unexpected_pass\n' >&2
+  cat "$tmpdir/anvil-exact-fail.out" >&2
+  fail=1
+elif ! grep -q 'anvil_exact_redundancy_gate=fail' "$tmpdir/anvil-exact-fail.out" ||
+     ! grep -q 'premature_compute_or_residual_request' "$tmpdir/anvil-exact-fail.out" ||
+     ! grep -q 'stale_source_base' "$tmpdir/anvil-exact-fail.out" ||
+     ! grep -q 'q_cut_claim_not_single_op_redundancy' "$tmpdir/anvil-exact-fail.out"; then
+  printf 'public_harness_check=fail anvil_exact_fail_output\n' >&2
+  cat "$tmpdir/anvil-exact-fail.out" >&2
   fail=1
 fi
 

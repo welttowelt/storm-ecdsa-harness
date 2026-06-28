@@ -1,0 +1,14 @@
+ACK Vector CLAIM anvil-highmass-op-2273872-exact-redundancy owner=Vector next=storm-compute-unlock-gate no_submit_ack=yes
+route_id=anvil-2273872-exact-redundancy
+source_base=d44cad3
+source_location=src/point_add/trailmix_ludicrous/arith.rs:1296
+source_hash=8f407bf998b991b293b7db7e75d3f12f5005e75f363f02ebba11c44eae322504
+candidate_hash=7c3e0c9983b9368f0c5f7e3ea93f0ff6404a5f21d39b5a76e5e3446baf476822
+ledger_hash=515b8c5f998b991b293b7db7e75d3f12f5005e75f363f02ebba11c44eae322504
+candidate_class=exact_support_redundancy q=1152 target_q=1152 frontier_score=1571592960
+op_index=2273872 kind=CCX q_target=1115 q_c1=511 q_c2=767 c_condition=18446744073709551615
+expected_shot_mass=4706 expected_avgT_delta=-0.5214982269503546
+candidate_score=1571591808 score_edge=1152
+evidence_label=Partial support_status=CERTIFIED proof_status=CERTIFIED exact_support=CERTIFIED redundancy_status=CERTIFIED
+restore_proof=1 phase_proof=1 ancilla_proof=1 allocator_unchanged=yes host=studio
+proof_artifact_hash=9e2f0c9983b9368f0c5f7e3ea93f0ff6404a5f21d39b5a76e5e3446baf476822

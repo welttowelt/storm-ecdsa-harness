@@ -1,0 +1,10 @@
+ACK Vector CLAIM anvil-630621-source-bound owner=Vector next=anvil-exact-redundancy-gate no_submit_ack=yes
+route_id=anvil-630621-namespace-bound
+source_base=d44cad3 frontier_score=1571592960 q=1152 evidence_label=Prefilter
+op_index=630621 kind=CCX q_target=1107 q_c1=1106 q_c2=562 expected_shot_mass=4653 expected_avgT_delta=-0.515625
+index_namespace=anvil_raw_to_trace_context namespace_status=MATCHED source_binding_status=BOUND
+support_lookup_index=630621 support_op_id=rank=gidney-thread;context=call929bit40
+source_bound=yes source_location=src/point_add/trailmix_ludicrous/gidney.rs:1233
+source_hash=7afcad3324ee11bb candidate_index_hash=8bfcad3324ee11cc trace_context_hash=9cfcad3324ee11dd
+trace_context_family=gidney_thread_forward_carry trace_context_call=929 trace_context_bit=40
+support_status=UNKNOWN proof_status=UNPROVEN host=studio

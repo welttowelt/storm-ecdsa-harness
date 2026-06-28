@@ -1,0 +1,6 @@
+ACK Vector HOLD anvil-3194639-namespace-missing owner=Vector next=resolve-op-index-namespace no_submit_ack=yes
+route_id=anvil-3194639-namespace-hold
+source_base=d44cad3 frontier_score=1571592960 q=1152 evidence_label=Prefilter
+op_index=3194639 kind=CCX q_target=1149 q_c1=1148 q_c2=558 expected_shot_mass=4670
+index_namespace=unknown namespace_status=MISSING source_binding_status=UNBOUND
+support_status=MISSING proof_status=UNPROVEN host=studio

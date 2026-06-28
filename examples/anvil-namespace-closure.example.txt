@@ -1,0 +1,11 @@
+ACK Vector NACK anvil-630625-live-carry owner=Vector next=advance-anvil-six-row-queue next_op_index=3194639 no_submit_ack=yes
+route_id=anvil-630625-namespace-closure
+source_base=d44cad3 frontier_score=1571592960 q=1152 evidence_label=Counterexample
+op_index=630625 kind=CCZ q_target=1107 q_c1=563 q_c2=768 expected_shot_mass=4653
+index_namespace=anvil_raw_to_trace_context namespace_status=MATCHED source_binding_status=BOUND
+support_lookup_index=630625 support_op_id=rank=gidney-thread;context=call929bit44
+source_bound=yes source_location=src/point_add/trailmix_ludicrous/gidney.rs:1233
+source_hash=7afcad3324ee11bb trace_context_hash=9cfcad3324ee11ee
+trace_context_family=gidney_thread_forward_carry trace_context_call=929 trace_context_bit=44
+support_status=COUNTEREXAMPLE proof_status=COUNTEREXAMPLE
+closure_reason=live_carry_target_toggle witness=a_i=1_and_b_i=1_toggle_target host=studio

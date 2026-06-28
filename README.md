@@ -155,6 +155,12 @@ agent instructions or used as a preflight before route work:
 - `skills/anvil-mass-ledger-gate.md`: require conditional-Toffoli mass ledgers
   to be machine-readable, source-bound, score-consistent, and routed to the
   right next gate before workers promote rows.
+- `skills/anvil-namespace-gate.md`: require high-mass Anvil `op_index` rows to
+  declare the index namespace and source binding before exact-support proof
+  work.
+- `skills/anvil-exact-redundancy-gate.md`: require one high-mass Anvil op to
+  carry exact-support, restore, phase, ancilla, allocator, and score evidence
+  before review.
 - `skills/pebbling-theorem-gate.md`: require recompute/pebbling packets to name
   the DAG node, producer/consumers, recompute path, score edge, and certified
   restore/phase/ancilla/support proofs before route review.
@@ -311,6 +317,8 @@ The bridge names are:
 - `emit-bundle-support-gate`
 - `construction-intake-gate`
 - `anvil-mass-ledger-gate`
+- `anvil-namespace-gate`
+- `anvil-exact-redundancy-gate`
 - `pebbling-theorem-gate`
 - `transcript-overlap-gate`
 - `paper-gidney-constant-workspace-adder`
